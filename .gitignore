@@ -1,0 +1,15 @@
+/.php-cs-fixer.cache
+/.phpunit.cache
+/.phpunit.result.cache
+/.phpstan-cache
+/phpstan.neon
+/phpbench.json
+/clover.xml
+/coveralls-upload.json
+/phpunit.xml
+/vendor/
+/docs/load-testing/results/**/*.json
+/test/k6/results/**/*.json
+/.vscode
+/k6-v0.56.0-linux-amd64
+*:Zone.Identifier
