@@ -43,7 +43,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/App/src/",
-            "Htmx\\": "src/htmx/src/",
+            "Htmx\\": "src/Htmx/src/",
             "Mezzio\\Async\\": "src/mezzio-async/src/",
             "PhpDb\\Async\\": "src/phpdb-async/src/"
         }

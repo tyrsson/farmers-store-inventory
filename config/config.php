@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\ConfigProvider;
+use Htmx\ConfigProvider as HtmxConfigProvider;
 use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ConfigAggregator\PhpFileProvider;
@@ -45,6 +46,7 @@ $aggregator = new ConfigAggregator([
     Mezzio\Async\ConfigProvider::class,
     // Default App module config
     ConfigProvider::class,
+    HtmxConfigProvider::class,
     // Load application config in a pre-defined order in such a way that local settings
     // overwrite global settings. (Loaded as first to last):
     //   - `global.php`
