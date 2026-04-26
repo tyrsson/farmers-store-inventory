@@ -122,3 +122,99 @@ We will be using a "module" architecture in the sense that each namespace we add
 2. The scan out process will be similar but not identical. For product moving to the floor it should remain in inventory its status just changes. For actual deliveries/pick up then it will be removed from inventory since it will no longer be in store or available for sale or transfer.
 
 3. I meant overstock, was just a typo. I am human after all :P
+
+---
+
+## Bundled / Per-Case Items — Workflow & Data Model Notes
+
+Some manifest lines represent a **single AO# that contains multiple physical pieces** (e.g. one
+box with 2 chairs, SKU 189780). The same SKU can also arrive as a standalone single unit on a
+different manifest. Both variants must be trackable without skewing piece counts.
+
+### Data model
+
+`manifest_item` holds `case_qty SMALLINT UNSIGNED NOT NULL DEFAULT 1` recording how many
+physical pieces arrived in the box.
+
+- `case_qty = 1` — normal single unit (default; no special handling)
+- `case_qty > 1` — bundled case; the AO# covers `case_qty` physical pieces
+
+At manifest confirmation the application **expands** each `manifest_item` into `case_qty`
+individual `product` rows. Every piece row carries the same `ao_number` and the same
+`case_qty` value (for provenance — "I came from a 2-piece box"). Each piece then has fully
+independent `product_status` tracking from day one.
+
+**Piece counts on the `product` table are plain `COUNT(*)`** — no `SUM` needed — because
+every row represents exactly one physical piece. `SUM(manifest_item.case_qty)` is only
+used when summarising manifest receiving totals (lines received vs pieces received).
+
+### Scanning workflow
+
+During manifest processing the operator toggles **"Bundled / Per case"** and enters the piece
+count before confirming the scan. The toggle is off by default and resets to off after each
+confirmation so normal single-item scanning is unaffected.
+
+### Damage workflow
+
+Because each piece is its own `product` row, partial damage within a case requires no
+split-record workaround. The operator simply marks the damaged piece rows with the `damaged`
+status flag while leaving the clean piece rows untouched.
+
+### Reporting
+
+- Piece counts are `COUNT(*)` on `product` (active inventory) or `SUM(manifest_item.case_qty)`
+  on `manifest_item` (receiving totals).
+- Manifest summary stats should show both line count and piece count where bundled items are
+  present (e.g. "38 lines / 44 pcs").
+
+### Confirmed decisions
+
+1. **One `product` row per physical piece.** `case_qty` on `product` records the original
+   box size for context; it does not affect count queries.
+2. **`ao_number` is `NOT NULL`** on both `manifest_item` and `product`. Every piece that came
+   out of a box shares that box's AO#. There is no unique constraint on `ao_number` alone in
+   `product` — multiple pieces from one box legitimately share the same AO#.
+3. **Partial qty sell-out:** no longer a schema concern — each piece is already a separate row
+   and can be removed independently.
+
+---
+
+## Inventory Removal Workflows
+
+There are exactly **four** workflows that can remove a SKU from inventory for non-supervisor
+roles. Managers and supervisors may also perform direct inventory adjustments.
+
+| # | Workflow | Who | What happens |
+|---|---|---|---|
+| 1 | **Process Manifest** | Warehouse | Adds items to inventory (inbound — not a removal) |
+| 2 | **Process Ticket** (Delivery or Pickup) | Warehouse | Removes items; records customer name per AO for fraud protection |
+| 3 | **Process Transfer** | Warehouse | Removes items from current store; marks them in-transit to destination store |
+| 4 | **PQA Resolution** | Manager | Closes damage report after credit received; removes item from damaged inventory |
+
+### Process Ticket
+
+A ticket represents a Celerant customer order being fulfilled — either a **Delivery** (truck)
+or **Pickup** (customer collects in store). The operator scans each AO# as items are loaded or
+handed over. On completion, items are removed from inventory and the **customer name** is stored
+against each AO. This is the anti-fraud record that Celerant does not provide.
+
+Tickets originate in Celerant and are imported or manually entered here. This system does not
+create tickets — it only processes them.
+
+### Process Transfer
+
+An inter-store transfer requires the sending warehouse to scan all items before they leave.
+The destination store is selected at the start. On completion, items are removed from the
+source store's inventory. A future receipt-scan at the destination store can confirm arrival.
+
+### PQA Resolution
+
+When corporate issues a credit for a damaged item, a manager resolves the PQA case from the
+damage detail page. The item is removed from active inventory (disposed, returned to DC, or
+sold at discount). This is not a standalone list — it is triggered from the damage detail view.
+
+### Floor / Status Changes (NOT removal workflows)
+
+Moving a product to the sales floor is a **status change only** — the item remains in
+inventory. Overstock, Bargain Center, and Repairable flags do not reduce inventory counts.
+Only the four workflows above actually decrement the piece count.

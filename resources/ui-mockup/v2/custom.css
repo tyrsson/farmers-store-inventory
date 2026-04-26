@@ -534,41 +534,19 @@
 
 /* ── Login page ──────────────────────────────────────────── */
 .ims-login-wrap {
-    min-height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-}
-.ims-login-card {
     width: 100%;
-    max-width: 400px;
+    max-width: 460px;
 }
-.ims-login-brand {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 8px;
+@media (min-width: 992px) {
+    .ims-login-wrap {
+        max-width: 820px;
+    }
 }
-.ims-login-brand i {
-    font-size: 2rem;
-    color: var(--bs-primary);
-}
-.ims-login-brand-name {
-    font-size: 1.5rem;
-    font-weight: 800;
+.ims-login-brand-panel {
+    background: color-mix(in srgb, var(--bs-primary) 18%, var(--bs-body-bg));
+    border-right: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-card-border-radius) 0 0 var(--bs-card-border-radius);
     color: var(--bs-body-color);
-}
-.ims-login-tagline {
-    text-align: center;
-    color: var(--bs-secondary-color);
-    font-size: 0.875rem;
-    margin-bottom: 28px;
-}
-.ims-login-wrap {
-    width: 100%;
-    max-width: 400px;
 }
 
 /* ── Avatar size variant ─────────────────────────────────── */

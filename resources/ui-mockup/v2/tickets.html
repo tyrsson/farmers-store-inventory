@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Manifests | Farmers IMS</title>
+    <title>Tickets | Farmers IMS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="custom.css" />
@@ -16,7 +16,7 @@
             <i class="bi bi-list fs-4"></i>
         </button>
         <div>
-            <div class="fw-bold lh-1 small">Manifests</div>
+            <div class="fw-bold lh-1 small">Tickets</div>
             <div class="text-secondary" style="font-size:.7rem;">Store #207 · Leeds, AL</div>
         </div>
     </div>
@@ -46,8 +46,8 @@
         <nav class="nav flex-column gap-1">
             <a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
             <a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i> Inventory</a>
-            <a href="manifests.html" class="nav-link active" aria-current="page"><i class="bi bi-clipboard2-data"></i> Manifests</a>
-            <a href="tickets.html" class="nav-link"><i class="bi bi-receipt"></i> Tickets</a>
+            <a href="manifests.html" class="nav-link"><i class="bi bi-clipboard2-data"></i> Manifests</a>
+            <a href="tickets.html" class="nav-link active" aria-current="page"><i class="bi bi-receipt"></i> Tickets</a>
             <a href="transfers.html" class="nav-link"><i class="bi bi-arrow-left-right"></i> Transfers</a>
             <a href="#" class="nav-link"><i class="bi bi-exclamation-octagon"></i> Damage Reports <span class="badge bg-danger">37</span></a>
         </nav>
@@ -83,104 +83,160 @@
 
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
-                <h1 class="h4 fw-bold mb-0">Manifests</h1>
-                <p class="text-secondary small mb-0">5 manifests — Store #207</p>
+                <h1 class="h4 fw-bold mb-0">Tickets</h1>
+                <p class="text-secondary small mb-0">Delivery &amp; Pickup — Store #207</p>
             </div>
-            <button class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-lg"></i> New Manifest
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newTicketModal">
+                <i class="bi bi-plus-lg"></i> New Ticket
             </button>
         </div>
 
-        <!-- Manifest list -->
+        <!-- Pending today -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="sidebar-section-label mb-0">Pending Today</div>
+            <span class="badge bg-warning text-dark">2</span>
+        </div>
         <div class="d-flex flex-column gap-3 mb-4">
 
-            <!-- In-progress manifest -->
-            <a href="process-manifest.html" class="card text-decoration-none text-body">
+            <a href="process-ticket.html" class="card text-decoration-none text-body">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
                         <div>
-                            <div class="fw-bold">207-0415</div>
-                            <div class="text-secondary small">Apr 15, 2026 · DC #4021 · 44 items</div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-primary"><i class="bi bi-truck me-1"></i>Delivery</span>
+                                <span class="fw-bold small">TKT-207-0426-001</span>
+                            </div>
+                            <div class="fw-semibold">JAMIE JORDAN</div>
+                            <div class="text-secondary small">6 items · Apr 26, 2026 · 9:00 AM</div>
                         </div>
-                        <span class="badge bg-warning text-dark flex-shrink-0">In Progress</span>
+                        <span class="badge bg-warning text-dark flex-shrink-0">Pending</span>
                     </div>
                     <div class="ims-progress-label">
-                        <span>27 of 44 scanned</span>
-                        <span class="text-danger"><i class="bi bi-exclamation-circle"></i> 2 damaged</span>
+                        <span>0 of 6 loaded</span>
                     </div>
-                    <div class="progress" style="height:6px;" role="progressbar" aria-valuenow="61" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-warning" style="width:61%"></div>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Completed manifests -->
-            <a href="manifest-detail.html" class="card text-decoration-none text-body">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
-                        <div>
-                            <div class="fw-bold">207-0401</div>
-                            <div class="text-secondary small">Apr 1, 2026 · DC #4018 · 38 items</div>
-                        </div>
-                        <span class="badge bg-success flex-shrink-0">Complete</span>
-                    </div>
-                    <div class="ims-progress-label"><span>38 of 38 scanned</span><span class="text-danger">5 damaged</span></div>
-                    <div class="progress" style="height:6px;" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-success" style="width:100%"></div>
+                    <div class="progress" style="height:6px;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-warning" style="width:0%"></div>
                     </div>
                 </div>
             </a>
 
-            <a href="manifest-detail.html" class="card text-decoration-none text-body">
+            <a href="process-ticket.html" class="card text-decoration-none text-body">
                 <div class="card-body">
                     <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
                         <div>
-                            <div class="fw-bold">207-0318</div>
-                            <div class="text-secondary small">Mar 18, 2026 · DC #4009 · 52 items</div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-info text-dark"><i class="bi bi-bag-check me-1"></i>Pickup</span>
+                                <span class="fw-bold small">TKT-207-0426-002</span>
+                            </div>
+                            <div class="fw-semibold">KIMBERLY CHAPMAN</div>
+                            <div class="text-secondary small">4 items · Apr 26, 2026 · 11:30 AM</div>
                         </div>
-                        <span class="badge bg-success flex-shrink-0">Complete</span>
+                        <span class="badge bg-warning text-dark flex-shrink-0">Pending</span>
                     </div>
-                    <div class="ims-progress-label"><span>52 of 52 scanned</span><span class="text-danger">8 damaged</span></div>
-                    <div class="progress" style="height:6px;" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-success" style="width:100%"></div>
+                    <div class="ims-progress-label">
+                        <span>0 of 4 loaded</span>
                     </div>
-                </div>
-            </a>
-
-            <a href="manifest-detail.html" class="card text-decoration-none text-body">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
-                        <div>
-                            <div class="fw-bold">207-0304</div>
-                            <div class="text-secondary small">Mar 4, 2026 · DC #3998 · 29 items</div>
-                        </div>
-                        <span class="badge bg-success flex-shrink-0">Complete</span>
-                    </div>
-                    <div class="ims-progress-label"><span>29 of 29 scanned</span><span class="text-danger">3 damaged</span></div>
-                    <div class="progress" style="height:6px;" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-success" style="width:100%"></div>
-                    </div>
-                </div>
-            </a>
-
-            <a href="manifest-detail.html" class="card text-decoration-none text-body">
-                <div class="card-body">
-                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
-                        <div>
-                            <div class="fw-bold">207-0218</div>
-                            <div class="text-secondary small">Feb 18, 2026 · DC #3981 · 41 items</div>
-                        </div>
-                        <span class="badge bg-success flex-shrink-0">Complete</span>
-                    </div>
-                    <div class="ims-progress-label"><span>41 of 41 scanned</span><span class="text-danger">6 damaged</span></div>
-                    <div class="progress" style="height:6px;" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
-                        <div class="progress-bar bg-success" style="width:100%"></div>
+                    <div class="progress" style="height:6px;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar bg-warning" style="width:0%"></div>
                     </div>
                 </div>
             </a>
 
         </div>
+
+        <!-- Recent completed -->
+        <div class="sidebar-section-label mb-2">Recent — Completed</div>
+        <div class="d-flex flex-column gap-3 mb-4">
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-primary"><i class="bi bi-truck me-1"></i>Delivery</span>
+                                <span class="fw-bold small">TKT-207-0424-003</span>
+                            </div>
+                            <div class="fw-semibold">PRISCILLA MCDANAL</div>
+                            <div class="text-secondary small">1 item · Apr 24, 2026 · Completed 10:18 AM</div>
+                        </div>
+                        <span class="badge bg-success flex-shrink-0">Complete</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-info text-dark"><i class="bi bi-bag-check me-1"></i>Pickup</span>
+                                <span class="fw-bold small">TKT-207-0420-004</span>
+                            </div>
+                            <div class="fw-semibold">JOHN SMITH</div>
+                            <div class="text-secondary small">3 items · Apr 20, 2026 · Completed 2:45 PM</div>
+                        </div>
+                        <span class="badge bg-success flex-shrink-0">Complete</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-primary"><i class="bi bi-truck me-1"></i>Delivery</span>
+                                <span class="fw-bold small">TKT-207-0418-005</span>
+                            </div>
+                            <div class="fw-semibold">MARY JOHNSON</div>
+                            <div class="text-secondary small">2 items · Apr 18, 2026 · Completed 1:12 PM</div>
+                        </div>
+                        <span class="badge bg-success flex-shrink-0">Complete</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </main>
+</div>
+
+<!-- New Ticket modal -->
+<div class="modal fade" id="newTicketModal" tabindex="-1" aria-labelledby="newTicketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newTicketModalLabel">New Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label form-label-sm fw-semibold">Store</label>
+                    <input type="text" class="form-control form-control-sm" value="Store #207 — Leeds, AL" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label form-label-sm fw-semibold" for="tkt-type">Ticket Type</label>
+                    <select class="form-select form-select-sm" id="tkt-type">
+                        <option value="delivery">Delivery — items loaded onto truck</option>
+                        <option value="pickup">Pickup — customer collecting in store</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label form-label-sm fw-semibold" for="tkt-customer">Customer Name</label>
+                    <input type="text" class="form-control form-control-sm" id="tkt-customer" placeholder="e.g. JAMIE JORDAN" />
+                    <div class="form-text">Customer name is stored against each scanned AO# for anti-fraud records.</div>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label form-label-sm fw-semibold" for="tkt-date">Scheduled Date &amp; Time</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="tkt-date" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="process-ticket.html" class="btn btn-primary">Create &amp; Start Scanning</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <nav class="fixed-bottom ims-bottom-nav d-lg-none" aria-label="Main navigation">
@@ -188,7 +244,7 @@
         <li class="nav-item"><a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a></li>
         <li class="nav-item"><a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i><span>Inventory</span></a></li>
         <li class="nav-item"><div class="ims-scan-fab-wrap"><button class="ims-scan-fab" aria-label="Scan"><i class="bi bi-upc-scan"></i></button><span class="ims-scan-fab-label">Scan</span></div></li>
-        <li class="nav-item"><a href="manifests.html" class="nav-link active" aria-current="page"><i class="bi bi-clipboard2-data"></i><span>Manifests</span></a></li>
+        <li class="nav-item"><a href="manifests.html" class="nav-link"><i class="bi bi-clipboard2-data"></i><span>Manifests</span></a></li>
         <li class="nav-item"><a href="settings.html" class="nav-link"><i class="bi bi-person-circle"></i><span>Profile</span></a></li>
     </ul>
 </nav>

@@ -29,6 +29,9 @@
   const countBadge    = document.getElementById('pm-count-badge');
   const processList   = document.getElementById('pm-processed-list');
   const toastCont     = document.getElementById('pm-toast-container');
+  const perCaseCheck  = document.getElementById('pm-per-case');
+  const caseQtyInput  = document.getElementById('pm-case-qty');
+  const caseQtyRow    = document.getElementById('pm-case-qty-row');
 
   // ── Progress update ───────────────────────────────────────────────────────
   function updateProgress() {
@@ -63,16 +66,20 @@
   }
 
   // ── Add processed item to list ────────────────────────────────────────────
-  function addProcessedItem(ao, sku, model, isDamaged) {
+  function addProcessedItem(ao, sku, model, isDamaged, caseQty) {
     const footer = processList.querySelector('.card-footer');
     const item = document.createElement('div');
     item.className = 'ims-product-item';
+    const caseTag = caseQty > 1
+      ? `<div class="mt-1"><span class="badge bg-secondary"><i class="bi bi-box-seam"></i> ${caseQty} pcs</span></div>`
+      : '';
     if (isDamaged) {
       item.innerHTML = `
         <div class="ims-product-thumb bg-danger bg-opacity-10"><i class="bi bi-exclamation-triangle text-danger"></i></div>
         <div class="flex-grow-1">
           <div class="ims-product-name">${model || 'Unknown Product'}</div>
           <div class="ims-product-ids">SKU: ${sku || '—'} <span>AO#: ${ao}</span></div>
+          ${caseTag}
         </div>
         <a href="damage-detail.html" class="badge badge-ims-damaged text-decoration-none">Damaged</a>`;
     } else {
@@ -81,43 +88,58 @@
         <div class="flex-grow-1">
           <div class="ims-product-name">${model || 'Unknown Product'}</div>
           <div class="ims-product-ids">SKU: ${sku || '—'} <span>AO#: ${ao}</span></div>
+          ${caseTag}
         </div>
         <span class="badge bg-success">OK</span>`;
     }
     processList.insertBefore(item, footer);
   }
 
+  // ── Per-case toggle ───────────────────────────────────────────────────────
+  perCaseCheck.addEventListener('change', () => {
+    caseQtyRow.classList.toggle('d-none', !perCaseCheck.checked);
+    if (perCaseCheck.checked) caseQtyInput.focus();
+  });
+
   // ── Clear inputs ──────────────────────────────────────────────────────────
   function clearInputs() {
-    aoInput.value    = '';
-    skuInput.value   = '';
-    modelInput.value = '';
+    aoInput.value        = '';
+    skuInput.value       = '';
+    modelInput.value     = '';
+    perCaseCheck.checked = false;
+    caseQtyRow.classList.add('d-none');
+    caseQtyInput.value   = '2';
     aoInput.focus();
   }
 
   // ── Process a scan result ─────────────────────────────────────────────────
-  function processScan(ao, sku, model, isDamaged) {
+  function processScan(ao, sku, model, isDamaged, caseQty) {
     if (!ao.trim()) return;
     state.scanned++;
     if (isDamaged) state.damaged++;
     updateProgress();
-    addProcessedItem(ao.trim(), sku.trim(), model.trim(), isDamaged);
+    addProcessedItem(ao.trim(), sku.trim(), model.trim(), isDamaged, caseQty);
+    const pcsSuffix = caseQty > 1 ? ` · ${caseQty} pcs` : '';
     showToast(
       isDamaged
-        ? `Damaged: ${ao.trim()}`
-        : `Scanned OK: ${ao.trim()}`,
+        ? `Damaged: ${ao.trim()}${pcsSuffix}`
+        : `Scanned OK: ${ao.trim()}${pcsSuffix}`,
       isDamaged ? 'damage' : 'ok',
     );
     clearInputs();
   }
 
   // ── Button handlers ───────────────────────────────────────────────────────
+  function readCaseQty() {
+    return perCaseCheck.checked ? (parseInt(caseQtyInput.value, 10) || 1) : 1;
+  }
+
   okBtn.addEventListener('click', () => {
-    processScan(aoInput.value, skuInput.value, modelInput.value, false);
+    processScan(aoInput.value, skuInput.value, modelInput.value, false, readCaseQty());
   });
 
   damageBtn.addEventListener('click', () => {
-    processScan(aoInput.value, skuInput.value, modelInput.value, true);
+    processScan(aoInput.value, skuInput.value, modelInput.value, true, readCaseQty());
   });
 
   // ── Hardware wedge scanner: fires rapid keystrokes ending in Enter ─────────
@@ -127,7 +149,8 @@
       e.preventDefault();
       // Auto-submit OK if AO# filled (no damage assumed from wedge scan)
       if (aoInput.value.trim()) {
-        processScan(aoInput.value, skuInput.value, modelInput.value, false);
+        // Hardware wedge scan: per-case flag is ignored for speed; operator can toggle it first if needed
+        processScan(aoInput.value, skuInput.value, modelInput.value, false, readCaseQty());
       }
     }
   });

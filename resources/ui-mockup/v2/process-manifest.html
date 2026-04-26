@@ -47,6 +47,8 @@
             <a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
             <a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i> Inventory</a>
             <a href="manifests.html" class="nav-link active" aria-current="page"><i class="bi bi-clipboard2-data"></i> Manifests</a>
+            <a href="tickets.html" class="nav-link"><i class="bi bi-receipt"></i> Tickets</a>
+            <a href="transfers.html" class="nav-link"><i class="bi bi-arrow-left-right"></i> Transfers</a>
             <a href="#" class="nav-link"><i class="bi bi-exclamation-octagon"></i> Damage Reports <span class="badge bg-danger">37</span></a>
         </nav>
         <div class="mt-auto pt-2 border-top border-secondary-subtle">
@@ -138,6 +140,21 @@
                         <i class="bi bi-exclamation-triangle"></i> Mark Damaged
                     </button>
                 </div>
+                <!-- Bundled / per-case items (e.g. 2 chairs shipped as 1 box) -->
+                <div class="mt-2 pt-2 border-top border-secondary-subtle">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="pm-per-case" role="switch" />
+                        <label class="form-check-label small" for="pm-per-case">
+                            <i class="bi bi-box-seam text-secondary"></i> Bundled / Per case
+                        </label>
+                    </div>
+                    <div class="mt-2 d-none" id="pm-case-qty-row">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="number" class="form-control form-control-sm" id="pm-case-qty" min="2" value="2" inputmode="numeric" style="width:80px;" />
+                            <span class="form-text mb-0">pcs in this case <span class="text-secondary small">(e.g. 2 chairs in 1 box)</span></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -181,6 +198,15 @@
                 <div class="flex-grow-1">
                     <div class="ims-product-name">Twin Bunk Bed Set</div>
                     <div class="ims-product-ids">SKU: 162800 <span>AO#: A006488340</span><span>207-0415</span></div>
+                </div>
+                <span class="badge bg-success">OK</span>
+            </div>
+            <div class="ims-product-item">
+                <div class="ims-product-thumb bg-success bg-opacity-10"><i class="bi bi-check-lg text-success"></i></div>
+                <div class="flex-grow-1">
+                    <div class="ims-product-name">Table &amp; 4 Chairs Set</div>
+                    <div class="ims-product-ids">SKU: 189780 <span>AO#: A006455614</span><span>207-0415</span></div>
+                    <div class="mt-1"><span class="badge bg-secondary"><i class="bi bi-box-seam"></i> 5 pcs</span></div>
                 </div>
                 <span class="badge bg-success">OK</span>
             </div>
