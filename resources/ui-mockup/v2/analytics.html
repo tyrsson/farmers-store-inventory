@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics | Farmers IMS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="custom.css" />
+</head>
+<body>
+
+<nav class="navbar fixed-top ims-topbar bg-body-tertiary border-bottom border-secondary-subtle px-3">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <button class="btn btn-sm btn-link text-body p-1 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#imsSidebar" aria-label="Open navigation">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div>
+            <div class="fw-bold lh-1 small">Analytics</div>
+            <div class="text-secondary" style="font-size:.7rem;">Store #207 · Leeds, AL</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="d-none d-sm-flex gap-2 me-2">
+            <input type="radio" class="btn-check" name="range" id="r-30" checked />
+            <label class="btn btn-sm btn-outline-secondary" for="r-30">30d</label>
+            <input type="radio" class="btn-check" name="range" id="r-90" />
+            <label class="btn btn-sm btn-outline-secondary" for="r-90">90d</label>
+            <input type="radio" class="btn-check" name="range" id="r-6m" />
+            <label class="btn btn-sm btn-outline-secondary" for="r-6m">6mo</label>
+        </div>
+        <button class="btn btn-sm btn-link text-body p-1 ims-notif-btn" aria-label="Notifications">
+            <i class="bi bi-bell-fill fs-5"></i>
+        </button>
+        <div class="ims-avatar">JW</div>
+    </div>
+</nav>
+
+<div class="offcanvas-lg offcanvas-start ims-sidebar bg-body-tertiary border-end border-secondary-subtle d-flex flex-column" tabindex="-1" id="imsSidebar" aria-labelledby="imsSidebarLabel">
+    <div class="offcanvas-header border-bottom border-secondary-subtle">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-boxes fs-4 text-primary"></i>
+            <div><div class="fw-bold lh-1" id="imsSidebarLabel">Farmers IMS</div><div class="text-secondary" style="font-size:.7rem;">Inventory Management</div></div>
+        </div>
+        <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#imsSidebar" aria-label="Close"></button>
+    </div>
+    <div class="px-3 py-2 border-bottom border-secondary-subtle">
+        <div class="text-secondary" style="font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;">Active Store</div>
+        <div class="fw-semibold small">Store #207 · Leeds, AL</div>
+    </div>
+    <div class="offcanvas-body p-2 d-flex flex-column flex-grow-1 overflow-y-auto">
+        <div class="sidebar-section-label">Main</div>
+        <nav class="nav flex-column gap-1">
+            <a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i> Inventory</a>
+            <a href="manifests.html" class="nav-link"><i class="bi bi-clipboard2-data"></i> Manifests</a>
+            <a href="tickets.html" class="nav-link"><i class="bi bi-receipt"></i> Tickets</a>
+            <a href="transfers.html" class="nav-link"><i class="bi bi-arrow-left-right"></i> Transfers</a>
+            <a href="#" class="nav-link"><i class="bi bi-exclamation-octagon"></i> Damage Reports <span class="badge bg-danger">37</span></a>
+        </nav>
+        <div class="sidebar-section-label mt-2">Stores</div>
+        <button class="nav-link d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#storesList" aria-expanded="false">
+            <i class="bi bi-shop"></i><span class="flex-grow-1">All Stores</span><i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
+        </button>
+        <div class="collapse" id="storesList">
+            <div class="d-flex flex-column gap-1 ps-2">
+                <button class="ims-store-item active"><i class="bi bi-house-fill text-primary"></i><span class="fw-semibold">#207</span> Leeds, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#112</span> Birmingham, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#134</span> Huntsville, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#156</span> Montgomery, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#178</span> Mobile, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#191</span> Tuscaloosa, AL</button>
+            </div>
+        </div>
+        <div class="sidebar-section-label mt-2">Reporting</div>
+        <nav class="nav flex-column gap-1">
+            <a href="analytics.html" class="nav-link active" aria-current="page"><i class="bi bi-bar-chart-line"></i> Analytics</a>
+        </nav>
+        <div class="mt-auto pt-2 border-top border-secondary-subtle">
+            <nav class="nav flex-column gap-1">
+                <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+                <a href="login.html" class="nav-link"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="ims-layout">
+    <main class="ims-main p-3 p-lg-4">
+
+        <div class="d-flex align-items-center justify-content-between mb-1">
+            <h1 class="h4 fw-bold mb-0">Analytics</h1>
+            <div class="d-flex d-sm-none gap-2">
+                <input type="radio" class="btn-check" name="range-mob" id="rm-30" checked />
+                <label class="btn btn-sm btn-outline-secondary" for="rm-30">30d</label>
+                <input type="radio" class="btn-check" name="range-mob" id="rm-90" />
+                <label class="btn btn-sm btn-outline-secondary" for="rm-90">90d</label>
+                <input type="radio" class="btn-check" name="range-mob" id="rm-6m" />
+                <label class="btn btn-sm btn-outline-secondary" for="rm-6m">6mo</label>
+            </div>
+        </div>
+        <p class="text-secondary small mb-4">Store #207 · Nov 2025 – Apr 2026</p>
+
+        <!-- KPI summary cards -->
+        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-secondary" style="font-size:.72rem; text-transform:uppercase; font-weight:700; letter-spacing:.06em;">Items Processed</div>
+                        <div class="ims-stat-value mt-1">204</div>
+                        <div class="ims-stat-delta"><i class="bi bi-arrow-up-short text-success"></i> 12% vs prior period</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-secondary" style="font-size:.72rem; text-transform:uppercase; font-weight:700; letter-spacing:.06em;">Damage Rate</div>
+                        <div class="ims-stat-value mt-1 text-danger">18.1%</div>
+                        <div class="ims-stat-delta"><i class="bi bi-arrow-down-short text-success"></i> 2.4 pts vs prior</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-secondary" style="font-size:.72rem; text-transform:uppercase; font-weight:700; letter-spacing:.06em;">Manifests</div>
+                        <div class="ims-stat-value mt-1">5</div>
+                        <div class="ims-stat-delta"><i class="bi bi-dash text-secondary"></i> Same as prior period</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-secondary" style="font-size:.72rem; text-transform:uppercase; font-weight:700; letter-spacing:.06em;">Avg PQA Resolution</div>
+                        <div class="ims-stat-value mt-1">3.2d</div>
+                        <div class="ims-stat-delta"><i class="bi bi-arrow-down-short text-success"></i> 0.8d faster</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 1: Damage trend + Status breakdown -->
+        <div class="row g-3 mb-3">
+            <div class="col-12 col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span class="small fw-semibold">Damage Rate Trend</span>
+                        <span class="text-secondary small">% of items per manifest</span>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartDamageTrend" height="220"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span class="small fw-semibold">Items by Status</span>
+                    </div>
+                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                        <canvas id="chartStatusBreakdown" style="max-height:220px;"></canvas>
+                        <div class="mt-3 w-100" id="statusLegend"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Manifests bar + Top damaged categories -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <span class="small fw-semibold">Items per Manifest</span>
+                        <span class="text-secondary small">total vs damaged</span>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartManifests" height="220"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span class="small fw-semibold">Top Damaged Categories</span>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartCategories" height="220"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manifest detail table -->
+        <div class="card mb-4">
+            <div class="card-header small fw-semibold">Manifest Summary</div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0 small">
+                    <thead>
+                        <tr>
+                            <th>Manifest</th>
+                            <th>Date (DC Load)</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-end">Scanned</th>
+                            <th class="text-end">Damaged</th>
+                            <th class="text-end">Damage Rate</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><a href="process-manifest.html" class="text-primary">207-0415</a></td>
+                            <td class="text-secondary">Apr 15, 2026</td>
+                            <td class="text-end">44</td>
+                            <td class="text-end">27</td>
+                            <td class="text-end text-danger">2</td>
+                            <td class="text-end">7.4%</td>
+                            <td><span class="badge bg-warning text-dark">In Progress</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="manifest-detail.html" class="text-primary">207-0401</a></td>
+                            <td class="text-secondary">Apr 1, 2026</td>
+                            <td class="text-end">38</td>
+                            <td class="text-end">38</td>
+                            <td class="text-end text-danger">5</td>
+                            <td class="text-end">13.2%</td>
+                            <td><span class="badge bg-success">Complete</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="manifest-detail.html" class="text-primary">207-0318</a></td>
+                            <td class="text-secondary">Mar 18, 2026</td>
+                            <td class="text-end">52</td>
+                            <td class="text-end">52</td>
+                            <td class="text-end text-danger">8</td>
+                            <td class="text-end">15.4%</td>
+                            <td><span class="badge bg-success">Complete</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="manifest-detail.html" class="text-primary">207-0304</a></td>
+                            <td class="text-secondary">Mar 4, 2026</td>
+                            <td class="text-end">29</td>
+                            <td class="text-end">29</td>
+                            <td class="text-end text-danger">3</td>
+                            <td class="text-end">10.3%</td>
+                            <td><span class="badge bg-success">Complete</span></td>
+                        </tr>
+                        <tr>
+                            <td><a href="manifest-detail.html" class="text-primary">207-0218</a></td>
+                            <td class="text-secondary">Feb 18, 2026</td>
+                            <td class="text-end">41</td>
+                            <td class="text-end">41</td>
+                            <td class="text-end text-danger">6</td>
+                            <td class="text-end">14.6%</td>
+                            <td><span class="badge bg-success">Complete</span></td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="table-secondary">
+                        <tr>
+                            <td colspan="2" class="fw-semibold">Totals</td>
+                            <td class="text-end fw-semibold">204</td>
+                            <td class="text-end fw-semibold">187</td>
+                            <td class="text-end fw-semibold text-danger">24</td>
+                            <td class="text-end fw-semibold">12.8%</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<nav class="fixed-bottom ims-bottom-nav d-lg-none" aria-label="Main navigation">
+    <ul class="nav w-100 h-100 m-0 p-0 list-unstyled">
+        <li class="nav-item"><a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i><span>Dashboard</span></a></li>
+        <li class="nav-item"><a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i><span>Inventory</span></a></li>
+        <li class="nav-item"><div class="ims-scan-fab-wrap"><button class="ims-scan-fab" aria-label="Scan"><i class="bi bi-upc-scan"></i></button><span class="ims-scan-fab-label">Scan</span></div></li>
+        <li class="nav-item"><a href="manifests.html" class="nav-link"><i class="bi bi-clipboard2-data"></i><span>Manifests</span></a></li>
+        <li class="nav-item"><a href="settings.html" class="nav-link"><i class="bi bi-person-circle"></i><span>Profile</span></a></li>
+    </ul>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    // ── Brand tokens (mirror custom.css) ────────────────────────────────────
+    const PRIMARY      = '#4a80b4';
+    const DANGER       = '#f1707d';
+    const SUCCESS      = '#2eca8b';
+    const WARNING      = '#f0c040';
+    const PURPLE       = '#c59bfc';
+    const AMBER        = '#d4a830';
+    const MUTED        = 'rgba(255,255,255,0.12)';
+    const GRID_COLOR   = 'rgba(255,255,255,0.08)';
+    const TEXT_COLOR   = 'rgba(255,255,255,0.55)';
+
+    // ── Global Chart.js defaults for dark theme ──────────────────────────────
+    Chart.defaults.color           = TEXT_COLOR;
+    Chart.defaults.borderColor     = GRID_COLOR;
+    Chart.defaults.font.family     = 'system-ui, sans-serif';
+    Chart.defaults.font.size       = 12;
+    Chart.defaults.plugins.legend.display = false; // we use custom legends
+
+    // ── Shared tooltip style ─────────────────────────────────────────────────
+    const tooltip = {
+        backgroundColor: '#1e2530',
+        borderColor: 'rgba(255,255,255,0.12)',
+        borderWidth: 1,
+        padding: 10,
+        titleColor: '#fff',
+        bodyColor: TEXT_COLOR,
+    };
+
+    // ── Manifests (x-axis labels) ─────────────────────────────────────────
+    const manifests = ['207-0218', '207-0304', '207-0318', '207-0401', '207-0415*'];
+
+    // ── 1. Damage Rate Trend (line) ──────────────────────────────────────────
+    new Chart(document.getElementById('chartDamageTrend'), {
+        type: 'line',
+        data: {
+            labels: manifests,
+            datasets: [{
+                label: 'Damage Rate %',
+                data: [14.6, 10.3, 15.4, 13.2, 7.4],
+                borderColor: DANGER,
+                backgroundColor: 'rgba(241,112,125,0.12)',
+                pointBackgroundColor: DANGER,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                fill: true,
+                tension: 0.35,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: { tooltip },
+            scales: {
+                x: { grid: { color: GRID_COLOR } },
+                y: {
+                    grid: { color: GRID_COLOR },
+                    ticks: { callback: v => v + '%' },
+                    min: 0,
+                    max: 25,
+                },
+            },
+        },
+    });
+
+    // ── 2. Status breakdown (doughnut) ───────────────────────────────────────
+    const statusLabels = ['Floor', 'Damaged', 'Pending PQA', 'Overstock', 'Bargain', 'Repairable', 'Non-Rep'];
+    const statusData   = [105, 37, 18, 21, 12, 6, 5];
+    const statusColors = [SUCCESS, DANGER, WARNING, PRIMARY, AMBER, PURPLE, TEXT_COLOR];
+
+    new Chart(document.getElementById('chartStatusBreakdown'), {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusData,
+                backgroundColor: statusColors,
+                borderColor: '#1a2030',
+                borderWidth: 3,
+                hoverOffset: 6,
+            }],
+        },
+        options: {
+            responsive: true,
+            cutout: '68%',
+            plugins: {
+                tooltip: { ...tooltip, callbacks: {
+                    label: ctx => ` ${ctx.label}: ${ctx.parsed} items`
+                }},
+            },
+        },
+    });
+
+    // Custom legend
+    const legendEl = document.getElementById('statusLegend');
+    const total = statusData.reduce((a, b) => a + b, 0);
+    legendEl.innerHTML = statusLabels.map((label, i) => `
+        <div class="d-flex align-items-center justify-content-between mb-1" style="font-size:.75rem;">
+            <span class="d-flex align-items-center gap-2">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${statusColors[i]};flex-shrink:0;"></span>
+                ${label}
+            </span>
+            <span class="text-secondary">${statusData[i]} <span class="text-muted">(${Math.round(statusData[i]/total*100)}%)</span></span>
+        </div>`).join('');
+
+    // ── 3. Items per manifest — grouped bar (total vs damaged) ───────────────
+    new Chart(document.getElementById('chartManifests'), {
+        type: 'bar',
+        data: {
+            labels: manifests,
+            datasets: [
+                {
+                    label: 'Total',
+                    data: [41, 29, 52, 38, 44],
+                    backgroundColor: 'rgba(74,128,180,0.5)',
+                    borderColor: PRIMARY,
+                    borderWidth: 1,
+                    borderRadius: 3,
+                },
+                {
+                    label: 'Damaged',
+                    data: [6, 3, 8, 5, 2],
+                    backgroundColor: 'rgba(241,112,125,0.5)',
+                    borderColor: DANGER,
+                    borderWidth: 1,
+                    borderRadius: 3,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                tooltip,
+                legend: {
+                    display: true,
+                    labels: { color: TEXT_COLOR, boxWidth: 12, boxHeight: 12 },
+                },
+            },
+            scales: {
+                x: { grid: { color: GRID_COLOR } },
+                y: { grid: { color: GRID_COLOR }, beginAtZero: true },
+            },
+        },
+    });
+
+    // ── 4. Top damaged categories (horizontal bar) ───────────────────────────
+    new Chart(document.getElementById('chartCategories'), {
+        type: 'bar',
+        data: {
+            labels: ['Bedroom', 'Living Room', 'Dining', 'Mattresses', 'Accent', 'Office'],
+            datasets: [{
+                label: 'Damaged Items',
+                data: [11, 8, 4, 4, 2, 1],
+                backgroundColor: [
+                    'rgba(241,112,125,0.7)',
+                    'rgba(241,112,125,0.55)',
+                    'rgba(241,112,125,0.45)',
+                    'rgba(241,112,125,0.38)',
+                    'rgba(241,112,125,0.30)',
+                    'rgba(241,112,125,0.22)',
+                ],
+                borderColor: DANGER,
+                borderWidth: 1,
+                borderRadius: 3,
+            }],
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { tooltip },
+            scales: {
+                x: { grid: { color: GRID_COLOR }, beginAtZero: true },
+                y: { grid: { display: false } },
+            },
+        },
+    });
+
+})();
+</script>
+</body>
+</html>

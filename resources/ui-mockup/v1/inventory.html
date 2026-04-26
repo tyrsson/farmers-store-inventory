@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Inventory | Farmers IMS</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- LAYER 3 PERSISTENT: Bottom nav -->
+<nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
+    <button class="bottom-nav-item" data-page="dashboard" aria-label="Dashboard">
+        <i class="bi bi-grid-fill bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Dashboard</span>
+    </button>
+    <button class="bottom-nav-item active" data-page="inventory" aria-label="Inventory" aria-current="page">
+        <i class="bi bi-boxes bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Inventory</span>
+    </button>
+    <div class="bottom-nav-scan">
+        <button class="scan-fab" aria-label="Scan product barcode">
+            <i class="bi bi-upc-scan"></i>
+        </button>
+        <span class="scan-fab-label">Scan</span>
+    </div>
+    <button class="bottom-nav-item" data-page="manifests" aria-label="Manifests">
+        <i class="bi bi-clipboard2-data bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Manifests</span>
+    </button>
+    <button class="bottom-nav-item" data-page="profile" aria-label="Profile">
+        <i class="bi bi-person-circle bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Profile</span>
+    </button>
+</nav>
+
+<!-- LAYER 3 PERSISTENT: Toast container -->
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+<!-- Sidebar backdrop -->
+<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+<!-- HTMX SWAP TARGET -->
+<main id="app">
+
+    <!-- LAYER 2: Body partial -->
+    <aside class="sidebar" id="sidebar" aria-label="Site navigation">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-mark" aria-hidden="true">
+                <i class="bi bi-boxes"></i>
+            </div>
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-name">Farmers IMS</div>
+                <div class="sidebar-brand-tagline">Inventory Management</div>
+            </div>
+            <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close navigation">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-store-info">
+            <div class="sidebar-store-label">Active Store</div>
+            <div class="sidebar-store-name">Store #207 · Leeds, AL</div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <div class="sidebar-section-label">Main</div>
+
+            <a href="index.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-grid-fill"></i></span>
+                Dashboard
+            </a>
+            <a href="inventory.html" class="sidebar-nav-link active" aria-current="page">
+                <span class="sidebar-nav-icon"><i class="bi bi-boxes"></i></span>
+                Inventory
+            </a>
+            <a href="manifests.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-clipboard2-data"></i></span>
+                Manifests
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-exclamation-octagon"></i></span>
+                Damage Reports
+                <span class="sidebar-nav-badge">37</span>
+            </a>
+
+            <div class="sidebar-section-label">Stores</div>
+
+            <!-- Stores accordion -->
+            <button class="sidebar-nav-link sidebar-accordion-toggle"
+                    id="stores-toggle"
+                    aria-expanded="false"
+                    aria-controls="stores-list">
+                <span class="sidebar-nav-icon"><i class="bi bi-shop"></i></span>
+                All Stores
+                <i class="bi bi-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
+            </button>
+            <ul class="sidebar-stores-list" id="stores-list" role="list">
+                <li>
+                    <button class="store-list-item active" data-store-id="207" data-store-city="Leeds, AL">
+                        <span class="store-list-number">#207</span>
+                        <span class="store-list-city">Leeds, AL</span>
+                        <i class="bi bi-house-fill store-list-home-icon" title="My Store" aria-label="My Store"></i>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="112" data-store-city="Birmingham, AL">
+                        <span class="store-list-number">#112</span>
+                        <span class="store-list-city">Birmingham, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="134" data-store-city="Huntsville, AL">
+                        <span class="store-list-number">#134</span>
+                        <span class="store-list-city">Huntsville, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="156" data-store-city="Montgomery, AL">
+                        <span class="store-list-number">#156</span>
+                        <span class="store-list-city">Montgomery, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="178" data-store-city="Mobile, AL">
+                        <span class="store-list-number">#178</span>
+                        <span class="store-list-city">Mobile, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="191" data-store-city="Tuscaloosa, AL">
+                        <span class="store-list-number">#191</span>
+                        <span class="store-list-city">Tuscaloosa, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="214" data-store-city="Gadsden, AL">
+                        <span class="store-list-number">#214</span>
+                        <span class="store-list-city">Gadsden, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="229" data-store-city="Dothan, AL">
+                        <span class="store-list-number">#229</span>
+                        <span class="store-list-city">Dothan, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="241" data-store-city="Florence, AL">
+                        <span class="store-list-number">#241</span>
+                        <span class="store-list-city">Florence, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="255" data-store-city="Anniston, AL">
+                        <span class="store-list-number">#255</span>
+                        <span class="store-list-city">Anniston, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="263" data-store-city="Meridian, MS">
+                        <span class="store-list-number">#263</span>
+                        <span class="store-list-city">Meridian, MS</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="278" data-store-city="Jackson, MS">
+                        <span class="store-list-number">#278</span>
+                        <span class="store-list-city">Jackson, MS</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-label">Reporting</div>
+
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-bar-chart-line"></i></span>
+                Analytics
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-arrow-left-right"></i></span>
+                Transfer Lookup
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="settings.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-gear"></i></span>
+                Settings
+            </a>
+            <a href="login.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-box-arrow-left"></i></span>
+                Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <div class="app-body">
+
+        <header class="topbar" role="banner">
+            <button class="topbar-menu-btn" id="menu-btn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="topbar-brand">
+                <div class="topbar-app-name">Inventory</div>
+                <div class="topbar-store">Store #207 · Leeds, AL</div>
+            </div>
+
+            <div class="topbar-actions">
+                <button class="topbar-icon-btn" aria-label="Notifications">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="notification-dot" aria-hidden="true"></span>
+                </button>
+                <div class="topbar-avatar" role="img" aria-label="Signed in as J. Walker">JW</div>
+            </div>
+        </header>
+
+        <!-- LAYER 1: Inventory page template -->
+        <main class="main-content" id="main-content">
+
+            <div class="page-header">
+                <h1 class="page-title">Inventory</h1>
+                <p class="page-subtitle">482 products &mdash; Store #207 Leeds, AL</p>
+            </div>
+
+            <!-- Search -->
+            <div class="form-group">
+                <div class="search-wrap">
+                    <i class="bi bi-search search-icon" aria-hidden="true"></i>
+                    <input
+                        class="form-control"
+                        type="search"
+                        placeholder="Search by SKU, AO number, or description&hellip;"
+                        aria-label="Search inventory"
+                        inputmode="search"
+                    />
+                </div>
+            </div>
+
+            <!-- Filter chips -->
+            <div class="filter-chips" role="group" aria-label="Filter by status">
+                <button class="filter-chip active">All <span>482</span></button>
+                <button class="filter-chip">
+                    <i class="bi bi-circle-fill chip-dot chip-dot-damaged"></i>
+                    Damaged <span>37</span>
+                </button>
+                <button class="filter-chip">
+                    <i class="bi bi-circle-fill chip-dot chip-dot-floor"></i>
+                    Floor <span>278</span>
+                </button>
+                <button class="filter-chip">
+                    <i class="bi bi-circle-fill chip-dot chip-dot-pending-pqa"></i>
+                    Pending PQA <span>12</span>
+                </button>
+                <button class="filter-chip">
+                    <i class="bi bi-circle-fill chip-dot chip-dot-overstock"></i>
+                    Overstock <span>58</span>
+                </button>
+                <button class="filter-chip">
+                    <i class="bi bi-circle-fill chip-dot chip-dot-bargain"></i>
+                    Bargain <span>9</span>
+                </button>
+            </div>
+
+            <!-- Inventory list -->
+            <div class="card">
+                <div class="product-list" role="list" aria-label="Inventory items">
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Queen Sleigh Bed Frame</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: FRN-4821</span>
+                                <span class="product-id">AO#: 00194827</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-damaged">Damaged</span>
+                                <span class="badge badge-pending-pqa">Pending PQA</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Today</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 3</span>
+                        </div>
+                    </div>
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">5-Drawer Dresser w/ Mirror</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: FRN-3310</span>
+                                <span class="product-id">AO#: 00194655</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-damaged">Damaged</span>
+                                <span class="badge badge-repairable">Repairable</span>
+                                <span class="badge badge-bargain">Bargain Center</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Today</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 5</span>
+                        </div>
+                    </div>
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">King Platform Bed Base</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: FRN-5512</span>
+                                <span class="product-id">AO#: 00193781</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-floor">Floor</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Apr 24</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 0</span>
+                        </div>
+                    </div>
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Sectional Sofa — Right Arm</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: LVG-7741</span>
+                                <span class="product-id">AO#: 00193902</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-damaged">Damaged</span>
+                                <span class="badge badge-non-repairable">Non-Repairable</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Apr 25</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 2</span>
+                        </div>
+                    </div>
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Dining Table — 6 Person</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: DIN-2209</span>
+                                <span class="product-id">AO#: 00193610</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-floor">Floor</span>
+                                <span class="badge badge-overstock">Overstock</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Apr 23</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 0</span>
+                        </div>
+                    </div>
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Recliner Chair — Chocolate</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: LVG-9910</span>
+                                <span class="product-id">AO#: 00193401</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-bargain">Bargain Center</span>
+                                <span class="badge badge-damaged">Damaged</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Apr 22</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 4</span>
+                        </div>
+                    </div>
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Twin Bunk Bed — White</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: FRN-1102</span>
+                                <span class="product-id">AO#: 00193200</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-floor">Floor</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Apr 21</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 0</span>
+                        </div>
+                    </div>
+
+                    <div class="product-item" role="listitem">
+                        <div class="product-thumb" aria-hidden="true">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">Coffee Table — Rustic Oak</div>
+                            <div class="product-ids">
+                                <span class="product-id">SKU: LVG-4408</span>
+                                <span class="product-id">AO#: 00193088</span>
+                            </div>
+                            <div class="product-badges">
+                                <span class="badge badge-overstock">Overstock</span>
+                            </div>
+                        </div>
+                        <div class="product-meta">
+                            <span class="product-time">Apr 20</span>
+                            <span class="product-img-count"><i class="bi bi-images"></i> 0</span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-ghost btn-sm btn-full">
+                        Load more <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+        <!-- END LAYER 1 -->
+
+        <footer class="footer">
+            &copy; 2026 Farmers Furniture &mdash; Inventory Management System
+        </footer>
+
+    </div><!-- /.app-body -->
+
+</main>
+<!-- END HTMX SWAP TARGET -->
+
+<script src="app.js"></script>
+</body>
+</html>

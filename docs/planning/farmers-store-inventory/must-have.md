@@ -16,6 +16,10 @@ So we will end up with these as a minimum set of tables.
 * product_status (relational table to track if a product is damaged)
 * product_image (to store records for images attached to damaged products)
 
+### Per-Store PQA Email
+
+Each store record must have a configurable `pqa_email` field. When a damage report has images attached, the warehouse user can press **Send Images** which emails all attached damage photos to that store's PQA email address. The external PQA system will then automatically associate the images with the correct PQA case. The damage notes stored in this system are for internal warehouse reference only — managers will enter their own notes in the PQA system directly.
+
 ## Project Motivation
 
 Farmers currently has an "inventory system" (built via sharepoint or celerant, I think, it sucks), but it does not provide a means to track the huge amount of product that each store gets that is damaged which leads to store managers wasting a huge amount of time when trying to get needed product from another location. There is 254 locations in the south east US. We are building this application to provide a means for each store that is registered to easily track which products arrive damaged and which are in good order and can be sold or transferred to another location if needed.
@@ -25,6 +29,43 @@ Each product that is marked as damaged should also have images attached since it
 Ultimately it would also be useful if a user with the role DC_Warehouse could log in and generate reporting around what % of product has been recieved by each store that is damaged. This will hopefully provide insight to how well the Distrubution Center personel are handling the product during loading prior to shipping to each location; and if they are actively screening product for signs of damage before sending it to each location.
 
 The prefered workflow is when a DC incoming shipment is processed at each location the application will provide a means to scan the barcode on each product (we will need to identify a php library that provides that functionality). I have images of a sample SKU card which has the SKU id and the Tag ID on every product that gets shipped. Once the manifest is processed then the store inventory can be updated, or possibly it can be updated in real time each time a product is scanned. Then once the product is being prepped for delivery or prepared to go to the sales floor if a damaged product is found then one can be modified and marked as damaged, pictures taken and it flagged as damaged. When the product is flagged as damaged a notification should be sent to the Manager for that location so that a PQA process can be started so that the store can be issued a credit on that particular product from the corporate office. The PQA process is outside the scope of this project.
+
+### Barcode Scanning — ZXing-js (Camera-based, Mobile-first)
+
+SKU cards use **Code 128B** barcodes encoding the AO# (e.g. `A006523361`). Scanning will be implemented using **[`@zxing/library`](https://github.com/zxing-js/library)** — a pure JavaScript port of ZXing that reads Code 128 natively via the device camera.
+
+**Initial deployment:** mobile camera only. Warehouse staff point their phone camera at the SKU card barcode during manifest processing; the decoded AO# is sent directly to the scan input field and handled identically to a typed entry.
+
+**Future:** if the company adopts dedicated USB HID or Bluetooth wedge scanners, no library changes are needed — hardware scanners act as keyboards and emit keystrokes straight into the focused `<input>`, so the same handler works without modification.
+
+**SKU Card — all data is Farmers/DC internal:**  
+The DC prints and applies these cards to every product as it is loaded for shipment. Every field on the card originates from Farmers' DC system:
+
+| Field | Example | Description |
+|---|---|---|
+| AO# | `A006523361` | Per-unit unique ID (Farmers internal) |
+| SKU | `195844` | 6-digit integer product-type ID (Farmers internal) |
+| VSN | `P0ZZ266457` | Vendor Stock Number |
+| Vendor | `EMBY` | Vendor abbreviation |
+| Vendor Model | `SM590NS` | Vendor model number |
+| Description | `NIGHTSTAND` | Product description |
+| Finish/Cover/Size/ST | *(varies)* | Customer configuration specs |
+
+The barcode almost certainly encodes the **AO#** since that is the DC's primary per-unit tracking identifier. This should be confirmed by scanning a card (Google Lens shows the raw decoded value).
+
+**Future integration opportunity:** Since all this data originates in the DC's system, a data feed (CSV export, API, or EDI) from the DC could allow manifests to be pre-populated with full product details before the shipment even arrives at the store — eliminating all manual entry entirely.
+
+**Data available from a successful scan:**
+- AO# pre-filled from barcode scan
+- SKU, vendor, description, specs entered manually on first encounter; auto-filled on repeat SKUs as the local catalogue grows
+
+**Phase 1 — manual entry with AO pre-fill:**  
+The AO# is populated automatically from the scan. The user manually enters any remaining fields on first encounter. Over time the system builds a product catalogue keyed by **Farmers SKU** (6-digit integer) — once a SKU has been seen, future scans can auto-fill vendor, vendor model, description, and specs, reducing manual input progressively.
+
+**Future — full lookup:**  
+Once a sufficient product catalogue exists (or a DC data feed is established), scanning can resolve the full product record server-side with no manual entry required.
+
+The scan input must remain focused after each confirmation so the user can scan the next item without tapping the screen.
 
 ### Project dependecies
 
@@ -81,3 +122,99 @@ We will be using a "module" architecture in the sense that each namespace we add
 2. The scan out process will be similar but not identical. For product moving to the floor it should remain in inventory its status just changes. For actual deliveries/pick up then it will be removed from inventory since it will no longer be in store or available for sale or transfer.
 
 3. I meant overstock, was just a typo. I am human after all :P
+
+---
+
+## Bundled / Per-Case Items — Workflow & Data Model Notes
+
+Some manifest lines represent a **single AO# that contains multiple physical pieces** (e.g. one
+box with 2 chairs, SKU 189780). The same SKU can also arrive as a standalone single unit on a
+different manifest. Both variants must be trackable without skewing piece counts.
+
+### Data model
+
+`manifest_item` holds `case_qty SMALLINT UNSIGNED NOT NULL DEFAULT 1` recording how many
+physical pieces arrived in the box.
+
+- `case_qty = 1` — normal single unit (default; no special handling)
+- `case_qty > 1` — bundled case; the AO# covers `case_qty` physical pieces
+
+At manifest confirmation the application **expands** each `manifest_item` into `case_qty`
+individual `product` rows. Every piece row carries the same `ao_number` and the same
+`case_qty` value (for provenance — "I came from a 2-piece box"). Each piece then has fully
+independent `product_status` tracking from day one.
+
+**Piece counts on the `product` table are plain `COUNT(*)`** — no `SUM` needed — because
+every row represents exactly one physical piece. `SUM(manifest_item.case_qty)` is only
+used when summarising manifest receiving totals (lines received vs pieces received).
+
+### Scanning workflow
+
+During manifest processing the operator toggles **"Bundled / Per case"** and enters the piece
+count before confirming the scan. The toggle is off by default and resets to off after each
+confirmation so normal single-item scanning is unaffected.
+
+### Damage workflow
+
+Because each piece is its own `product` row, partial damage within a case requires no
+split-record workaround. The operator simply marks the damaged piece rows with the `damaged`
+status flag while leaving the clean piece rows untouched.
+
+### Reporting
+
+- Piece counts are `COUNT(*)` on `product` (active inventory) or `SUM(manifest_item.case_qty)`
+  on `manifest_item` (receiving totals).
+- Manifest summary stats should show both line count and piece count where bundled items are
+  present (e.g. "38 lines / 44 pcs").
+
+### Confirmed decisions
+
+1. **One `product` row per physical piece.** `case_qty` on `product` records the original
+   box size for context; it does not affect count queries.
+2. **`ao_number` is `NOT NULL`** on both `manifest_item` and `product`. Every piece that came
+   out of a box shares that box's AO#. There is no unique constraint on `ao_number` alone in
+   `product` — multiple pieces from one box legitimately share the same AO#.
+3. **Partial qty sell-out:** no longer a schema concern — each piece is already a separate row
+   and can be removed independently.
+
+---
+
+## Inventory Removal Workflows
+
+There are exactly **four** workflows that can remove a SKU from inventory for non-supervisor
+roles. Managers and supervisors may also perform direct inventory adjustments.
+
+| # | Workflow | Who | What happens |
+|---|---|---|---|
+| 1 | **Process Manifest** | Warehouse | Adds items to inventory (inbound — not a removal) |
+| 2 | **Process Ticket** (Delivery or Pickup) | Warehouse | Removes items; records customer name per AO for fraud protection |
+| 3 | **Process Transfer** | Warehouse | Removes items from current store; marks them in-transit to destination store |
+| 4 | **PQA Resolution** | Manager | Closes damage report after credit received; removes item from damaged inventory |
+
+### Process Ticket
+
+A ticket represents a Celerant customer order being fulfilled — either a **Delivery** (truck)
+or **Pickup** (customer collects in store). The operator scans each AO# as items are loaded or
+handed over. On completion, items are removed from inventory and the **customer name** is stored
+against each AO. This is the anti-fraud record that Celerant does not provide.
+
+Tickets originate in Celerant and are imported or manually entered here. This system does not
+create tickets — it only processes them.
+
+### Process Transfer
+
+An inter-store transfer requires the sending warehouse to scan all items before they leave.
+The destination store is selected at the start. On completion, items are removed from the
+source store's inventory. A future receipt-scan at the destination store can confirm arrival.
+
+### PQA Resolution
+
+When corporate issues a credit for a damaged item, a manager resolves the PQA case from the
+damage detail page. The item is removed from active inventory (disposed, returned to DC, or
+sold at discount). This is not a standalone list — it is triggered from the damage detail view.
+
+### Floor / Status Changes (NOT removal workflows)
+
+Moving a product to the sales floor is a **status change only** — the item remains in
+inventory. Overstock, Bargain Center, and Repairable flags do not reduce inventory counts.
+Only the four workflows above actually decrement the piece count.
