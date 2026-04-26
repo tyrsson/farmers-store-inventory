@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <!--
+        Login page — no sidebar/topbar/nav (unauthenticated shell)
+        Still represents the LAYER 3 layout for a login-specific layout variant
+    -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Sign In | Farmers IMS</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="login-page">
+    <div class="login-card">
+
+        <div class="login-header">
+            <div class="login-logo-mark" aria-hidden="true">
+                <i class="bi bi-boxes"></i>
+            </div>
+            <h1 class="login-app-name">Farmers IMS</h1>
+            <p class="login-app-sub">Inventory Management System</p>
+        </div>
+
+        <form class="login-form" method="post" action="#" novalidate>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email address</label>
+                <input
+                    class="form-control"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="you@farmersfurniture.com"
+                    autocomplete="email"
+                    inputmode="email"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-group">
+                    <input
+                        class="form-control"
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                        autocomplete="current-password"
+                        required
+                    />
+                    <button class="input-group-action" type="button" data-toggle-pw aria-label="Toggle password visibility">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CSRF token will go here in the real form -->
+
+            <button class="btn btn-primary btn-full btn-lg" type="submit">
+                Sign In
+            </button>
+
+            <div class="divider"></div>
+
+            <a href="#" class="btn btn-ghost btn-full">
+                Forgot your password?
+            </a>
+
+        </form>
+
+        <div class="login-footer">
+            Access is restricted to authorised Farmers Furniture personnel.<br />
+            Contact your store manager if you need access.
+        </div>
+
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

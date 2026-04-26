@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Settings | Farmers IMS</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- LAYER 3 PERSISTENT: Bottom nav -->
+<nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
+    <button class="bottom-nav-item" data-page="dashboard" aria-label="Dashboard">
+        <i class="bi bi-grid-fill bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Dashboard</span>
+    </button>
+    <button class="bottom-nav-item" data-page="inventory" aria-label="Inventory">
+        <i class="bi bi-boxes bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Inventory</span>
+    </button>
+    <div class="bottom-nav-scan">
+        <button class="scan-fab" aria-label="Scan product barcode">
+            <i class="bi bi-upc-scan"></i>
+        </button>
+        <span class="scan-fab-label">Scan</span>
+    </div>
+    <button class="bottom-nav-item" data-page="manifests" aria-label="Manifests">
+        <i class="bi bi-clipboard2-data bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Manifests</span>
+    </button>
+    <button class="bottom-nav-item active" data-page="profile" aria-label="Profile" aria-current="page">
+        <i class="bi bi-person-circle bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Profile</span>
+    </button>
+</nav>
+
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+<!-- HTMX SWAP TARGET -->
+<main id="app">
+
+    <!-- LAYER 2: Body partial -->
+    <aside class="sidebar" id="sidebar" aria-label="Site navigation">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-mark" aria-hidden="true">
+                <i class="bi bi-boxes"></i>
+            </div>
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-name">Farmers IMS</div>
+                <div class="sidebar-brand-tagline">Inventory Management</div>
+            </div>
+            <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close navigation">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-store-info">
+            <div class="sidebar-store-label">Active Store</div>
+            <div class="sidebar-store-name">Store #207 · Leeds, AL</div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <div class="sidebar-section-label">Main</div>
+
+            <a href="index.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-grid-fill"></i></span>
+                Dashboard
+            </a>
+            <a href="inventory.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-boxes"></i></span>
+                Inventory
+            </a>
+            <a href="manifests.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-clipboard2-data"></i></span>
+                Manifests
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-exclamation-octagon"></i></span>
+                Damage Reports
+                <span class="sidebar-nav-badge">37</span>
+            </a>
+
+            <div class="sidebar-section-label">Stores</div>
+
+            <button class="sidebar-nav-link sidebar-accordion-toggle"
+                    id="stores-toggle"
+                    aria-expanded="false"
+                    aria-controls="stores-list">
+                <span class="sidebar-nav-icon"><i class="bi bi-shop"></i></span>
+                All Stores
+                <i class="bi bi-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
+            </button>
+            <ul class="sidebar-stores-list" id="stores-list" role="list">
+                <li>
+                    <button class="store-list-item active" data-store-id="207" data-store-city="Leeds, AL">
+                        <span class="store-list-number">#207</span>
+                        <span class="store-list-city">Leeds, AL</span>
+                        <i class="bi bi-house-fill store-list-home-icon" aria-label="My Store"></i>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="112" data-store-city="Birmingham, AL">
+                        <span class="store-list-number">#112</span>
+                        <span class="store-list-city">Birmingham, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="134" data-store-city="Huntsville, AL">
+                        <span class="store-list-number">#134</span>
+                        <span class="store-list-city">Huntsville, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="156" data-store-city="Montgomery, AL">
+                        <span class="store-list-number">#156</span>
+                        <span class="store-list-city">Montgomery, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="178" data-store-city="Mobile, AL">
+                        <span class="store-list-number">#178</span>
+                        <span class="store-list-city">Mobile, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="191" data-store-city="Tuscaloosa, AL">
+                        <span class="store-list-number">#191</span>
+                        <span class="store-list-city">Tuscaloosa, AL</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-label">Reporting</div>
+
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-bar-chart-line"></i></span>
+                Analytics
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-arrow-left-right"></i></span>
+                Transfer Lookup
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="settings.html" class="sidebar-nav-link active" aria-current="page">
+                <span class="sidebar-nav-icon"><i class="bi bi-gear-fill"></i></span>
+                Settings
+            </a>
+            <a href="login.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-box-arrow-left"></i></span>
+                Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <div class="app-body">
+
+        <header class="topbar" role="banner">
+            <button class="topbar-menu-btn" id="menu-btn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="topbar-brand">
+                <div class="topbar-app-name">Settings</div>
+                <div class="topbar-store">Store #207 · Leeds, AL</div>
+            </div>
+            <div class="topbar-actions">
+                <button class="topbar-icon-btn" aria-label="Notifications">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="notification-dot" aria-hidden="true"></span>
+                </button>
+                <div class="topbar-avatar" role="img" aria-label="Signed in as J. Walker">JW</div>
+            </div>
+        </header>
+
+        <!-- LAYER 1: Settings page -->
+        <main class="main-content" id="main-content">
+
+            <h1 class="page-title">Settings</h1>
+
+            <!-- ── My Account ───────────────────────────────────── -->
+            <div class="settings-group-label">My Account</div>
+
+            <div class="settings-card">
+
+                <!-- Profile header -->
+                <div class="settings-profile-header">
+                    <div class="settings-avatar" aria-hidden="true">JW</div>
+                    <div class="settings-profile-info">
+                        <div class="settings-profile-name">James Walker</div>
+                        <div class="settings-profile-meta">
+                            <span class="settings-role-badge">Manager</span>
+                            <span class="settings-profile-store">Store #207 · Leeds, AL</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost btn-sm settings-change-pw-btn" id="open-pw-modal-btn" aria-haspopup="dialog">
+                        <i class="bi bi-key" aria-hidden="true"></i> Change Password
+                    </button>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- Display name row -->
+                <div class="settings-row" id="name-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Display Name</span>
+                        <span class="settings-value" id="name-display">James Walker</span>
+                    </div>
+                    <button class="section-link settings-edit-btn" id="name-edit-btn" aria-pressed="false">
+                        <i class="bi bi-pencil" aria-hidden="true"></i> Edit
+                    </button>
+                </div>
+                <div class="settings-inline-form" id="name-form" hidden>
+                    <input type="text" class="form-control" id="name-input" value="James Walker" aria-label="Display name" autocomplete="name" />
+                    <div class="settings-form-actions">
+                        <button class="btn btn-primary btn-sm" id="name-save-btn">
+                            <i class="bi bi-check2"></i> Save
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="name-cancel-btn">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- Email row -->
+                <div class="settings-row" id="email-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Email Address</span>
+                        <span class="settings-value">j.walker@farmershome.com</span>
+                    </div>
+                    <button class="section-link settings-edit-btn" id="email-edit-btn" aria-pressed="false">
+                        <i class="bi bi-pencil" aria-hidden="true"></i> Edit
+                    </button>
+                </div>
+                <div class="settings-inline-form" id="email-form" hidden>
+                    <input type="email" class="form-control" id="email-input" value="j.walker@farmershome.com" aria-label="Email address" autocomplete="email" />
+                    <div class="settings-form-actions">
+                        <button class="btn btn-primary btn-sm" id="email-save-btn">
+                            <i class="bi bi-check2"></i> Save
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="email-cancel-btn">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- Role row (read-only) -->
+                <div class="settings-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Role</span>
+                        <span class="settings-value">Manager</span>
+                    </div>
+                    <span class="settings-readonly-hint">Assigned by admin</span>
+                </div>
+
+            </div>
+
+            <!-- ── Store Configuration ───────────────────────────── -->
+            <div class="settings-group-label">
+                Store Configuration
+                <span class="settings-role-gate-badge">
+                    <i class="bi bi-shield-lock-fill" aria-hidden="true"></i> Manager+
+                </span>
+            </div>
+
+            <div class="settings-card">
+
+                <!-- Store info (read-only) -->
+                <div class="settings-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Store</span>
+                        <span class="settings-value">Store #207 · Leeds, AL</span>
+                    </div>
+                    <span class="settings-readonly-hint">Assigned by admin</span>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- PQA Email -->
+                <div class="settings-row" id="pqa-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">PQA Email</span>
+                        <span class="settings-value" id="pqa-display">pqa-207@farmershome.com</span>
+                    </div>
+                    <button class="section-link settings-edit-btn" id="pqa-edit-btn" aria-pressed="false">
+                        <i class="bi bi-pencil" aria-hidden="true"></i> Edit
+                    </button>
+                </div>
+                <p class="settings-hint-text">
+                    Damage photos are emailed to this address when <strong>Send Images</strong> is triggered on a damage report.
+                    The PQA system associates them automatically by AO#.
+                </p>
+                <div class="settings-inline-form" id="pqa-form" hidden>
+                    <input type="email" class="form-control" id="pqa-input" value="pqa-207@farmershome.com" aria-label="Store PQA email address" autocomplete="off" />
+                    <div class="settings-form-actions">
+                        <button class="btn btn-primary btn-sm" id="pqa-save-btn">
+                            <i class="bi bi-check2"></i> Save
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="pqa-cancel-btn">Cancel</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── Notifications ─────────────────────────────────── -->
+            <div class="settings-group-label">Notifications</div>
+
+            <div class="settings-card">
+
+                <div class="settings-row settings-toggle-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Damage report flagged</span>
+                        <span class="settings-hint">Notify me when a product is marked as damaged</span>
+                    </div>
+                    <label class="settings-switch" aria-label="Notify on damage flag">
+                        <input type="checkbox" checked />
+                        <span class="settings-switch-track"></span>
+                    </label>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-row settings-toggle-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Manifest processing complete</span>
+                        <span class="settings-hint">Notify me when a manifest is fully processed</span>
+                    </div>
+                    <label class="settings-switch" aria-label="Notify on manifest complete">
+                        <input type="checkbox" checked />
+                        <span class="settings-switch-track"></span>
+                    </label>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-row settings-toggle-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Transfer request received</span>
+                        <span class="settings-hint">Notify me when another store requests a transfer</span>
+                    </div>
+                    <label class="settings-switch" aria-label="Notify on transfer request">
+                        <input type="checkbox" />
+                        <span class="settings-switch-track"></span>
+                    </label>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-row settings-toggle-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">PQA status update</span>
+                        <span class="settings-hint">Notify me when a PQA case status changes</span>
+                    </div>
+                    <label class="settings-switch" aria-label="Notify on PQA update">
+                        <input type="checkbox" checked />
+                        <span class="settings-switch-track"></span>
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- ── Application ───────────────────────────────────── -->
+            <div class="settings-group-label">Application</div>
+
+            <div class="settings-card">
+
+                <div class="settings-row settings-toggle-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Dark Mode</span>
+                        <span class="settings-hint">Currently the only supported theme</span>
+                    </div>
+                    <label class="settings-switch settings-switch-disabled" aria-label="Dark mode (always on)">
+                        <input type="checkbox" checked disabled />
+                        <span class="settings-switch-track"></span>
+                    </label>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <div class="settings-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Version</span>
+                        <span class="settings-value">Farmers IMS v0.1.0-alpha</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── Danger Zone ───────────────────────────────────── -->
+            <div class="settings-group-label">Account</div>
+
+            <div class="settings-card">
+                <div class="settings-row">
+                    <div class="settings-row-label">
+                        <span class="settings-label">Sign Out</span>
+                        <span class="settings-hint">Sign out of all sessions on this device</span>
+                    </div>
+                    <a href="login.html" class="btn btn-ghost btn-sm settings-signout-btn">
+                        <i class="bi bi-box-arrow-left" aria-hidden="true"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="app-footer" role="contentinfo">
+            <span>Farmers IMS &copy; 2026 Webinertia LLC</span>
+        </footer>
+
+    </div><!-- /.app-body -->
+
+<!-- Change Password Modal -->
+<div class="modal-backdrop" id="pw-modal-backdrop" aria-hidden="true"></div>
+<div class="modal" id="pw-modal" role="dialog" aria-modal="true" aria-labelledby="pw-modal-title" aria-hidden="true">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="pw-modal-title">
+                <i class="bi bi-key" aria-hidden="true"></i> Change Password
+            </h2>
+            <button class="modal-close-btn" id="pw-modal-close" aria-label="Close">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label" for="current-password">Current Password</label>
+                <div class="password-input-wrap">
+                    <input type="password" class="form-control" id="current-password" autocomplete="current-password" />
+                    <button type="button" class="password-toggle" aria-label="Show password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="new-password">New Password</label>
+                <div class="password-input-wrap">
+                    <input type="password" class="form-control" id="new-password" autocomplete="new-password" />
+                    <button type="button" class="password-toggle" aria-label="Show password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="confirm-password">Confirm New Password</label>
+                <div class="password-input-wrap">
+                    <input type="password" class="form-control" id="confirm-password" autocomplete="new-password" />
+                    <button type="button" class="password-toggle" aria-label="Show password">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost btn-sm" id="pw-modal-cancel">Cancel</button>
+            <button class="btn btn-primary btn-sm" id="pw-modal-save">
+                <i class="bi bi-check2"></i> Update Password
+            </button>
+        </div>
+    </div>
+</div>
+
+</main><!-- /#app -->
+
+<script src="app.js"></script>
+<script>
+// Settings inline-edit toggle (shared pattern)
+(function () {
+    const pairs = [
+        { editBtn: 'name-edit-btn',  form: 'name-form',  cancelBtn: 'name-cancel-btn',  saveBtn: 'name-save-btn',  displayId: 'name-display', inputId: 'name-input' },
+        { editBtn: 'email-edit-btn', form: 'email-form', cancelBtn: 'email-cancel-btn', saveBtn: 'email-save-btn' },
+        { editBtn: 'pqa-edit-btn',   form: 'pqa-form',   cancelBtn: 'pqa-cancel-btn',   saveBtn: 'pqa-save-btn',   displayId: 'pqa-display',  inputId: 'pqa-input'  },
+    ];
+
+    pairs.forEach(function ({ editBtn, form, cancelBtn, saveBtn, displayId, inputId }) {
+        const $edit   = document.getElementById(editBtn);
+        const $form   = document.getElementById(form);
+        const $cancel = document.getElementById(cancelBtn);
+        const $save   = document.getElementById(saveBtn);
+
+        if (!$edit || !$form) return;
+
+        $edit.addEventListener('click', function () {
+            $form.hidden = false;
+            $edit.hidden = true;
+            if (inputId) document.getElementById(inputId)?.focus();
+        });
+
+        $cancel.addEventListener('click', function () {
+            $form.hidden = true;
+            $edit.hidden = false;
+        });
+
+        $save.addEventListener('click', function () {
+            // Update display value if present
+            if (displayId && inputId) {
+                const val = document.getElementById(inputId)?.value.trim();
+                if (val) document.getElementById(displayId).textContent = val;
+            }
+            $form.hidden = true;
+            $edit.hidden = false;
+
+            // Show toast
+            if (typeof window.showToast === 'function') {
+                window.showToast('Settings saved', 'success');
+            }
+        });
+    });
+
+    // Password modal
+    var $openPw    = document.getElementById('open-pw-modal-btn');
+    var $pwModal   = document.getElementById('pw-modal');
+    var $pwBackdrop = document.getElementById('pw-modal-backdrop');
+    var $pwClose   = document.getElementById('pw-modal-close');
+    var $pwCancel  = document.getElementById('pw-modal-cancel');
+    var $pwSave    = document.getElementById('pw-modal-save');
+
+    function openPwModal() {
+        $pwModal.classList.add('is-open');
+        $pwBackdrop.classList.add('is-open');
+        $pwModal.removeAttribute('aria-hidden');
+        $pwBackdrop.removeAttribute('aria-hidden');
+        document.getElementById('current-password').focus();
+    }
+
+    function closePwModal() {
+        $pwModal.classList.remove('is-open');
+        $pwBackdrop.classList.remove('is-open');
+        $pwModal.setAttribute('aria-hidden', 'true');
+        $pwBackdrop.setAttribute('aria-hidden', 'true');
+        // Clear fields
+        ['current-password', 'new-password', 'confirm-password'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    }
+
+    $openPw.addEventListener('click', openPwModal);
+    $pwClose.addEventListener('click', closePwModal);
+    $pwCancel.addEventListener('click', closePwModal);
+    $pwBackdrop.addEventListener('click', closePwModal);
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && $pwModal.classList.contains('is-open')) closePwModal();
+    });
+
+    $pwSave.addEventListener('click', function () {
+        closePwModal();
+        if (typeof window.showToast === 'function') {
+            window.showToast('Password updated', 'success');
+        }
+    });
+
+    // Password show/hide toggles (modal)
+    document.querySelectorAll('.password-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = btn.previousElementSibling;
+            var isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            btn.querySelector('i').className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    });
+}());
+</script>
+</body>
+</html>

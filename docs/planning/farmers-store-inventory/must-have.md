@@ -16,6 +16,10 @@ So we will end up with these as a minimum set of tables.
 * product_status (relational table to track if a product is damaged)
 * product_image (to store records for images attached to damaged products)
 
+### Per-Store PQA Email
+
+Each store record must have a configurable `pqa_email` field. When a damage report has images attached, the warehouse user can press **Send Images** which emails all attached damage photos to that store's PQA email address. The external PQA system will then automatically associate the images with the correct PQA case. The damage notes stored in this system are for internal warehouse reference only — managers will enter their own notes in the PQA system directly.
+
 ## Project Motivation
 
 Farmers currently has an "inventory system" (built via sharepoint or celerant, I think, it sucks), but it does not provide a means to track the huge amount of product that each store gets that is damaged which leads to store managers wasting a huge amount of time when trying to get needed product from another location. There is 254 locations in the south east US. We are building this application to provide a means for each store that is registered to easily track which products arrive damaged and which are in good order and can be sold or transferred to another location if needed.
@@ -25,6 +29,43 @@ Each product that is marked as damaged should also have images attached since it
 Ultimately it would also be useful if a user with the role DC_Warehouse could log in and generate reporting around what % of product has been recieved by each store that is damaged. This will hopefully provide insight to how well the Distrubution Center personel are handling the product during loading prior to shipping to each location; and if they are actively screening product for signs of damage before sending it to each location.
 
 The prefered workflow is when a DC incoming shipment is processed at each location the application will provide a means to scan the barcode on each product (we will need to identify a php library that provides that functionality). I have images of a sample SKU card which has the SKU id and the Tag ID on every product that gets shipped. Once the manifest is processed then the store inventory can be updated, or possibly it can be updated in real time each time a product is scanned. Then once the product is being prepped for delivery or prepared to go to the sales floor if a damaged product is found then one can be modified and marked as damaged, pictures taken and it flagged as damaged. When the product is flagged as damaged a notification should be sent to the Manager for that location so that a PQA process can be started so that the store can be issued a credit on that particular product from the corporate office. The PQA process is outside the scope of this project.
+
+### Barcode Scanning — ZXing-js (Camera-based, Mobile-first)
+
+SKU cards use **Code 128B** barcodes encoding the AO# (e.g. `A006523361`). Scanning will be implemented using **[`@zxing/library`](https://github.com/zxing-js/library)** — a pure JavaScript port of ZXing that reads Code 128 natively via the device camera.
+
+**Initial deployment:** mobile camera only. Warehouse staff point their phone camera at the SKU card barcode during manifest processing; the decoded AO# is sent directly to the scan input field and handled identically to a typed entry.
+
+**Future:** if the company adopts dedicated USB HID or Bluetooth wedge scanners, no library changes are needed — hardware scanners act as keyboards and emit keystrokes straight into the focused `<input>`, so the same handler works without modification.
+
+**SKU Card — all data is Farmers/DC internal:**  
+The DC prints and applies these cards to every product as it is loaded for shipment. Every field on the card originates from Farmers' DC system:
+
+| Field | Example | Description |
+|---|---|---|
+| AO# | `A006523361` | Per-unit unique ID (Farmers internal) |
+| SKU | `195844` | 6-digit integer product-type ID (Farmers internal) |
+| VSN | `P0ZZ266457` | Vendor Stock Number |
+| Vendor | `EMBY` | Vendor abbreviation |
+| Vendor Model | `SM590NS` | Vendor model number |
+| Description | `NIGHTSTAND` | Product description |
+| Finish/Cover/Size/ST | *(varies)* | Customer configuration specs |
+
+The barcode almost certainly encodes the **AO#** since that is the DC's primary per-unit tracking identifier. This should be confirmed by scanning a card (Google Lens shows the raw decoded value).
+
+**Future integration opportunity:** Since all this data originates in the DC's system, a data feed (CSV export, API, or EDI) from the DC could allow manifests to be pre-populated with full product details before the shipment even arrives at the store — eliminating all manual entry entirely.
+
+**Data available from a successful scan:**
+- AO# pre-filled from barcode scan
+- SKU, vendor, description, specs entered manually on first encounter; auto-filled on repeat SKUs as the local catalogue grows
+
+**Phase 1 — manual entry with AO pre-fill:**  
+The AO# is populated automatically from the scan. The user manually enters any remaining fields on first encounter. Over time the system builds a product catalogue keyed by **Farmers SKU** (6-digit integer) — once a SKU has been seen, future scans can auto-fill vendor, vendor model, description, and specs, reducing manual input progressively.
+
+**Future — full lookup:**  
+Once a sufficient product catalogue exists (or a DC data feed is established), scanning can resolve the full product record server-side with no manual entry required.
+
+The scan input must remain focused after each confirmation so the user can scan the next item without tapping the screen.
 
 ### Project dependecies
 

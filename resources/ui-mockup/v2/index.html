@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Farmers IMS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="custom.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOP NAVBAR (fixed)
+════════════════════════════════════════════════════════════ -->
+<nav class="navbar fixed-top ims-topbar bg-body-tertiary border-bottom border-secondary-subtle px-3">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <!-- Hamburger — triggers offcanvas sidebar on all sizes (hidden lg+) -->
+        <button class="btn btn-sm btn-link text-body p-1 d-lg-none"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#imsSidebar"
+                aria-controls="imsSidebar"
+                aria-label="Open navigation">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div>
+            <div class="fw-bold lh-1 small">Dashboard</div>
+            <div class="text-secondary" style="font-size:0.7rem;">Store #207 · Leeds, AL</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-link text-body p-1 ims-notif-btn" aria-label="Notifications">
+            <i class="bi bi-bell-fill fs-5"></i>
+            <span class="ims-notif-dot"></span>
+        </button>
+        <div class="ims-avatar"
+             data-bs-toggle="tooltip"
+             data-bs-title="James Walker — Manager">JW</div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SIDEBAR (offcanvas on mobile, persistent on lg+)
+════════════════════════════════════════════════════════════ -->
+<div class="offcanvas-lg offcanvas-start ims-sidebar bg-body-tertiary border-end border-secondary-subtle d-flex flex-column"
+     tabindex="-1"
+     id="imsSidebar"
+     aria-labelledby="imsSidebarLabel">
+
+    <!-- Header -->
+    <div class="offcanvas-header border-bottom border-secondary-subtle">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-boxes fs-4 text-primary"></i>
+            <div>
+                <div class="fw-bold lh-1" id="imsSidebarLabel">Farmers IMS</div>
+                <div class="text-secondary" style="font-size:0.7rem;">Inventory Management</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#imsSidebar" aria-label="Close"></button>
+    </div>
+
+    <!-- Store badge -->
+    <div class="px-3 py-2 border-bottom border-secondary-subtle">
+        <div class="text-secondary" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;">Active Store</div>
+        <div class="fw-semibold small">Store #207 · Leeds, AL</div>
+    </div>
+
+    <!-- Nav links -->
+    <div class="offcanvas-body p-2 d-flex flex-column flex-grow-1 overflow-y-auto">
+        <div class="sidebar-section-label">Main</div>
+        <nav class="nav flex-column gap-1">
+            <a href="index.html" class="nav-link active" aria-current="page">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+            <a href="inventory.html" class="nav-link">
+                <i class="bi bi-boxes"></i> Inventory
+            </a>
+            <a href="manifests.html" class="nav-link">
+                <i class="bi bi-clipboard2-data"></i> Manifests
+            </a>
+            <a href="#" class="nav-link">
+                <i class="bi bi-exclamation-octagon"></i> Damage Reports
+                <span class="badge bg-danger">37</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-section-label mt-2">Stores</div>
+        <!-- Bootstrap Collapse for stores accordion -->
+        <button class="nav-link d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#storesList"
+                aria-expanded="false"
+                aria-controls="storesList">
+            <i class="bi bi-shop"></i>
+            <span class="flex-grow-1">All Stores</span>
+            <i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
+        </button>
+        <div class="collapse" id="storesList">
+            <div class="d-flex flex-column gap-1 ps-2">
+                <button class="ims-store-item active">
+                    <i class="bi bi-house-fill text-primary"></i>
+                    <span class="fw-semibold">#207</span> Leeds, AL
+                </button>
+                <button class="ims-store-item"><span class="fw-semibold">#112</span> Birmingham, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#134</span> Huntsville, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#156</span> Montgomery, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#178</span> Mobile, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#191</span> Tuscaloosa, AL</button>
+            </div>
+        </div>
+
+        <div class="sidebar-section-label mt-2">Reporting</div>
+        <nav class="nav flex-column gap-1">
+            <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart-line"></i> Analytics</a>
+        </nav>
+
+        <!-- Sidebar footer -->
+        <div class="mt-auto pt-2 border-top border-secondary-subtle">
+            <nav class="nav flex-column gap-1">
+                <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+                <a href="login.html" class="nav-link"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN LAYOUT WRAPPER
+════════════════════════════════════════════════════════════ -->
+<div class="ims-layout">
+    <main class="ims-main p-3 p-lg-4">
+
+        <!-- Page header -->
+        <div class="mb-3">
+            <h1 class="h4 fw-bold mb-0">Dashboard</h1>
+            <p class="text-secondary small mb-0">Sunday, Apr 26 2026 — Store #207 Leeds, AL</p>
+        </div>
+
+        <!-- Alert -->
+        <div class="alert alert-warning d-flex align-items-center gap-2 py-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+            <span class="small">12 products have pending PQA reviews awaiting manager action.</span>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="text-secondary small mb-1">Total Inventory</div>
+                        <div class="ims-stat-value text-primary">482</div>
+                        <div class="ims-stat-delta mt-1">+14 since last manifest</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 border-danger border-opacity-50">
+                    <div class="card-body">
+                        <div class="text-secondary small mb-1">Damaged</div>
+                        <div class="ims-stat-value" style="color:var(--ims-damaged-color)">37</div>
+                        <div class="ims-stat-delta mt-1 text-danger-emphasis">↑ 5 this week</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 border-warning border-opacity-50">
+                    <div class="card-body">
+                        <div class="text-secondary small mb-1">Pending PQA</div>
+                        <div class="ims-stat-value" style="color:var(--ims-pqa-color)">12</div>
+                        <div class="ims-stat-delta mt-1 text-warning-emphasis">↑ 3 today</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100 border-success border-opacity-50">
+                    <div class="card-body">
+                        <div class="text-secondary small mb-1">On Floor</div>
+                        <div class="ims-stat-value" style="color:var(--ims-floor-color)">278</div>
+                        <div class="ims-stat-delta mt-1">Ready to sell</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick actions -->
+        <h2 class="h6 fw-bold text-uppercase text-secondary mb-2" style="letter-spacing:.05em; font-size:.7rem;">Quick Actions</h2>
+        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+            <div class="col">
+                <a href="#" class="ims-quick-action ims-accent w-100">
+                    <i class="bi bi-upc-scan"></i> Scan Product
+                </a>
+            </div>
+            <div class="col">
+                <a href="process-manifest.html" class="ims-quick-action w-100">
+                    <i class="bi bi-clipboard2-plus"></i> Process Manifest
+                </a>
+            </div>
+            <div class="col">
+                <a href="damage-detail.html" class="ims-quick-action w-100">
+                    <i class="bi bi-exclamation-octagon"></i> Flag Damage
+                </a>
+            </div>
+            <div class="col">
+                <a href="#" class="ims-quick-action w-100">
+                    <i class="bi bi-arrow-left-right"></i> Transfer Check
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent damage reports -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h6 fw-bold text-uppercase text-secondary mb-0" style="letter-spacing:.05em; font-size:.7rem;">Recent Damage Reports</h2>
+            <a href="inventory.html" class="small text-primary text-decoration-none">View all <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="card mb-4">
+            <a href="damage-detail.html" class="ims-product-item">
+                <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ims-product-name">Queen Sleigh Bed Frame</div>
+                        <div class="ims-product-ids">SKU: 195844 <span>AO#: A006523361</span><span>207-0415</span></div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <span class="badge badge-ims-damaged">Damaged</span>
+                        <span class="badge badge-ims-pqa">Pending PQA</span>
+                    </div>
+                </div>
+                <div class="ims-product-meta">
+                    <span>2h ago</span>
+                    <span><i class="bi bi-images"></i> 3</span>
+                </div>
+            </a>
+            <a href="damage-detail.html" class="ims-product-item">
+                <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ims-product-name">5-Drawer Dresser w/ Mirror</div>
+                        <div class="ims-product-ids">SKU: 189168 <span>AO#: A006509201</span><span>207-0401</span></div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <span class="badge badge-ims-damaged">Damaged</span>
+                        <span class="badge badge-ims-repairable">Repairable</span>
+                        <span class="badge badge-ims-bargain">Bargain Center</span>
+                    </div>
+                </div>
+                <div class="ims-product-meta">
+                    <span>5h ago</span>
+                    <span><i class="bi bi-images"></i> 5</span>
+                </div>
+            </a>
+            <a href="damage-detail.html" class="ims-product-item">
+                <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ims-product-name">Sectional Sofa — Right Arm</div>
+                    <div class="ims-product-ids">SKU: 201337 <span>AO#: A006498102</span></div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <span class="badge badge-ims-damaged">Damaged</span>
+                        <span class="badge badge-ims-nonrep">Non-Repairable</span>
+                    </div>
+                </div>
+                <div class="ims-product-meta">
+                    <span>Yesterday</span>
+                    <span><i class="bi bi-images"></i> 2</span>
+                </div>
+            </a>
+            <a href="damage-detail.html" class="ims-product-item">
+                <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ims-product-name">King Platform Bed Base</div>
+                    <div class="ims-product-ids">SKU: 178052 <span>AO#: A006483781</span></div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <span class="badge badge-ims-damaged">Damaged</span>
+                        <span class="badge badge-ims-floor">Floor</span>
+                    </div>
+                </div>
+                <div class="ims-product-meta">
+                    <span>Yesterday</span>
+                    <span><i class="bi bi-images"></i> 1</span>
+                </div>
+            </a>
+            <a href="damage-detail.html" class="ims-product-item">
+                <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ims-product-name">Dining Table — 6 Person</div>
+                        <div class="ims-product-ids">SKU: 164290 <span>AO#: A006473610</span><span>207-0304</span></div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        <span class="badge badge-ims-damaged">Damaged</span>
+                        <span class="badge badge-ims-pqa">Pending PQA</span>
+                    </div>
+                </div>
+                <div class="ims-product-meta">
+                    <span>2 days ago</span>
+                    <span><i class="bi bi-images"></i> 4</span>
+                </div>
+            </a>
+            <div class="card-footer text-center py-2">
+                <a href="inventory.html" class="btn btn-sm btn-outline-secondary w-100">
+                    View All Damage Reports <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BOTTOM NAV (mobile only)
+════════════════════════════════════════════════════════════ -->
+<nav class="fixed-bottom ims-bottom-nav d-lg-none" aria-label="Main navigation">
+    <ul class="nav w-100 h-100 m-0 p-0 list-unstyled">
+        <li class="nav-item">
+            <a href="index.html" class="nav-link active" aria-current="page">
+                <i class="bi bi-grid-fill"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="inventory.html" class="nav-link">
+                <i class="bi bi-boxes"></i>
+                <span>Inventory</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <div class="ims-scan-fab-wrap">
+                <button class="ims-scan-fab" aria-label="Scan product">
+                    <i class="bi bi-upc-scan"></i>
+                </button>
+                <span class="ims-scan-fab-label">Scan</span>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="manifests.html" class="nav-link">
+                <i class="bi bi-clipboard2-data"></i>
+                <span>Manifests</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="settings.html" class="nav-link">
+                <i class="bi bi-person-circle"></i>
+                <span>Profile</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

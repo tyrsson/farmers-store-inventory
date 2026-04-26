@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Damage Report — AO#00194827 | Farmers IMS</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- LAYER 3 PERSISTENT: Bottom nav -->
+<nav class="bottom-nav" id="bottom-nav" aria-label="Main navigation">
+    <button class="bottom-nav-item active" data-page="dashboard" aria-label="Dashboard" aria-current="page">
+        <i class="bi bi-grid-fill bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Dashboard</span>
+    </button>
+    <button class="bottom-nav-item" data-page="inventory" aria-label="Inventory">
+        <i class="bi bi-boxes bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Inventory</span>
+    </button>
+    <div class="bottom-nav-scan">
+        <button class="scan-fab" aria-label="Scan product barcode">
+            <i class="bi bi-upc-scan"></i>
+        </button>
+        <span class="scan-fab-label">Scan</span>
+    </div>
+    <button class="bottom-nav-item" data-page="manifests" aria-label="Manifests">
+        <i class="bi bi-clipboard2-data bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Manifests</span>
+    </button>
+    <button class="bottom-nav-item" data-page="profile" aria-label="Profile">
+        <i class="bi bi-person-circle bottom-nav-icon"></i>
+        <span class="bottom-nav-label">Profile</span>
+    </button>
+</nav>
+
+<div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="false"></div>
+<div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
+
+<!-- HTMX SWAP TARGET -->
+<main id="app">
+
+    <!-- LAYER 2: Body partial -->
+    <aside class="sidebar" id="sidebar" aria-label="Site navigation">
+        <div class="sidebar-header">
+            <div class="sidebar-logo-mark" aria-hidden="true">
+                <i class="bi bi-boxes"></i>
+            </div>
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-name">Farmers IMS</div>
+                <div class="sidebar-brand-tagline">Inventory Management</div>
+            </div>
+            <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close navigation">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-store-info">
+            <div class="sidebar-store-label">Active Store</div>
+            <div class="sidebar-store-name">Store #207 · Leeds, AL</div>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Primary">
+            <div class="sidebar-section-label">Main</div>
+
+            <a href="index.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-grid-fill"></i></span>
+                Dashboard
+            </a>
+            <a href="inventory.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-boxes"></i></span>
+                Inventory
+            </a>
+            <a href="manifests.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-clipboard2-data"></i></span>
+                Manifests
+            </a>
+            <a href="#" class="sidebar-nav-link active" aria-current="page">
+                <span class="sidebar-nav-icon"><i class="bi bi-exclamation-octagon"></i></span>
+                Damage Reports
+                <span class="sidebar-nav-badge">37</span>
+            </a>
+
+            <div class="sidebar-section-label">Stores</div>
+
+            <button class="sidebar-nav-link sidebar-accordion-toggle"
+                    id="stores-toggle"
+                    aria-expanded="false"
+                    aria-controls="stores-list">
+                <span class="sidebar-nav-icon"><i class="bi bi-shop"></i></span>
+                All Stores
+                <i class="bi bi-chevron-down sidebar-nav-chevron" aria-hidden="true"></i>
+            </button>
+            <ul class="sidebar-stores-list" id="stores-list" role="list">
+                <li>
+                    <button class="store-list-item active" data-store-id="207" data-store-city="Leeds, AL">
+                        <span class="store-list-number">#207</span>
+                        <span class="store-list-city">Leeds, AL</span>
+                        <i class="bi bi-house-fill store-list-home-icon" aria-label="My Store"></i>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="112" data-store-city="Birmingham, AL">
+                        <span class="store-list-number">#112</span>
+                        <span class="store-list-city">Birmingham, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="134" data-store-city="Huntsville, AL">
+                        <span class="store-list-number">#134</span>
+                        <span class="store-list-city">Huntsville, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="156" data-store-city="Montgomery, AL">
+                        <span class="store-list-number">#156</span>
+                        <span class="store-list-city">Montgomery, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="178" data-store-city="Mobile, AL">
+                        <span class="store-list-number">#178</span>
+                        <span class="store-list-city">Mobile, AL</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="store-list-item" data-store-id="191" data-store-city="Tuscaloosa, AL">
+                        <span class="store-list-number">#191</span>
+                        <span class="store-list-city">Tuscaloosa, AL</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="sidebar-section-label">Reporting</div>
+
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-bar-chart-line"></i></span>
+                Analytics
+            </a>
+            <a href="#" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-arrow-left-right"></i></span>
+                Transfer Lookup
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="settings.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-gear"></i></span>
+                Settings
+            </a>
+            <a href="login.html" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon"><i class="bi bi-box-arrow-left"></i></span>
+                Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <div class="app-body">
+
+        <header class="topbar" role="banner">
+            <button class="topbar-menu-btn" id="menu-btn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="topbar-brand">
+                <div class="topbar-app-name">Damage Report</div>
+                <div class="topbar-store">Store #207 · Leeds, AL</div>
+            </div>
+            <div class="topbar-actions">
+                <button class="topbar-icon-btn" aria-label="Notifications">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="notification-dot" aria-hidden="true"></span>
+                </button>
+                <div class="topbar-avatar" role="img" aria-label="Signed in as J. Walker">JW</div>
+            </div>
+        </header>
+
+        <!-- LAYER 1: Damage report detail page -->
+        <main class="main-content" id="main-content">
+
+            <!-- Back link -->
+            <a href="index.html" class="back-link">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                Recent Damage Reports
+            </a>
+
+            <!-- Product summary card -->
+            <div class="damage-summary-card">
+                <div class="damage-summary-thumb" aria-hidden="true">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="damage-summary-info">
+                    <h1 class="damage-summary-name">Queen Sleigh Bed Frame</h1>
+                    <div class="damage-summary-ids">
+                        <span class="damage-summary-id">SKU: FRN-4821</span>
+                        <span class="damage-summary-id">AO#: 00194827</span>
+                    </div>
+                    <div class="damage-summary-meta">
+                        <span class="damage-summary-meta-item">
+                            <i class="bi bi-building" aria-hidden="true"></i>
+                            Vendor: LIFESTYLE DCG
+                        </span>
+                        <span class="damage-summary-meta-item">
+                            <i class="bi bi-tag" aria-hidden="true"></i>
+                            Maj: FBR
+                        </span>
+                    </div>
+                    <div class="damage-summary-badges">
+                        <span class="badge badge-damaged">Damaged</span>
+                        <span class="badge badge-pending-pqa">Pending PQA</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report metadata row -->
+            <div class="damage-meta-strip">
+                <div class="damage-meta-cell">
+                    <span class="damage-meta-label">Flagged by</span>
+                    <span class="damage-meta-value">T. Reynolds</span>
+                </div>
+                <div class="damage-meta-cell">
+                    <span class="damage-meta-label">Date / Time</span>
+                    <span class="damage-meta-value">Apr 26, 2026 &mdash; 9:12 AM</span>
+                </div>
+                <div class="damage-meta-cell">
+                    <span class="damage-meta-label">Manifest</span>
+                    <a href="manifest-detail.html" class="damage-meta-link">207-0401</a>
+                </div>
+                <div class="damage-meta-cell">
+                    <span class="damage-meta-label">Trans ID</span>
+                    <span class="damage-meta-value damage-meta-mono">2154408</span>
+                </div>
+            </div>
+
+            <!-- Status editor -->
+            <div class="section-header">
+                <span class="section-title">Status</span>
+                <button class="section-link" id="status-edit-btn" aria-pressed="false">
+                    <i class="bi bi-pencil" aria-hidden="true"></i> Edit
+                </button>
+            </div>
+
+            <div class="card damage-status-card" id="status-card">
+                <div class="status-toggle-group" role="group" aria-label="Product statuses" id="status-toggle-group">
+                    <button class="status-toggle status-toggle-damaged active" data-status="damaged" aria-pressed="true">
+                        <i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i>
+                        Damaged
+                    </button>
+                    <button class="status-toggle status-toggle-pending-pqa active" data-status="pending_pqa" aria-pressed="true">
+                        <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                        Pending PQA
+                    </button>
+                    <button class="status-toggle status-toggle-floor" data-status="floor" aria-pressed="false">
+                        <i class="bi bi-shop-window" aria-hidden="true"></i>
+                        Floor
+                    </button>
+                    <button class="status-toggle status-toggle-bargain" data-status="bargain" aria-pressed="false">
+                        <i class="bi bi-percent" aria-hidden="true"></i>
+                        Bargain Center
+                    </button>
+                    <button class="status-toggle status-toggle-repairable" data-status="repairable" aria-pressed="false">
+                        <i class="bi bi-tools" aria-hidden="true"></i>
+                        Repairable
+                    </button>
+                    <button class="status-toggle status-toggle-non-repairable" data-status="non_repairable" aria-pressed="false">
+                        <i class="bi bi-x-octagon-fill" aria-hidden="true"></i>
+                        Non-Repairable
+                    </button>
+                    <button class="status-toggle status-toggle-overstock" data-status="overstock" aria-pressed="false">
+                        <i class="bi bi-layers" aria-hidden="true"></i>
+                        Overstock
+                    </button>
+                </div>
+                <div class="damage-status-actions" id="status-actions" hidden>
+                    <button class="btn btn-primary btn-sm" id="status-save-btn">
+                        <i class="bi bi-check2"></i> Save Status
+                    </button>
+                    <button class="btn btn-ghost btn-sm" id="status-cancel-btn">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Damage notes -->
+            <div class="section-header">
+                <span class="section-title">Damage Notes</span>
+                <button class="section-link" id="notes-edit-btn" aria-pressed="false">
+                    <i class="bi bi-pencil" aria-hidden="true"></i> Edit
+                </button>
+            </div>
+
+            <div class="card damage-notes-card">
+                <p class="damage-notes-text" id="damage-notes-display">
+                    Corner of frame severely dented on delivery. Box appeared to have been dropped — visible
+                    crush damage to packaging on lower-left corner. Frame rail cracked approximately 6&Prime; from
+                    head post join. Headboard finish scratched along right side. Item was shrink-wrapped but
+                    internal cardboard padding was compressed.
+                </p>
+                <textarea
+                    class="damage-notes-editor form-control"
+                    id="damage-notes-editor"
+                    rows="5"
+                    aria-label="Damage description"
+                    hidden
+                >Corner of frame severely dented on delivery. Box appeared to have been dropped — visible crush damage to packaging on lower-left corner. Frame rail cracked approximately 6″ from head post join. Headboard finish scratched along right side. Item was shrink-wrapped but internal cardboard padding was compressed.</textarea>
+                <div class="damage-notes-actions" id="notes-actions" hidden>
+                    <button class="btn btn-primary btn-sm" id="notes-save-btn">
+                        <i class="bi bi-check2"></i> Save Notes
+                    </button>
+                    <button class="btn btn-ghost btn-sm" id="notes-cancel-btn">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Photo gallery -->
+            <div class="section-header">
+                <span class="section-title">Photos <span class="section-count">3</span></span>
+                <button class="section-link">
+                    <i class="bi bi-camera" aria-hidden="true"></i> Add Photo
+                </button>
+            </div>
+
+            <div class="damage-photo-grid" role="list" aria-label="Damage photos">
+
+                <div class="damage-photo-card" role="listitem" tabindex="0" aria-label="Damage photo 1 — tap to view">
+                    <div class="damage-photo-placeholder" aria-hidden="true">
+                        <i class="bi bi-image-fill"></i>
+                    </div>
+                    <div class="damage-photo-overlay">
+                        <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                    </div>
+                    <span class="damage-photo-label">Frame corner</span>
+                </div>
+
+                <div class="damage-photo-card" role="listitem" tabindex="0" aria-label="Damage photo 2 — tap to view">
+                    <div class="damage-photo-placeholder" aria-hidden="true">
+                        <i class="bi bi-image-fill"></i>
+                    </div>
+                    <div class="damage-photo-overlay">
+                        <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                    </div>
+                    <span class="damage-photo-label">Rail crack</span>
+                </div>
+
+                <div class="damage-photo-card" role="listitem" tabindex="0" aria-label="Damage photo 3 — tap to view">
+                    <div class="damage-photo-placeholder damage-photo-placeholder-alt" aria-hidden="true">
+                        <i class="bi bi-image-fill"></i>
+                    </div>
+                    <div class="damage-photo-overlay">
+                        <i class="bi bi-zoom-in" aria-hidden="true"></i>
+                    </div>
+                    <span class="damage-photo-label">Headboard scratch</span>
+                </div>
+
+                <button class="damage-photo-add" aria-label="Add new damage photo">
+                    <i class="bi bi-camera-fill" aria-hidden="true"></i>
+                    <span>Add Photo</span>
+                </button>
+
+            </div>
+
+            <!-- PQA section -->
+            <div class="section-header">
+                <span class="section-title">PQA Workflow</span>
+            </div>
+
+            <div class="card pqa-card">
+                <div class="pqa-status-row">
+                    <div class="pqa-status-indicator pqa-pending" aria-label="PQA status: Pending">
+                        <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                    </div>
+                    <div class="pqa-status-info">
+                        <div class="pqa-status-label">PQA Pending</div>
+                        <div class="pqa-status-sub">Awaiting manager review &amp; credit submission</div>
+                    </div>
+                </div>
+
+                <div class="pqa-detail-grid">
+                    <div class="pqa-detail-cell">
+                        <span class="pqa-detail-label">Estimated Credit</span>
+                        <span class="pqa-detail-value">—</span>
+                    </div>
+                    <div class="pqa-detail-cell">
+                        <span class="pqa-detail-label">Submitted by</span>
+                        <span class="pqa-detail-value">Not submitted</span>
+                    </div>
+                    <div class="pqa-detail-cell">
+                        <span class="pqa-detail-label">PQA Number</span>
+                        <span class="pqa-detail-value">—</span>
+                    </div>
+                    <div class="pqa-detail-cell">
+                        <span class="pqa-detail-label">Resolved</span>
+                        <span class="pqa-detail-value">—</span>
+                    </div>
+                </div>
+
+                <div class="pqa-note">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    Use <strong>Send Images</strong> to email damage photos to this store&rsquo;s configured PQA address. The PQA credit process is handled in the external system &mdash; update status here once submitted.
+                </div>
+            </div>
+
+            <!-- Action bar -->
+            <div class="damage-action-bar">
+                <button class="btn btn-primary">
+                    <i class="bi bi-camera-fill"></i>
+                    Add Photos
+                </button>
+                <button class="btn btn-accent">
+                    <i class="bi bi-envelope-arrow-up-fill"></i>
+                    Send Images
+                </button>
+                <button class="btn btn-ghost btn-danger-ghost">
+                    <i class="bi bi-archive-fill"></i>
+                    Archive
+                </button>
+            </div>
+
+        </main>
+
+        <footer class="footer">
+            &copy; 2026 Farmers Furniture &mdash; Inventory Management System
+        </footer>
+
+    </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
