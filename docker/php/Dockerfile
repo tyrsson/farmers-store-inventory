@@ -5,6 +5,9 @@
 # Then use: FROM trueasync/php-true-async@sha256:<digest>
 FROM trueasync/php-true-async:latest AS base
 
+RUN apt-get update -qq && apt-get install -y --no-install-recommends inotify-tools \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /var/www/app
 
 CMD ["php", "bin/mezzio-async", "start"]

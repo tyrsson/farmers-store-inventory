@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Mezzio\Async\Runner;
 
+use Async\Channel;
 use Async\Scope;
 use Laminas\HttpHandlerRunner\RequestHandlerRunnerInterface;
 use Mezzio\Async\Http\RequestParser;
@@ -13,8 +14,7 @@ use Mezzio\Async\Http\StaticFileHandler;
 use Psr\Http\Server\RequestHandlerInterface;
 use Throwable;
 
-use function Async\await;
-use function Async\timeout;
+use function Async\delay;
 use function fclose;
 use function is_resource;
 use function strtolower;
@@ -53,18 +53,23 @@ final readonly class AsyncRunner implements RequestHandlerRunnerInterface
                         $firstRequest = false;
                         $request = $this->parser->parse($conn, $peerName);
                     } else {
-                        // Keep-alive: cap idle wait so coroutines are not held open indefinitely.
-                        // OperationCanceledException (timeout) propagates to the outer catch and
-                        // silently closes the connection — same as any other clean break.
+                        // Keep-alive idle timeout — race the parser against a delay.
+                        // Channel(1): whichever coroutine finishes first sends its result;
+                        // the second sendAsync() on a full channel is a no-op. No exceptions.
                         $idleScope = Scope::inherit();
-                        try {
-                            $request = await(
-                                $idleScope->spawn(fn() => $this->parser->parse($conn, $peerName)),
-                                timeout(self::KEEP_ALIVE_TIMEOUT_MS),
-                            );
-                        } finally {
-                            $idleScope->dispose();
-                        }
+                        $ch        = new Channel(1);
+
+                        $idleScope->spawn(function () use ($ch, $conn, $peerName): void {
+                            $ch->sendAsync($this->parser->parse($conn, $peerName));
+                        });
+
+                        $idleScope->spawn(function () use ($ch): void {
+                            delay(self::KEEP_ALIVE_TIMEOUT_MS);
+                            $ch->sendAsync(null); // timeout: treat as closed connection
+                        });
+
+                        $request = $ch->recv();
+                        $idleScope->dispose();
                     }
                 } catch (Throwable $e) {
                     break;

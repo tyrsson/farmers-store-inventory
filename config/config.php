@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\ConfigProvider;
+use Htmx\ConfigProvider as HtmxConfigProvider;
 use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ConfigAggregator\PhpFileProvider;
@@ -14,8 +15,14 @@ $cacheConfig = [
 ];
 
 $aggregator = new ConfigAggregator([
+    \Axleus\Message\ConfigProvider::class,
+    \Mezzio\Session\Ext\ConfigProvider::class,
+    \Mezzio\Session\ConfigProvider::class,
+    \Webware\CommandBus\ConfigProvider::class,
+    \Axleus\Mailer\ConfigProvider::class,
+    \Webware\CommandBus\Event\ConfigProvider::class,
+    \PhpDb\Mysql\ConfigProvider::class,
     \PhpDb\ConfigProvider::class,
-    \PhpDb\Pgsql\ConfigProvider::class,
     \PhpDb\Async\ConfigProvider::class,
     \Axleus\Log\ConfigProvider::class,
     \Laminas\Hydrator\ConfigProvider::class,
@@ -39,6 +46,7 @@ $aggregator = new ConfigAggregator([
     Mezzio\Async\ConfigProvider::class,
     // Default App module config
     ConfigProvider::class,
+    HtmxConfigProvider::class,
     // Load application config in a pre-defined order in such a way that local settings
     // overwrite global settings. (Loaded as first to last):
     //   - `global.php`

@@ -21,7 +21,7 @@ Runner/
   AsyncRunner.php                  ← implements RequestHandlerRunnerInterface; handles connections
   AsyncRunnerFactory.php
 Http/
-  Server.php                       ← TCP socket, scheduler entry, Scope, accept loop, signals
+  Server.php                       ← TCP socket, scheduler entry, Scope, accept loop, signals, hot-reload
   ServerFactory.php
   RequestParser.php                ← fread-based chunk accumulator → PSR-7
   RequestParserFactory.php
@@ -33,13 +33,15 @@ Http/
   StaticFileHandlerFactory.php
 Log/
   LoggerDelegator.php              ← adds StreamHandlers to file + stderr
+HotCodeReload/
+  Watcher.php                      ← inotifywait subprocess; triggers restart on .php/.phtml change
+  WatcherFactory.php
 ```
 
 **Not yet implemented** (planned, do not fabricate):
 - `Command/` (Start, Stop, Reload, Status)
 - `Event/` (PSR-14 lifecycle events and listeners)
 - `PidManager`
-- `HotCodeReload/`
 
 ---
 
@@ -50,8 +52,10 @@ Log/
   accept loop, and signal handling. It exposes a single `listen(callable $connectionHandler)` method.
 - **`AsyncRunner`** is a thin Mezzio integration layer. `run()` calls `$this->server->listen($this->handleConnection(...))`. All connection logic (parse, dispatch, emit, log) lives in `handleConnection()`.
 - **`Async\Scope`** owns all connection coroutines. Cancelling the scope shuts the server down.
-- **No FrankenPHP**, no Swoole. The HTTP server uses PHP's native `stream_socket_server` /
-  `stream_socket_accept` — automatically non-blocking inside TrueAsync coroutines.
+- **No FrankenPHP**, no Swoole. The HTTP server uses `socket_create` with `SO_REUSEPORT`
+  exported to a stream via `socket_export_stream`, then `stream_socket_accept` — automatically
+  non-blocking inside TrueAsync coroutines. `SO_REUSEPORT` is required for hot-reload so the
+  restarted process can bind the port while the old socket still exists in the kernel.
 - **`await(spawn(...))`** is required to enter the TrueAsync scheduler from the CLI entry
   point. The entire server lifecycle runs inside `Http\Server::listen()`.
 
@@ -183,6 +187,22 @@ await_any_or_fail([signal(Signal::SIGTERM), signal(Signal::SIGINT)]);
 $scope->cancel();
 $scope->awaitAfterCancellation(errorHandler: fn($e) => $logger->error(...));
 ```
+
+### Hot-Reload Restart
+`HotCodeReload\Watcher` watches `src/` and `config/` using an `inotifywait` subprocess
+(not `Async\FileSystemWatcher` — recursive mode is broken in the current build).
+
+A `Channel(1)` races the signal listener against the file watcher. On file change:
+1. Scope is cancelled and drained
+2. **After** `await()` returns (scheduler fully exited), `fclose($server)` is called
+3. `pcntl_exec(PHP_BINARY, $argv)` replaces the process
+
+`pcntl_exec` **must** be outside `await(spawn(...))`. TrueAsync's io_uring layer holds
+internal kernel references to the server socket fd that survive PHP's `fclose()`. Calling
+exec inside the scheduler causes `Address already in use` in the new process.
+
+The server socket uses `SO_REUSEPORT` (via `socket_create` + `socket_export_stream`) so
+the new process can bind the port immediately without waiting for the old socket to release.
 
 ---
 

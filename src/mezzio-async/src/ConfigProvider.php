@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Mezzio\Async;
 
 use Laminas\HttpHandlerRunner\RequestHandlerRunnerInterface;
+use Mezzio\Async\HotCodeReload\Watcher;
+use Mezzio\Async\HotCodeReload\WatcherFactory;
 use Mezzio\Async\Http\RequestParser;
 use Mezzio\Async\Http\ResponseEmitter;
 use Mezzio\Async\Http\Server;
@@ -46,6 +48,7 @@ final class ConfigProvider
                 Server::class               => ServerFactory::class,
                 ServerRequestFactory::class => \Mezzio\Async\Http\ServerRequestFactoryFactory::class,
                 StaticFileHandler::class    => \Mezzio\Async\Http\StaticFileHandlerFactory::class,
+                Watcher::class              => WatcherFactory::class,
             ],
             'aliases' => [
                 RequestHandlerRunnerInterface::class => AsyncRunner::class,
@@ -58,6 +61,11 @@ final class ConfigProvider
         return [
             'host' => '0.0.0.0',
             'port' => 8080,
+            'hot-reload' => [
+                'enabled'   => false,
+                'paths'     => ['src', 'config'],
+                'recursive' => true,
+            ],
         ];
     }
 }

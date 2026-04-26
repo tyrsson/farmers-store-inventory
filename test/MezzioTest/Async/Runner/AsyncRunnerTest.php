@@ -11,13 +11,11 @@ use Mezzio\Async\Http\ServerRequestFactory;
 use Mezzio\Async\Http\StaticFileHandler;
 use Mezzio\Async\Runner\AsyncRunner;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\NullLogger;
 
 #[CoversClass(AsyncRunner::class)]
-#[CoversMethod(AsyncRunner::class, 'run')]
 final class AsyncRunnerTest extends TestCase
 {
     public function testRunDelegatesToServerListen(): void
