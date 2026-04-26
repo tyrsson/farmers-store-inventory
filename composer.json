@@ -1,22 +1,25 @@
 {
-    "name": "webware/mezzio-async",
-    "description": "A custom Mezzio skeleton",
+    "name": "webware/farmers-store-inventory",
+    "description": "Warehouse inventory management system built with Mezzio and True Async.",
     "license": "BSD-3-Clause",
     "keywords": [
         "mezzio",
-        "custom skeleton"
+        "true async",
+        "inventory management"
     ],
     "authors": [
         {
             "name": "Joey Smith",
             "email": "jsmith@webinertia.net",
-            "homepage": "https://github.com/tyrsson/mezzio-async/discussions",
+            "homepage": "https://github.com/tyrsson/farmers-store-inventory/discussions",
             "role": "Developer"
         }
     ],
     "require": {
         "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
         "axleus/axleus-log": "0.0.x-dev",
+        "axleus/axleus-mailer": "dev-master",
+        "axleus/axleus-message": "dev-master",
         "laminas/laminas-component-installer": "^3.7",
         "laminas/laminas-config-aggregator": "^1.19",
         "laminas/laminas-diactoros": "^3.8",
@@ -27,19 +30,20 @@
         "mezzio/mezzio-fastroute": "^3.14",
         "mezzio/mezzio-helpers": "^5.20",
         "mezzio/mezzio-laminasviewrenderer": "^3.0",
-        "phly/phly-event-dispatcher": "^1.5.0"
+        "webware/commandbus-event": "0.1.x-dev"
     },
     "require-dev": {
-        "php-db/phpdb-pgsql": "0.1.x-dev",
+        "php-db/phpdb-mysql": "0.4.x-dev",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-phpunit": "^2.0",
-        "phpunit/phpunit": "^11.5.42",
+        "phpunit/phpunit": "^13.0.0",
         "roave/security-advisories": "dev-master",
         "webware/coding-standard": "^0.1.0"
     },
     "autoload": {
         "psr-4": {
             "App\\": "src/App/src/",
+            "Htmx\\": "src/htmx/src/",
             "Mezzio\\Async\\": "src/mezzio-async/src/",
             "PhpDb\\Async\\": "src/phpdb-async/src/"
         }
@@ -65,6 +69,9 @@
             "@test"
         ],
         "clear-config-cache": "php bin/clear-config-cache.php",
+        "development-disable": "php bin/development-mode --disable",
+        "development-enable": "php bin/development-mode --enable",
+        "development-status": "php bin/development-mode --status",
         "cs-check": "vendor/bin/php-cs-fixer check",
         "cs-fix": "vendor/bin/php-cs-fixer fix",
         "test": "phpunit --colors=always",

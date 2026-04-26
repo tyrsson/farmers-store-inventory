@@ -14,8 +14,14 @@ $cacheConfig = [
 ];
 
 $aggregator = new ConfigAggregator([
+    \Axleus\Message\ConfigProvider::class,
+    \Mezzio\Session\Ext\ConfigProvider::class,
+    \Mezzio\Session\ConfigProvider::class,
+    \Webware\CommandBus\ConfigProvider::class,
+    \Axleus\Mailer\ConfigProvider::class,
+    \Webware\CommandBus\Event\ConfigProvider::class,
+    \PhpDb\Mysql\ConfigProvider::class,
     \PhpDb\ConfigProvider::class,
-    \PhpDb\Pgsql\ConfigProvider::class,
     \PhpDb\Async\ConfigProvider::class,
     \Axleus\Log\ConfigProvider::class,
     \Laminas\Hydrator\ConfigProvider::class,
