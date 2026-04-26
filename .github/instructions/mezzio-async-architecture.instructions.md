@@ -27,7 +27,7 @@ src/mezzio-async/src/
     AsyncRunner.php                  ← implements RequestHandlerRunnerInterface; connection handling
     AsyncRunnerFactory.php
   Http/
-    Server.php                       ← TCP socket, scheduler entry, Scope, accept loop, signals
+    Server.php                       ← TCP socket, scheduler entry, Scope, accept loop, signals, hot-reload
     ServerFactory.php
     RequestParser.php                ← fread accumulator → ?ServerRequestInterface
     RequestParserFactory.php
@@ -39,13 +39,15 @@ src/mezzio-async/src/
     StaticFileHandlerFactory.php
   Log/
     LoggerDelegator.php              ← adds StreamHandlers to Monolog logger
+  HotCodeReload/
+    Watcher.php                      ← inotifywait subprocess; triggers restart on .php/.phtml change
+    WatcherFactory.php
 ```
 
 **Not yet implemented — do not fabricate these:**
 - `Command/` (Start, Stop, Reload, Status)
 - `Event/` (PSR-14 lifecycle events and listeners)
 - `PidManager`
-- `HotCodeReload/`
 
 ---
 
@@ -85,10 +87,22 @@ Current `getDependencies()` registration:
     Server::class               => ServerFactory::class,
     ServerRequestFactory::class => ServerRequestFactoryFactory::class,
     StaticFileHandler::class    => StaticFileHandlerFactory::class,
+    Watcher::class              => WatcherFactory::class,
 ],
 'aliases' => [
     RequestHandlerRunnerInterface::class => AsyncRunner::class,
 ],
+```
+
+Default config includes hot-reload settings:
+```php
+'mezzio-async' => [
+    'hot-reload' => [
+        'enabled'   => false,        // true in dev via global.php
+        'paths'     => ['src', 'config'],
+        'recursive' => true,
+    ],
+]
 ```
 
 ---
@@ -126,19 +140,28 @@ public function __construct(
     private string          $host,
     private int             $port,
     private LoggerInterface $logger,
+    private ?Watcher        $watcher = null,  // null = hot-reload disabled
 )
 ```
 
 `ServerFactory` reads config from `$config['mezzio-async']['http-server']`, falling
 back to the flat `$config['mezzio-async']` array. Default host `0.0.0.0`, port `8080`.
+When `mezzio-async.hot-reload.enabled` is `true`, `ServerFactory` resolves `Watcher`
+from the container and injects it.
 
 The `listen(callable $connectionHandler): void` method:
-1. Creates `stream_socket_server` with `tcp_nodelay` option
-2. Wraps everything in `await(spawn(...))` to enter the TrueAsync scheduler
+1. Creates the server socket via `createServerSocket()` using `socket_create` +
+   `SO_REUSEADDR` + `SO_REUSEPORT` (required for hot-reload — see http-server-implementation)
+2. Wraps the server lifecycle in `await(spawn(...))` to enter the TrueAsync scheduler
 3. Creates a `Scope` with an exception handler that logs unhandled connection errors
-4. Spawns the accept loop coroutine into the scope; passes each connection to `$connectionHandler`
-5. Calls `await_any_or_fail([signal(Signal::SIGTERM), signal(Signal::SIGINT)])`
-6. Calls `$scope->cancel()` then `$scope->awaitAfterCancellation(...)`
+4. Spawns the accept loop into the scope; spawns each connection as `$connectionHandler`
+5. Spawns a signal listener coroutine watching `SIGTERM`/`SIGINT`
+6. If `$watcher` is set, calls `$watcher->startIn($scope, $onReload)` which sends `true`
+   to `$shutdownCh` on file change
+7. Blocks on `$shutdownCh->recv()` — first of signal (`false`) or file change (`true`) wins
+8. Calls `$scope->cancel()` then `$scope->awaitAfterCancellation(...)`
+9. **After** `await()` returns (scheduler fully exited): `fclose($server)` then
+   `pcntl_exec(PHP_BINARY, $argv)` if restarting
 
 ---
 
@@ -218,8 +241,14 @@ Services live for the entire server lifetime, shared across all request coroutin
 
 ## What to Avoid
 
-- Do **not** create `Event/`, `Command/`, `PidManager`, or `HotCodeReload/` until they are
+- Do **not** create `Event/`, `Command/`, or `PidManager` until they are
   explicitly planned and designed
 - Do **not** use PSR-14 event dispatching yet — the event system is not implemented
 - Do **not** reference `mezzio-swoole` class names or patterns — this is a separate project
 - Do **not** use named arguments for `stream_socket_accept` — positional only
+- Do **not** use `Async\FileSystemWatcher` with `recursive=true` — it is buggy in the
+  current TrueAsync build; it only delivers events for files directly in the watched root,
+  not subdirectories. Use `inotifywait` subprocess instead (see `HotCodeReload\Watcher`).
+- Do **not** call `pcntl_exec` from inside `await(spawn(...))` — the TrueAsync scheduler
+  holds internal io_uring/epoll references to open FDs; calling exec inside it causes
+  the restarted process to fail with `Address already in use`. Call it after `await()` returns.

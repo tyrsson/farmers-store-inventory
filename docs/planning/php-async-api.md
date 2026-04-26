@@ -337,6 +337,83 @@ $scope->awaitCompletion($t);              // cancel scope wait after 5s
 
 Watches filesystem paths for changes. Useful for hot-code-reload in development.
 
+```php
+new FileSystemWatcher(string $path, bool $recursive = false, bool $coalesce = true)
+```
+
+- `$path` — file or directory to watch. Throws `Error` if the path does not exist.
+- `$recursive` — if `true`, subdirectories are also monitored.
+- `$coalesce` — `true` (default): merge multiple events per file into one (optimal for
+  hot-reload). `false`: deliver every OS event individually (useful for auditing).
+
+Monitoring starts **immediately** on construction. Events are buffered even before
+iteration begins.
+
+**`Async\FileSystemEvent` — event properties:**
+
+| Property   | Type      | Description                                              |
+|------------|-----------|----------------------------------------------------------|
+| `path`     | `string`  | The path passed to the `FileSystemWatcher` constructor   |
+| `filename` | `?string` | Name of the file that triggered the event (may be null)  |
+| `renamed`  | `bool`    | `true` — file was created, deleted, or renamed           |
+| `changed`  | `bool`    | `true` — file contents were modified                     |
+
+**Iteration** — events are delivered via `foreach` in a coroutine. The coroutine
+suspends automatically when the buffer is empty and resumes on the next event:
+
+```php
+$watcher = new Async\FileSystemWatcher('/etc/myapp', recursive: true);
+
+foreach ($watcher as $event) {
+    echo "{$event->filename}: renamed={$event->renamed}, changed={$event->changed}\n";
+}
+```
+
+**Lifecycle:**
+
+```php
+$watcher->close();      // stop monitoring; safe to call multiple times
+$watcher->isClosed();   // bool
+```
+
+If the `FileSystemWatcher` object goes out of scope it is automatically closed.
+It also terminates cleanly when the owning `Async\Scope` is cancelled.
+
+**Hot-reload example** (the pattern used by `Mezzio\Async\HotCodeReload\Watcher`):
+
+```php
+spawn(function() use ($scope): void {
+    $watcher = new Async\FileSystemWatcher('/var/www/app/src', recursive: true);
+
+    foreach ($watcher as $event) {
+        if (str_ends_with($event->filename ?? '', '.php')) {
+            $scope->cancel();       // drain connections
+            break;
+        }
+    }
+});
+```
+
+**Monitoring multiple directories concurrently:**
+
+```php
+$ch = new Async\Channel(1);   // first change wins
+
+foreach (['/var/www/app/src', '/var/www/app/config'] as $dir) {
+    spawn(function() use ($dir, $ch): void {
+        $watcher = new Async\FileSystemWatcher($dir, recursive: true);
+        foreach ($watcher as $event) {
+            if (str_ends_with($event->filename ?? '', '.php')) {
+                $ch->sendAsync($event->filename);
+                return;
+            }
+        }
+    });
+}
+
+$changedFile = $ch->recv();
+```
+
 ---
 
 ## Exception Hierarchy

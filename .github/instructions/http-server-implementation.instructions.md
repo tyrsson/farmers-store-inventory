@@ -21,24 +21,28 @@ applyTo: "src/mezzio-async/src/Http/**/*.php"
 
 ## Server Socket Setup
 
-```php
-$context = stream_context_create(['socket' => ['tcp_nodelay' => true]]);
-$server  = stream_socket_server(
-    sprintf('tcp://%s:%d', $host, $port),
-    $errno,
-    $errstr,
-    STREAM_SERVER_BIND | STREAM_SERVER_LISTEN,
-    $context,
-);
+The server socket is created via `socket_create` with `SO_REUSEPORT` set. This is
+**required** for hot-reload: `pcntl_exec` replaces the process image but TrueAsync's
+io_uring/epoll layer holds a kernel-level reference to the listening fd that survives
+PHP's `fclose()`. The new process must be able to bind the same port immediately without
+waiting for the old socket to be released.
 
-if ($server === false) {
-    throw new \RuntimeException(
-        sprintf('Cannot bind %s:%d — %s (%d)', $host, $port, $errstr, $errno)
-    );
+```php
+private function createServerSocket(): mixed
+{
+    $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+    socket_set_option($sock, SOL_SOCKET, SO_REUSEADDR, 1);
+    socket_set_option($sock, SOL_SOCKET, SO_REUSEPORT, 1);
+    socket_bind($sock, $this->host, $this->port);
+    socket_listen($sock, 4096);
+    return socket_export_stream($sock);  // ← back to a stream resource
 }
 ```
 
-The server socket is closed in the `finally` block of the accept coroutine, not in `listen()`.
+The stream resource from `socket_export_stream()` is used normally with
+`stream_socket_accept` in the accept loop. The server socket is closed in the `finally`
+block of the accept coroutine, **and** again after `await()` returns (outside the
+scheduler) as a safety net before `pcntl_exec`.
 
 ---
 
@@ -194,6 +198,41 @@ All `fwrite()` calls yield the coroutine on slow clients automatically.
 ```
 HTTP/1.1 {status} {reason}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n
 ```
+
+---
+
+## Hot-Reload (HotCodeReload\Watcher)
+
+`HotCodeReload\Watcher` watches source paths for `.php`/`.phtml` changes and triggers
+a server restart via a callback.
+
+**Implementation:** uses `inotifywait` (from `inotify-tools`) as a subprocess rather
+than `Async\FileSystemWatcher`. TrueAsync's `FileSystemWatcher` with `recursive=true` is
+buggy — it only delivers events for files created directly in the watched root, not in
+subdirectories.
+
+```php
+$cmd = array_merge(
+    ['inotifywait', '-m', '-e', 'close_write,moved_to', '--format', '%f', '-q'],
+    $this->recursive ? ['-r'] : [],
+    $this->paths,
+);
+$process = proc_open($cmd, [0 => ['pipe','r'], 1 => ['pipe','w'], 2 => ['file','/dev/null','w']], $pipes);
+```
+
+`fgets($stdout)` inside the coroutine suspends without blocking other coroutines.
+The subprocess is `proc_terminate()`d in `finally` so it is always cleaned up.
+
+**Docker requirement:** `inotify-tools` must be installed in the container image
+(`apt-get install -y inotify-tools`). Both `docker/php/Dockerfile` and
+`.devcontainer/docker/php/Dockerfile` install it.
+
+**Restart sequence inside `Http\Server::listen()`:**
+1. `Channel(1)` acts as first-wins between signal listener (`false`) and watcher (`true`).
+2. On file change the scope is cancelled, `awaitAfterCancellation()` drains connections.
+3. `pcntl_exec(PHP_BINARY, $argv)` is called **outside** `await(spawn(...))` — after the
+   TrueAsync scheduler has fully exited. Calling it inside the scheduler leaves io_uring
+   references open and causes `Address already in use` in the restarted process.
 
 ---
 
