@@ -6,12 +6,10 @@ namespace MezzioTest\Async\Http;
 
 use Mezzio\Async\Http\Server;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
 #[CoversClass(Server::class)]
-#[CoversMethod(Server::class, 'listen')]
 final class ServerTest extends TestCase
 {
     public function testListenBindsAndAcceptsConnections(): void

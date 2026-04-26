@@ -273,3 +273,6 @@ while (checkCondition() === false) {
 | Named args on `stream_socket_accept` | Positional only: `stream_socket_accept($s, -1, $peer)` |
 | Calling `awaitAfterCancellation()` from sync context | Must be called inside `await(spawn(...))` |
 | Logging before parse — null = speculative pre-connect | Parse outside `try/finally` that logs; close and return on null |
+| Calling `pcntl_exec()` inside `await(spawn(...))` | Call it **after** `await()` returns; scheduler holds io_uring FD refs that survive `fclose()` |
+| Using `Async\FileSystemWatcher` with `recursive=true` | Buggy in current build — only delivers events at root level; use `inotifywait` subprocess |
+| Channel for first-wins between two competing coroutines | Use `Channel(1)` — capacity-1 buffer; first `sendAsync()` wins, subsequent calls return false silently |
