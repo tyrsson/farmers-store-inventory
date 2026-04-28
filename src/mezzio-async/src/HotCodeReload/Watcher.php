@@ -4,28 +4,26 @@ declare(strict_types=1);
 
 namespace Mezzio\Async\HotCodeReload;
 
+use Async\Channel;
+use Async\FileSystemWatcher;
 use Async\Scope;
 use Psr\Log\LoggerInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
-use function array_merge;
-use function fclose;
-use function fgets;
+use function array_unique;
 use function in_array;
-use function is_resource;
+use function is_dir;
 use function pathinfo;
-use function proc_close;
-use function proc_open;
-use function proc_terminate;
-use function rtrim;
 
 use const PATHINFO_EXTENSION;
 
 /**
  * Watches PHP source files for changes and notifies the server to restart.
  *
- * Uses inotifywait (from inotify-tools) to monitor filesystem events,
- * working around a bug in TrueAsync's FileSystemWatcher where recursive
- * mode fails to deliver events for files in subdirectories.
+ * Uses Async\FileSystemWatcher (non-recursive) across all enumerated
+ * subdirectories, working around the TrueAsync bug where recursive mode
+ * fails to deliver events for files in subdirectories.
  *
  * Used exclusively in development. Spawn it into the server Scope via
  * {@see startIn()} so that it is automatically cancelled on shutdown.
@@ -48,10 +46,10 @@ final readonly class Watcher
     /**
      * Spawns the file-watcher coroutine into $scope.
      *
-     * Launches inotifywait as a subprocess and reads its stdout line by line
-     * inside a TrueAsync coroutine (fgets suspends the coroutine, not the
-     * process). On the first matching file event the subprocess is terminated,
-     * the callback is invoked, and the coroutine exits.
+     * Creates one non-recursive FileSystemWatcher per directory (enumerating
+     * all subdirectories when recursive mode is requested). All watchers race
+     * to send the first matching filename into a Channel(1); the winner
+     * triggers the reload callback and cancels the remaining watchers.
      *
      * @param Scope    $scope    The server Scope that owns this coroutine.
      * @param callable $onReload Called once when a watched file changes.
@@ -59,52 +57,80 @@ final readonly class Watcher
     public function startIn(Scope $scope, callable $onReload): void
     {
         $scope->spawn(function () use ($onReload): void {
-            $cmd = array_merge(
-                ['inotifywait', '-m', '-e', 'close_write,moved_to', '--format', '%f', '-q'],
-                $this->recursive ? ['-r'] : [],
-                $this->paths,
-            );
-
-            $process = proc_open($cmd, [
-                0 => ['pipe', 'r'],
-                1 => ['pipe', 'w'],
-                2 => ['file', '/dev/null', 'w'],
-            ], $pipes);
-
-            if ($process === false || ! is_resource($process)) {
-                $this->logger->error(
-                    'HotCodeReload: failed to start inotifywait — is inotify-tools installed?'
-                );
-                return;
-            }
-
-            fclose($pipes[0]);
-            $stdout = $pipes[1];
+            $dirs = $this->gatherDirectories();
 
             $this->logger->debug('HotCodeReload: watching', [
-                'paths'     => $this->paths,
-                'recursive' => $this->recursive,
+                'directories' => count($dirs),
+                'paths'       => $this->paths,
             ]);
 
-            try {
-                while (($line = fgets($stdout)) !== false) {
-                    $filename  = rtrim($line);
-                    $extension = pathinfo($filename, PATHINFO_EXTENSION);
+            // Channel(1): first matching file-change event wins; subsequent
+            // sendAsync() calls on a full channel are silently dropped.
+            $ch           = new Channel(1);
+            $watcherScope = Scope::inherit();
 
-                    if (in_array($extension, self::WATCHED_EXTENSIONS, strict: true)) {
-                        $this->logger->info(
-                            'HotCodeReload: file changed — scheduling restart',
-                            ['file' => $filename],
-                        );
-                        $onReload();
-                        return;
+            foreach ($dirs as $dir) {
+                $watcherScope->spawn(static function () use ($dir, $ch): void {
+                    $watcher = new FileSystemWatcher($dir, recursive: false);
+                    foreach ($watcher as $event) {
+                        $ext = pathinfo($event->filename ?? '', PATHINFO_EXTENSION);
+                        if (in_array($ext, self::WATCHED_EXTENSIONS, strict: true)) {
+                            $ch->sendAsync($event->filename);
+                            return;
+                        }
+                    }
+                });
+            }
+
+            $filename = $ch->recv();
+            $watcherScope->cancel();
+
+            $this->logger->info(
+                'HotCodeReload: file changed — scheduling restart',
+                ['file' => $filename],
+            );
+
+            $onReload();
+        });
+    }
+
+    /**
+     * Collects all directories to watch.
+     *
+     * When recursive mode is enabled, enumerates every subdirectory under
+     * each configured root path. This is a one-time cost at startup that
+     * works around the TrueAsync FileSystemWatcher recursive-mode bug.
+     *
+     * @return string[]
+     */
+    private function gatherDirectories(): array
+    {
+        $dirs = [];
+
+        foreach ($this->paths as $path) {
+            if (! is_dir($path)) {
+                continue;
+            }
+
+            $dirs[] = $path;
+
+            if ($this->recursive) {
+                $iterator = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator(
+                        $path,
+                        RecursiveDirectoryIterator::SKIP_DOTS
+                    ),
+                    RecursiveIteratorIterator::SELF_FIRST
+                );
+
+                foreach ($iterator as $item) {
+                    if ($item->isDir()) {
+                        $dirs[] = $item->getPathname();
                     }
                 }
-            } finally {
-                fclose($stdout);
-                proc_terminate($process);
-                proc_close($process);
             }
-        });
+        }
+
+        return array_unique($dirs);
     }
 }
