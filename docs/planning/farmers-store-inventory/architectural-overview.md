@@ -14,3 +14,18 @@ There is also the question of whether Auth/Authz should be its own modules or wi
 
 We have a Htmx\Middleware\DetectAjaxRequestMiddleware that can be piped to detect the htmx request header which also disables the layout layer for rendering the htmx partial templates. The question is how well that will work in the true async environment. I can't think of a reason it should not work. If there is please call it out.
 
+## Pending Schema Changes
+
+The following columns need to be added before the next schema migration:
+
+### `product` table
+- `serial_number VARCHAR(50) NULL` — manufacturer serial number for the physical unit.
+  Distinct from `ao_number` (Farmers internal DC identifier). Nullable because not all
+  product types carry a manufacturer serial.
+
+### All tables — plugin params column
+- `params JSON NULL` — open-ended key/value store for plugin/extension use.
+  NULL by default; plugins may write arbitrary structured data here without requiring
+  schema migrations. Every table should carry this column so plugins have a consistent
+  extension point regardless of which entity they augment.
+
