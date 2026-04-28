@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace User\RequestHandler;
 
 use Laminas\Diactoros\Response\HtmlResponse;
+use Laminas\Diactoros\Response\RedirectResponse;
+use Mezzio\Authentication\UserInterface;
 use Mezzio\Template\TemplateRendererInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,6 +25,10 @@ final class LoginHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        if ($request->getAttribute(UserInterface::class) !== null) {
+            return new RedirectResponse('/');
+        }
+
         return new HtmlResponse($this->template->render('user::login'));
     }
 }

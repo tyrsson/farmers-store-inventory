@@ -30,7 +30,7 @@ final class RouteProvider implements RouteProviderInterface
 
         $routeCollector->post(
             '/login',
-            $middlewareFactory->prepare([LoginHandler::class]),
+            $middlewareFactory->prepare([AuthenticationMiddleware::class, LoginHandler::class]),
             'user.login.post'
         );
 
