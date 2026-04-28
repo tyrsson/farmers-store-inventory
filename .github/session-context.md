@@ -1,5 +1,5 @@
-# Session Context — Farmers IMS UI Mockup
-_Last updated: April 27, 2026_
+# Session Context — Farmers IMS
+_Last updated: April 28, 2026_
 
 ---
 
