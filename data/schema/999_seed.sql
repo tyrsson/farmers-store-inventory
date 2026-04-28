@@ -7,14 +7,14 @@ SET NAMES utf8mb4;
 -- -----------------------------------------------------------------------------
 -- Roles (ordered by ascending privilege level)
 -- -----------------------------------------------------------------------------
-INSERT INTO role (name) VALUES
+INSERT INTO role (role_id) VALUES
     ('Sales'),
     ('Warehouse'),
     ('Warehouse Supervisor'),
     ('Credit Manager'),
     ('DC Warehouse'),
     ('Manager')
-ON DUPLICATE KEY UPDATE name = VALUES(name);
+ON DUPLICATE KEY UPDATE role_id = VALUES(role_id);
 
 -- -----------------------------------------------------------------------------
 -- Sample stores

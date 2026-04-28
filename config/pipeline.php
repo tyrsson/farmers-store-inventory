@@ -13,6 +13,7 @@ use Mezzio\Router\Middleware\ImplicitHeadMiddleware;
 use Mezzio\Router\Middleware\ImplicitOptionsMiddleware;
 use Mezzio\Router\Middleware\MethodNotAllowedMiddleware;
 use Mezzio\Router\Middleware\RouteMiddleware;
+use Mezzio\Session\SessionMiddleware;
 use Psr\Container\ContainerInterface;
 use Webware\Traccio\Middleware\TracyDebuggerMiddleware;
 
@@ -26,6 +27,7 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
         : $app->pipe(ErrorHandler::class);
 
     $app->pipe(ServerUrlMiddleware::class);
+    $app->pipe(SessionMiddleware::class);
 
     // Pipe more middleware here that you want to execute on every request:
     // - bootstrapping

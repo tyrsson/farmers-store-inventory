@@ -4,48 +4,167 @@ declare(strict_types=1);
 
 use Axleus\Message\MessageLevel;
 ?>
-<!-- Side Navigation -->
-<nav class="side-nav" id="side-nav">
-    <div class="side-nav-logo">Webinertia</div>
-    <ul class="side-nav-items">
-        <li class="side-nav-item">
-            <a href="<?= $this->url('home') ?>" data-label="Home">🏠</a>
+<!-- ═══════════════════════════════════════════════════════════
+     TOP NAVBAR (fixed)
+════════════════════════════════════════════════════════════ -->
+<nav class="navbar fixed-top ims-topbar bg-body-tertiary border-bottom border-secondary-subtle px-3">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <button class="btn btn-sm btn-link text-body p-1 d-lg-none"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#imsSidebar"
+                aria-controls="imsSidebar"
+                aria-label="Open navigation">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div>
+            <div class="fw-bold lh-1 small">Dashboard</div>
+            <div class="text-secondary" style="font-size:0.7rem;">Store #207 &middot; Leeds, AL</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-link text-body p-1 ims-notif-btn" aria-label="Notifications">
+            <i class="bi bi-bell-fill fs-5"></i>
+            <span class="ims-notif-dot"></span>
+        </button>
+        <div class="ims-avatar"
+             data-bs-toggle="tooltip"
+             data-bs-title="James Walker — Manager">JW</div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SIDEBAR (offcanvas on mobile, persistent on lg+)
+════════════════════════════════════════════════════════════ -->
+<div class="offcanvas-lg offcanvas-start ims-sidebar bg-body-tertiary border-end border-secondary-subtle d-flex flex-column"
+     tabindex="-1"
+     id="imsSidebar"
+     aria-labelledby="imsSidebarLabel">
+
+    <div class="offcanvas-header border-bottom border-secondary-subtle">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-boxes fs-4 text-primary"></i>
+            <div>
+                <div class="fw-bold lh-1" id="imsSidebarLabel">Farmers IMS</div>
+                <div class="text-secondary" style="font-size:0.7rem;">Inventory Management</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#imsSidebar" aria-label="Close"></button>
+    </div>
+
+    <div class="px-3 py-2 border-bottom border-secondary-subtle">
+        <div class="text-secondary" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;">Active Store</div>
+        <div class="fw-semibold small">Store #207 &middot; Leeds, AL</div>
+    </div>
+
+    <div class="offcanvas-body p-2 d-flex flex-column flex-grow-1 overflow-y-auto">
+        <div class="sidebar-section-label">Main</div>
+        <nav class="nav flex-column gap-1">
+            <a href="<?= $this->url('home') ?>" class="nav-link">
+                <i class="bi bi-grid-fill"></i> Dashboard
+            </a>
+            <a href="#" class="nav-link">
+                <i class="bi bi-boxes"></i> Inventory
+            </a>
+            <a href="#" class="nav-link">
+                <i class="bi bi-clipboard2-data"></i> Manifests
+            </a>
+            <a href="#" class="nav-link">
+                <i class="bi bi-receipt"></i> Tickets
+            </a>
+            <a href="#" class="nav-link">
+                <i class="bi bi-arrow-left-right"></i> Transfers
+            </a>
+            <a href="#" class="nav-link">
+                <i class="bi bi-exclamation-octagon"></i> Damage Reports
+                <span class="badge bg-danger">37</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-section-label mt-2">Stores</div>
+        <button class="nav-link d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#storesList"
+                aria-expanded="false"
+                aria-controls="storesList">
+            <i class="bi bi-shop"></i>
+            <span class="flex-grow-1">All Stores</span>
+            <i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
+        </button>
+        <div class="collapse" id="storesList">
+            <div class="d-flex flex-column gap-1 ps-2">
+                <button class="ims-store-item active">
+                    <i class="bi bi-house-fill text-primary"></i>
+                    <span class="fw-semibold">#207</span> Leeds, AL
+                </button>
+                <button class="ims-store-item"><span class="fw-semibold">#112</span> Birmingham, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#134</span> Huntsville, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#156</span> Montgomery, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#178</span> Mobile, AL</button>
+                <button class="ims-store-item"><span class="fw-semibold">#191</span> Tuscaloosa, AL</button>
+            </div>
+        </div>
+
+        <div class="sidebar-section-label mt-2">Reporting</div>
+        <nav class="nav flex-column gap-1">
+            <a href="#" class="nav-link"><i class="bi bi-bar-chart-line"></i> Analytics</a>
+        </nav>
+
+        <div class="mt-auto pt-2 border-top border-secondary-subtle">
+            <nav class="nav flex-column gap-1">
+                <a href="#" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+                <a href="<?= $this->url('user.logout') ?>" class="nav-link"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN LAYOUT WRAPPER
+════════════════════════════════════════════════════════════ -->
+<div class="ims-layout">
+    <main class="ims-main p-3 p-lg-4">
+        <?= $this->content ?>
+    </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     BOTTOM NAV (mobile only)
+════════════════════════════════════════════════════════════ -->
+<nav class="fixed-bottom ims-bottom-nav d-lg-none" aria-label="Main navigation">
+    <ul class="nav w-100 h-100 m-0 p-0 list-unstyled">
+        <li class="nav-item">
+            <a href="<?= $this->url('home') ?>" class="nav-link">
+                <i class="bi bi-grid-fill"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="bi bi-boxes"></i>
+                <span>Inventory</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <div class="ims-scan-fab-wrap">
+                <button class="ims-scan-fab" aria-label="Scan product">
+                    <i class="bi bi-upc-scan"></i>
+                </button>
+                <span class="ims-scan-fab-label">Scan</span>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="bi bi-clipboard2-data"></i>
+                <span>Manifests</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="bi bi-person-circle"></i>
+                <span>Profile</span>
+            </a>
         </li>
     </ul>
 </nav>
-
-<!-- Mobile Navigation Toggle (visible ≤1024px) -->
-<button class="mobile-nav-toggle"
-        type="button"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#mobileNav"
-        aria-controls="mobileNav"
-        aria-label="Open navigation">
-    <span></span>
-</button>
-
-<main class="main-content">
-    <?= $this->content ?>
-</main>
-
-<footer>
-    <div class="footer-content">
-        <p>&copy; <?= date('Y') ?> <span class="footer-brand">Webinertia L.L.C.</span> <span class="accent-dot"></span> Shaping Digital Futures</p>
-    </div>
-</footer>
-
-<!-- Mobile Navigation Offcanvas Drawer -->
-<div class="offcanvas offcanvas-start"
-        tabindex="-1"
-        id="mobileNav"
-        aria-labelledby="mobileNavLabel">
-    <div class="offcanvas-header">
-        <span class="offcanvas-title" id="mobileNavLabel">Webinertia</span>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <a href="<?= $this->url('home') ?>" class="mobile-nav-link" data-bs-dismiss="offcanvas">
-            <span class="nav-icon">🏠</span><span class="nav-label">Home test</span>
-        </a>
-    </div>
-</div>

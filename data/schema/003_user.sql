@@ -3,11 +3,12 @@
 -- Each user belongs to exactly one store and has one role.
 -- Depends on: store, role
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS user (
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE IF NOT EXISTS `user` (
     id            INT UNSIGNED      AUTO_INCREMENT,
     store_id      SMALLINT UNSIGNED NOT NULL,
     role_id       TINYINT UNSIGNED  NOT NULL,
-    name          VARCHAR(150)      NOT NULL,
+    display_name  VARCHAR(150)      NOT NULL,
     email         VARCHAR(255)      NOT NULL,
     password_hash VARCHAR(255)      NOT NULL COMMENT 'bcrypt hash; never store plain text',
     active        TINYINT(1)        NOT NULL DEFAULT 1,

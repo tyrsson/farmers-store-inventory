@@ -5,6 +5,7 @@
 -- This auto-filling lookup eliminates re-entry of known SKUs over time.
 -- Depends on: major_code
 -- =============================================================================
+DROP TABLE IF EXISTS sku_catalogue;
 CREATE TABLE IF NOT EXISTS sku_catalogue (
     sku           MEDIUMINT UNSIGNED NOT NULL COMMENT '6-digit Farmers SKU',
     description   VARCHAR(255)       NOT NULL DEFAULT '',

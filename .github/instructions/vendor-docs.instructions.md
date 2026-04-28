@@ -14,8 +14,23 @@ this project. Consult these before implementing against any listed component.
 | Component | Version | Docs |
 |---|---|---|
 | **TrueAsync** (php-async extension) | PHP 8.6-dev | https://true-async.github.io/en/docs.html |
+| **TrueAsync Server** (http_server extension) | PHP 8.6+ | https://github.com/true-async/server/blob/main/README.md |
 | TrueAsync API quick-ref | — | `docs/planning/php-async-api.md` (workspace) |
 | TrueAsync known bugs | — | `docs/planning/trueasync-bugs.md` (workspace) |
+
+### TrueAsync Server — key API
+```php
+$server = new TrueAsync\Server\HttpServer(host: '0.0.0.0', port: 8080);
+$server->onRequest(function ($request, $response) {
+    $response->end('Hello, World!');
+});
+$server->start();
+```
+- HTTP/1.1 (keep-alive, pipelining) and HTTP/2 (multiplexing) are fully ready
+- TLS 1.2/1.3 built in; multi-worker via `SO_REUSEPORT` handled by the extension
+- HTTP/3 40%, WebSocket 30%, **SSE 0% (planned)** — SSE unavailable for v0.1.0
+- Replaces `Http\Server`, `RequestParser`, `ResponseEmitter` in mezzio-async
+- `ServerRequestFactory` still needed to bridge to PSR-7
 
 ---
 

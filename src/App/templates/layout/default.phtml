@@ -19,8 +19,8 @@ $this->headLink(
 
 // styles
 $this->headLink()
-    ->prependStylesheet($this->basePath('assets/css/style.css'))
-    //->prependStylesheet('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap')
+    ->prependStylesheet($this->basePath('assets/css/custom.css'))
+    ->prependStylesheet('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css')
     ->prepend([
         'crossorigin' => '',
         'href'        => 'https://fonts.gstatic.com',
@@ -45,15 +45,16 @@ $this->headScript()
     ->appendFile($this->basePath($this->asset('messenger.js')));
 
 $this->inlineScript()
-    ->prependFile('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js');
+    ->prependFile('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js')
+    ->appendFile($this->basePath('assets/js/app.js'));
 ?>
 
 <?= $this->doctype(); ?>
 
-<html lang="en-US" data-theme="dark">
+<html lang="en" data-bs-theme="dark">
     <head>
         <base href="<?= $this->basePath('/'); ?>" />
-        <?= $this->headTitle('Webinertia')->setSeparator(' | ') ?>
+        <?= $this->headTitle('Farmers IMS')->setSeparator(' | ') ?>
         <?= $this->headMeta() ?>
         <?= $this->headLink() ?>
         <?= $this->headScript() ?>

@@ -4,6 +4,7 @@
 -- pqa_email is the mailbox monitored by the PQA system; damage images are sent
 -- here so the PQA system can auto-associate them with a case.
 -- =============================================================================
+DROP TABLE IF EXISTS store;
 CREATE TABLE IF NOT EXISTS store (
     store_number SMALLINT UNSIGNED  NOT NULL COMMENT 'Farmers store number (e.g. 207)',
     city         VARCHAR(100)       NOT NULL,
