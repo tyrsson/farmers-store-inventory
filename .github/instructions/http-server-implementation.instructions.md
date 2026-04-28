@@ -3,6 +3,12 @@ description: "Use when implementing or reviewing the HTTP server layer: AsyncRun
 applyTo: "src/mezzio-async/src/Http/**/*.php"
 ---
 
+> **⚠ NOT THE ACTIVE RUNTIME (as of April 28, 2026).** `src/mezzio-async/` is retained for
+> future reintegration but is NOT loaded, NOT registered, and NOT running. The active stack
+> is the **PHP built-in web server** (`php -S 0.0.0.0:8080 -t public/`) inside a `php:latest`
+> container — verified from `.devcontainer/docker-compose.yml` and `public/index.php`.
+> These conventions apply only when working on files under `src/mezzio-async/src/Http/`.
+
 # HTTP Server Implementation Guide
 
 ## Actual Class Inventory

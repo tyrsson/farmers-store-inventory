@@ -2,6 +2,13 @@
 description: "Use when writing or reviewing any code that uses TrueAsync (php-async extension) primitives: spawn, await, Scope, Future, Channel, Context, Pool, TaskGroup, delay, suspend, protect, timeout. Also applies when handling coroutine cancellation, concurrency safety, signal handling, or entering the TrueAsync scheduler from CLI."
 ---
 
+> **⚠ NOT THE ACTIVE RUNTIME (as of April 28, 2026).** The `php-async` (TrueAsync) extension
+> is **not installed** in the active devcontainer. These primitives apply only to work on
+> `src/mezzio-async/` which is retained for future reintegration. The active stack is the
+> **PHP built-in web server** (`php -S`) inside a `php:latest` container — verified from
+> `.devcontainer/docker/php/Dockerfile` (no `pecl install true_async`) and
+> `.devcontainer/docker-compose.yml`. Do not use TrueAsync primitives in application code.
+
 # TrueAsync Primitives Usage Guide
 
 ## Extension Check

@@ -11,11 +11,4 @@ return [
     LogConfigProvider::class => [
         'log_errors' => true,
     ],
-    'mezzio-async' => [
-        'hot-reload' => [
-            'enabled'   => true,
-            'paths'     => ['src', 'config'],
-            'recursive' => true,
-        ],
-    ],
 ];

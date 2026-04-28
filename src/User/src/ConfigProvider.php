@@ -15,10 +15,10 @@ final class ConfigProvider
     public function __invoke(): array
     {
         return [
-            'dependencies'         => $this->getDependencies(),
-            'router'               => $this->getRouteProviders(),
-            'templates'            => $this->getTemplates(),
-            'mezzio-authentication'       => $this->getAuthenticationConfig(),
+            'dependencies'             => $this->getDependencies(),
+            'router'                   => $this->getRouteProviders(),
+            'templates'                => $this->getTemplates(),
+            'authentication'           => $this->getAuthenticationConfig(),
             CommandBusInterface::class => [
                 'command_map' => $this->getCommandMap(),
             ],

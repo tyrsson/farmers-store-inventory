@@ -1,6 +1,10 @@
 # Session Context — Farmers IMS
 _Last updated: April 28, 2026_
 
+> **⚠ Runtime environment changed (April 28, 2026):** TrueAsync (`php-async` extension) has been **removed** from the active stack. After 3 hours rebuilding the Docker environment and the VS Code devcontainer, the project now runs as a standard Mezzio application served by the **PHP built-in web server** (`php -S`) inside a `php:latest` Docker container. There is **no PHP-FPM and no nginx** in the active devcontainer stack. The decision was driven by current usability issues in TrueAsync (SIGABRT crashes, `proc_open` incompatibility inside coroutines, devcontainer instability). The `src/mezzio-async/` source tree and all TrueAsync planning docs (`docs/planning/php-async-api.md`, `docs/planning/trueasync-bugs.md`) are **retained** for future reintegration once the extension matures.
+>
+> **Verified from:** `.devcontainer/docker-compose.yml` (image `php:latest`, command `sleep infinity`), `.devcontainer/docker/php/Dockerfile` (`FROM php:latest`), `public/index.php` (`PHP_SAPI === 'cli-server'`), `devcontainer.json` (port 8080 forwarded). DO NOT assume the stack — read the files.
+
 ---
 
 ## Project Overview
@@ -9,8 +13,13 @@ _Last updated: April 28, 2026_
 Built for store-floor staff: receiving manifests from the DC, scanning SKU barcodes,
 recording and photographing damage, submitting items for PQA assessment.
 
-**Stack**: Mezzio + HTMX + Bootstrap 5.3.3 + Bootstrap Icons 1.13.1. PHP 8.6+ with the
-TrueAsync extension for the async server layer.
+**Stack**: Mezzio + HTMX + Bootstrap 5.3.3 + Bootstrap Icons 1.13.1. PHP 8.6+ served by
+the **PHP built-in web server** (`php -S 0.0.0.0:8080 -t public/`) inside a `php:latest`
+Docker container (standard synchronous, single-threaded). ~~TrueAsync extension~~ — removed
+(see note above); `src/mezzio-async/` retained for future use.
+
+> **There is no PHP-FPM and no nginx in this project's active devcontainer.** Verified from
+> `.devcontainer/docker-compose.yml` and `public/index.php`. Do not assume — verify.
 
 ---
 
@@ -181,8 +190,11 @@ All DML queries must use `PhpDb\Sql\*` via `TableGateway::getSql()`.
 See `.github/instructions/phpdb-sql-queries.instructions.md`.
 
 ### Hot-Reload
-Disabled via `config/autoload/development.local.php` (`mezzio-async.hot-reload.enabled = false`)
-to prevent TrueAsync SIGABRT crash on `fgets()` in `proc_open` pipe inside coroutine.
+~~Disabled via `config/autoload/development.local.php` (`mezzio-async.hot-reload.enabled = false`)
+to prevent TrueAsync SIGABRT crash on `fgets()` in `proc_open` pipe inside coroutine.~~
+**No longer applicable** — TrueAsync and `mezzio-async` are not active. The PHP built-in
+web server (`php -S`) must be manually stopped and restarted after code changes in the
+devcontainer terminal.
 
 ### NamedCommandTrait / commandbus
 `NamedCommandTrait` declares `protected readonly string $name`. Domain classes must NOT
@@ -191,6 +203,14 @@ have a `$name` property. Planned fix: rename to `$commandName` in the command-bu
 ---
 
 ## Dev Server
+
+> **Verified stack**: PHP built-in web server (`php -S`) inside `php:latest` container.
+> No PHP-FPM. No nginx. Source: `.devcontainer/docker-compose.yml`, `public/index.php`.
+
+- **Mezzio app**: PHP built-in server on port 8080 (forwarded by devcontainer)
+  ```bash
+  php -S 0.0.0.0:8080 -t /workspaces/farmers-store-inventory/public/
+  ```
 - **v2 mockup**: PHP built-in server on port 7655
   ```bash
   php -S 0.0.0.0:7655 -t /workspaces/farmers-store-inventory/resources/ui-mockup/v2/ &
