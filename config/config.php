@@ -47,7 +47,6 @@ $aggregator = new ConfigAggregator([
         : function () {
             return [];
         },
-    Mezzio\Async\ConfigProvider::class,
     // Module config
     User\ConfigProvider::class,
     // Default App module config
