@@ -27,9 +27,14 @@
         "laminas/laminas-stdlib": "^3.21",
         "laminas/laminas-view": "^3.0",
         "mezzio/mezzio": "^3.26",
+        "mezzio/mezzio-authentication": "^1.13",
+        "mezzio/mezzio-authentication-session": "*",
+        "mezzio/mezzio-authorization": "^1.11",
+        "mezzio/mezzio-authorization-acl": "^1.13",
         "mezzio/mezzio-fastroute": "^3.14",
         "mezzio/mezzio-helpers": "^5.20",
         "mezzio/mezzio-laminasviewrenderer": "^3.0",
+        "mezzio/mezzio-valinor": "^1.0",
         "webware/commandbus-event": "0.1.x-dev"
     },
     "require-dev": {
@@ -45,7 +50,8 @@
             "App\\": "src/App/src/",
             "Htmx\\": "src/Htmx/src/",
             "Mezzio\\Async\\": "src/mezzio-async/src/",
-            "PhpDb\\Async\\": "src/phpdb-async/src/"
+            "PhpDb\\Async\\": "src/phpdb-async/src/",
+            "User\\": "src/User/src/"
         }
     },
     "autoload-dev": {

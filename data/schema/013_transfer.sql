@@ -6,6 +6,7 @@
 -- v1.
 -- Depends on: store, user
 -- =============================================================================
+DROP TABLE IF EXISTS transfer;
 CREATE TABLE IF NOT EXISTS transfer (
     id            INT UNSIGNED      AUTO_INCREMENT,
     from_store_id SMALLINT UNSIGNED NOT NULL,
@@ -22,6 +23,6 @@ CREATE TABLE IF NOT EXISTS transfer (
     KEY idx_transfer_from_status (from_store_id, status),
     CONSTRAINT fk_xfer_from_store   FOREIGN KEY (from_store_id) REFERENCES store (store_number),
     CONSTRAINT fk_xfer_to_store     FOREIGN KEY (to_store_id)   REFERENCES store (store_number),
-    CONSTRAINT fk_xfer_completed_by FOREIGN KEY (completed_by)  REFERENCES user  (id),
-    CONSTRAINT fk_xfer_created_by   FOREIGN KEY (created_by)    REFERENCES user  (id)
+    CONSTRAINT fk_xfer_completed_by FOREIGN KEY (completed_by)  REFERENCES `user`  (id),
+    CONSTRAINT fk_xfer_created_by   FOREIGN KEY (created_by)    REFERENCES `user`  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

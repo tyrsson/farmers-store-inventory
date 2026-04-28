@@ -1,0 +1,599 @@
+/*
+ * Farmers IMS — Bootstrap 5.3 theme overrides
+ * Brand palette: Steel Blue #4a80b4  |  Amber #c49b22
+ * Only add what Bootstrap cannot do natively.
+ */
+
+/* ── Brand colour tokens ─────────────────────────────────── */
+[data-bs-theme="dark"] {
+    --bs-primary:            #4a80b4;
+    --bs-primary-rgb:        74, 128, 180;
+    --bs-link-color:         #4a80b4;
+    --bs-link-hover-color:   #5c93cb;
+
+    --ims-amber:             #c49b22;
+    --ims-amber-rgb:         196, 155, 34;
+    --ims-amber-subtle:      rgba(196, 155, 34, 0.15);
+    --ims-amber-border:      rgba(196, 155, 34, 0.35);
+
+    /* Status badge colours */
+    --ims-damaged-bg:        rgba(220,  53,  69, 0.15);
+    --ims-damaged-color:     #f1707d;
+    --ims-damaged-border:    rgba(220,  53,  69, 0.35);
+
+    --ims-floor-bg:          rgba( 25, 135,  84, 0.15);
+    --ims-floor-color:       #2eca8b;
+    --ims-floor-border:      rgba( 25, 135,  84, 0.35);
+
+    --ims-pqa-bg:            rgba(255, 193,   7, 0.12);
+    --ims-pqa-color:         #f0c040;
+    --ims-pqa-border:        rgba(255, 193,   7, 0.30);
+
+    --ims-bargain-bg:        rgba(196, 155,  34, 0.15);
+    --ims-bargain-color:     #d4a830;
+    --ims-bargain-border:    rgba(196, 155,  34, 0.35);
+
+    --ims-overstock-bg:      rgba( 13, 110, 253, 0.12);
+    --ims-overstock-color:   #6ea8fe;
+    --ims-overstock-border:  rgba( 13, 110, 253, 0.30);
+
+    --ims-repairable-bg:     rgba(102,  16, 242, 0.12);
+    --ims-repairable-color:  #c59bfc;
+    --ims-repairable-border: rgba(102,  16, 242, 0.30);
+
+    --ims-nonrep-bg:         rgba( 33,  37,  41, 0.70);
+    --ims-nonrep-color:      #9ea3a9;
+    --ims-nonrep-border:     rgba(148, 163, 184, 0.25);
+}
+
+/* ── btn-primary colour fix (CDN build, no Sass recompile) ── */
+.btn-primary {
+    --bs-btn-bg:            #4a80b4;
+    --bs-btn-border-color:  #4a80b4;
+    --bs-btn-hover-bg:      #3a70a4;
+    --bs-btn-hover-border-color: #3a70a4;
+    --bs-btn-active-bg:     #2e6090;
+    --bs-btn-disabled-bg:   #4a80b4;
+    --bs-btn-disabled-border-color: #4a80b4;
+}
+.btn-outline-primary {
+    --bs-btn-color:         #4a80b4;
+    --bs-btn-border-color:  #4a80b4;
+    --bs-btn-hover-bg:      #4a80b4;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.ims-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+}
+
+/* Sidebar nav-link style */
+.ims-sidebar .nav-link {
+    color: var(--bs-secondary-color);
+    border-radius: var(--bs-border-radius);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.15s, color 0.15s;
+}
+.ims-sidebar .nav-link:hover {
+    color: var(--bs-body-color);
+    background: var(--bs-tertiary-bg);
+}
+.ims-sidebar .nav-link.active {
+    color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), 0.12);
+    font-weight: 600;
+}
+.ims-sidebar .nav-link .badge {
+    margin-left: auto;
+}
+.ims-sidebar .sidebar-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+    padding: 16px 12px 4px;
+}
+
+/* Store switcher items */
+.ims-store-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    border-radius: var(--bs-border-radius);
+    color: var(--bs-secondary-color);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s;
+}
+.ims-store-item:hover {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+}
+.ims-store-item.active {
+    color: var(--bs-primary);
+    font-weight: 600;
+}
+
+/* ── Fixed top navbar ────────────────────────────────────── */
+.ims-topbar {
+    height: 56px;
+    z-index: 1035;
+}
+
+/* Avatar circle */
+.ims-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* ── Bottom nav (mobile only) ────────────────────────────── */
+.ims-bottom-nav {
+    height: 60px;
+    display: flex;
+    align-items: stretch;
+    background: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+    z-index: 1030;
+}
+
+.ims-bottom-nav .nav-item {
+    flex: 1;
+    display: flex;
+}
+
+.ims-bottom-nav .nav-link {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 0;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+.ims-bottom-nav .nav-link i {
+    font-size: 1.25rem;
+}
+.ims-bottom-nav .nav-link.active {
+    color: var(--bs-primary);
+}
+
+/* Scan FAB in bottom nav */
+.ims-scan-fab-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+}
+.ims-scan-fab {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -20px;
+    box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.45);
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+.ims-scan-fab-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--bs-secondary-color);
+}
+
+/* ── Main layout ─────────────────────────────────────────── */
+.ims-layout {
+    display: flex;
+    min-height: 100dvh;
+    padding-top: 56px;
+    padding-bottom: 60px; /* bottom nav height */
+}
+
+@media (min-width: 992px) {
+    /* At lg+ the offcanvas becomes a block element; pin it fixed beside the content */
+    .ims-sidebar {
+        position: fixed !important;
+        top: 56px; /* topbar height */
+        left: 0;
+        bottom: 0;
+        overflow-y: auto;
+        z-index: 1020;
+        display: flex !important;
+        flex-direction: column;
+    }
+
+    .ims-layout {
+        margin-left: 260px; /* sidebar width */
+        padding-bottom: 0;
+    }
+}
+
+.ims-main {
+    flex: 1;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+/* ── Status badges ───────────────────────────────────────── */
+.badge-ims-damaged    { background: var(--ims-damaged-bg);    color: var(--ims-damaged-color);    border: 1px solid var(--ims-damaged-border); }
+.badge-ims-floor      { background: var(--ims-floor-bg);      color: var(--ims-floor-color);      border: 1px solid var(--ims-floor-border); }
+.badge-ims-pqa        { background: var(--ims-pqa-bg);        color: var(--ims-pqa-color);        border: 1px solid var(--ims-pqa-border); }
+.badge-ims-bargain    { background: var(--ims-bargain-bg);    color: var(--ims-bargain-color);    border: 1px solid var(--ims-bargain-border); }
+.badge-ims-overstock  { background: var(--ims-overstock-bg);  color: var(--ims-overstock-color);  border: 1px solid var(--ims-overstock-border); }
+.badge-ims-repairable { background: var(--ims-repairable-bg); color: var(--ims-repairable-color); border: 1px solid var(--ims-repairable-border); }
+.badge-ims-nonrep     { background: var(--ims-nonrep-bg);     color: var(--ims-nonrep-color);     border: 1px solid var(--ims-nonrep-border); }
+
+/* ── Stat cards ──────────────────────────────────────────── */
+.ims-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+.ims-stat-delta {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+}
+
+/* ── Quick action cards ──────────────────────────────────── */
+.ims-quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 10px;
+    text-decoration: none;
+    color: var(--bs-secondary-color);
+    background: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+.ims-quick-action:hover {
+    background: var(--bs-secondary-bg);
+    border-color: var(--bs-primary);
+    color: var(--bs-body-color);
+}
+.ims-quick-action i {
+    font-size: 1.5rem;
+}
+.ims-quick-action.ims-accent {
+    border-color: var(--ims-amber-border);
+    color: var(--ims-amber);
+}
+.ims-quick-action.ims-accent:hover {
+    background: var(--ims-amber-subtle);
+}
+
+/* ── Product list items ──────────────────────────────────── */
+.ims-product-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--bs-border-color);
+    transition: background-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+.ims-product-item:last-child {
+    border-bottom: none;
+}
+.ims-product-item:hover {
+    background: var(--bs-tertiary-bg);
+    color: inherit;
+}
+.ims-product-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-secondary-color);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.ims-product-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-body-color);
+    margin-bottom: 2px;
+}
+.ims-product-ids {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+    margin-bottom: 4px;
+}
+.ims-product-ids span + span::before {
+    content: ' · ';
+}
+.ims-product-meta {
+    margin-left: auto;
+    text-align: right;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+/* ── Notification dot ────────────────────────────────────── */
+.ims-notif-btn {
+    position: relative;
+}
+.ims-notif-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dc3545;
+    border: 2px solid var(--bs-body-bg);
+}
+
+/* ── Back link ───────────────────────────────────────────── */
+.ims-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-secondary-color);
+    text-decoration: none;
+    margin-bottom: 16px;
+}
+.ims-back-link:hover {
+    color: var(--bs-body-color);
+}
+
+/* ── Progress bar label row ──────────────────────────────── */
+.ims-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+    margin-bottom: 4px;
+}
+
+/* ── Scan zone ───────────────────────────────────────────── */
+.ims-scan-zone {
+    background: var(--bs-tertiary-bg);
+    border: 2px dashed var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
+    padding: 32px 20px;
+    text-align: center;
+    transition: border-color 0.15s, padding 0.2s;
+}
+.ims-scan-zone.has-result {
+    padding: 16px 20px;
+}
+.ims-scan-icon {
+    font-size: 3rem;
+    color: var(--bs-primary);
+    margin-bottom: 12px;
+}
+.ims-scan-zone.has-result .ims-scan-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+}
+.ims-scan-zone.has-result .ims-scan-instructions {
+    display: none;
+}
+
+/* ── Status toggle buttons (damage / scan) ───────────────── */
+.ims-status-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.ims-status-btn {
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    cursor: pointer;
+    transition: all 0.15s;
+    pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.ims-status-btn.editing {
+    pointer-events: auto;
+    cursor: pointer;
+}
+.ims-status-btn.active-damaged    { background: var(--ims-damaged-bg);    color: var(--ims-damaged-color);    border-color: var(--ims-damaged-border); }
+.ims-status-btn.active-floor      { background: var(--ims-floor-bg);      color: var(--ims-floor-color);      border-color: var(--ims-floor-border); }
+.ims-status-btn.active-pqa        { background: var(--ims-pqa-bg);        color: var(--ims-pqa-color);        border-color: var(--ims-pqa-border); }
+.ims-status-btn.active-bargain    { background: var(--ims-bargain-bg);    color: var(--ims-bargain-color);    border-color: var(--ims-bargain-border); }
+.ims-status-btn.active-overstock  { background: var(--ims-overstock-bg);  color: var(--ims-overstock-color);  border-color: var(--ims-overstock-border); }
+.ims-status-btn.active-repairable { background: var(--ims-repairable-bg); color: var(--ims-repairable-color); border-color: var(--ims-repairable-border); }
+.ims-status-btn.active-nonrep     { background: var(--ims-nonrep-bg);     color: var(--ims-nonrep-color);     border-color: var(--ims-nonrep-border); }
+
+/* ── Photo grid ──────────────────────────────────────────── */
+.ims-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.ims-photo-card {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.ims-photo-card i {
+    font-size: 1.75rem;
+    color: var(--bs-secondary-color);
+}
+.ims-photo-add {
+    border-style: dashed;
+    cursor: pointer;
+    color: var(--bs-secondary-color);
+    font-size: 0.7rem;
+    font-weight: 600;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ── Manifest line item ──────────────────────────────────── */
+.ims-manifest-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.ims-manifest-item:last-child {
+    border-bottom: none;
+}
+.ims-manifest-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+/* ── Settings rows ───────────────────────────────────────── */
+.ims-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+.ims-settings-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.ims-settings-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-body-color);
+}
+.ims-settings-hint {
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color);
+    margin-top: 2px;
+}
+
+/* ── Login page ──────────────────────────────────────────── */
+.ims-login-wrap {
+    width: 100%;
+    max-width: 460px;
+}
+@media (min-width: 992px) {
+    .ims-login-wrap {
+        max-width: 820px;
+    }
+}
+.ims-login-brand-panel {
+    background: color-mix(in srgb, var(--bs-primary) 18%, var(--bs-body-bg));
+    border-right: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-card-border-radius) 0 0 var(--bs-card-border-radius);
+    color: var(--bs-body-color);
+}
+
+/* ── Avatar size variant ─────────────────────────────────── */
+.ims-avatar--lg {
+    width: 52px;
+    height: 52px;
+    font-size: 1rem;
+}
+
+/* ── Product thumb size variant ──────────────────────────── */
+.ims-product-thumb--lg {
+    width: 72px;
+    height: 72px;
+    font-size: 1.75rem;
+}
+
+/* ── Photo grid items (damage-detail) ────────────────────── */
+.ims-photo-item {
+    aspect-ratio: 1;
+    border-radius: var(--bs-border-radius);
+    background: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+}
+.ims-photo-label {
+    font-size: 0.65rem;
+    color: var(--bs-secondary-color);
+}
+.ims-photo-add {
+    border-style: dashed;
+}
+
+/* ── Status btn — generic .active (damage-detail uses data-status toggle) ── */
+.ims-status-btn.active {
+    background: var(--ims-damaged-bg);
+    color: var(--ims-damaged-color);
+    border-color: var(--ims-damaged-border);
+    pointer-events: auto;
+    cursor: pointer;
+}
+/* Make all status btns interactive on damage-detail */
+.ims-status-btn {
+    pointer-events: auto;
+    cursor: pointer;
+}

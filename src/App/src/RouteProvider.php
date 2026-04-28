@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Handler\PingHandler;
+use App\RequestHandler\DashboardHandler;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
@@ -27,7 +29,7 @@ final class RouteProvider implements RouteProviderInterface
         $routeCollector->get(
             '/',
             $middlewareFactory->prepare(
-                Handler\HomePageHandler::class
+                DashboardHandler::class
             ),
             'home'
         );
@@ -35,7 +37,7 @@ final class RouteProvider implements RouteProviderInterface
         $routeCollector->get(
             '/ping',
             $middlewareFactory->prepare(
-                Handler\PingHandler::class
+                PingHandler::class
             ),
             'api.ping'
         );

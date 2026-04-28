@@ -1,5 +1,5 @@
 # Session Context — Farmers IMS UI Mockup
-_Last updated: April 26, 2026_
+_Last updated: April 27, 2026_
 
 ---
 
@@ -125,11 +125,68 @@ the full Reporting nav section. This is intentional (these are detail pages).
 1. **Start Mezzio handler/template layer** — use the `htmx-mezzio` SKILL.md for the
    3-layer rendering stack (layout / body / page).
 2. **Integrate ZXing-js** into `process-manifest` for real camera scanning.
-3. **Database schema** — SKU catalogue, manifests, manifest_items, damage_reports, stores, users.
-4. **Auth** — session-based login handler.
-5. **Analytics endpoint** — JSON response for Chart.js data arrays.
-6. **Analytics — date range switching** — the 30d/90d/6mo buttons in the topbar are
+3. **Analytics endpoint** — JSON response for Chart.js data arrays.
+4. **Analytics — date range switching** — the 30d/90d/6mo buttons in the topbar are
    wired visually but not yet functional; will need an HTMX swap on the chart data.
+5. **mezzio-authorization-acl config** — create `config/autoload/authorization.global.php`
+   with `mezzio-authorization-acl` block (roles, resources = route names, allow rules).
+   Add `AuthorizationInterface::class => LaminasAcl::class` alias.
+6. **Template stubs** — `src/User/templates/user/` (login, list-users, create-user, edit-user).
+7. **Manifest, Inventory, Fulfilment modules** — not started.
+
+---
+
+## Application Layer Status (as of April 27, 2026)
+
+### Packages Installed
+- `mezzio/mezzio-authentication ^1.13`
+- `mezzio/mezzio-authorization ^1.11`
+- `mezzio/mezzio-authorization-acl ^1.13`
+- `mezzio/mezzio-valinor ^1.0`
+- `mezzio/mezzio-authentication-session` (dev)
+- All ConfigProviders injected into `config/config.php`
+
+### Database Schema (`data/schema/`)
+- 14 table files (001–014) + `999_seed.sql`
+- All files have `DROP TABLE IF EXISTS` for clean reimport
+- `user` is backticked everywhere (reserved word)
+- **`role` table**: `id TINYINT UNSIGNED AUTO_INCREMENT` + `role_id VARCHAR(50)` (was `name`)
+  — `role_id` is the Laminas ACL role identifier; Title Case with spaces is fine
+- **`user` table**: `display_name VARCHAR(150)` (was `name`) — renamed to avoid conflict
+  with `NamedCommandTrait`'s `protected readonly string $name` property
+- `999_seed.sql`: inserts use `role_id` column, `ON DUPLICATE KEY UPDATE role_id`
+- FK-safe DROP order (reverse): `transfer_item` → `transfer` → `ticket_item` → `ticket`
+  → `product_image` → `product_status` → `product` → `manifest_item` → `manifest`
+  → `sku_catalogue` → `major_code` → `user` → `role` → `store`
+
+### User Module (`src/User/src/`)
+**Do not touch without reading files first — user has done heavy refactoring.**
+
+Key decisions made:
+- `Entity\User` — `final readonly`, implements `UserInterface` + `NamedCommandInterface`
+  (via `NamedCommandTrait`). Properties: `displayName` (not `name` — avoids trait clash).
+- `Entity\Role` — `final readonly`, implements `NamedCommandInterface`. Properties:
+  `int $id`, `string $roleId`. No `$name` property — trait owns that for FQCN resolution.
+- `Entity\Store` — `final readonly`, implements `NamedCommandInterface`.
+- `Repository\UserRepositoryInterface` — extends `UserRepositoryContract` only (not `UserInterface`).
+  Identity comes from session at runtime, not the repository.
+- `Repository\UserRepository` — composes `TableGateway('user', $adapter)` internally;
+  uses `getSql()` + `prepareStatementForSqlObject()` for all DML queries.
+  Manual `hydrate()` method retained until phpdb readonly-clone support is merged.
+  See `@todo` in `UserRepositoryFactory` for the HydratingResultSet upgrade path.
+- `Command\CreateUserCommand` — implements `NamedCommandInterface`, wraps `UserInterface`.
+
+### Query Conventions
+All DML queries must use `PhpDb\Sql\*` via `TableGateway::getSql()`.
+See `.github/instructions/phpdb-sql-queries.instructions.md`.
+
+### Hot-Reload
+Disabled via `config/autoload/development.local.php` (`mezzio-async.hot-reload.enabled = false`)
+to prevent TrueAsync SIGABRT crash on `fgets()` in `proc_open` pipe inside coroutine.
+
+### NamedCommandTrait / commandbus
+`NamedCommandTrait` declares `protected readonly string $name`. Domain classes must NOT
+have a `$name` property. Planned fix: rename to `$commandName` in the command-bus package.
 
 ---
 

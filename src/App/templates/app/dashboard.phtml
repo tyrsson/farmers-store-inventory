@@ -1,0 +1,167 @@
+<?php $this->headTitle('Dashboard'); ?>
+
+<!-- Page header -->
+<div class="mb-3">
+    <h1 class="h4 fw-bold mb-0">Dashboard</h1>
+    <p class="text-secondary small mb-0">Store #207 Leeds, AL</p>
+</div>
+
+<!-- Alert -->
+<div class="alert alert-warning d-flex align-items-center gap-2 py-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+    <span class="small">12 products have pending PQA reviews awaiting manager action.</span>
+</div>
+
+<!-- Stat cards -->
+<div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-secondary small mb-1">Total Inventory</div>
+                <div class="ims-stat-value text-primary">482</div>
+                <div class="ims-stat-delta mt-1">+14 since last manifest</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-danger border-opacity-50">
+            <div class="card-body">
+                <div class="text-secondary small mb-1">Damaged</div>
+                <div class="ims-stat-value" style="color:var(--ims-damaged-color)">37</div>
+                <div class="ims-stat-delta mt-1 text-danger-emphasis">&uarr; 5 this week</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-warning border-opacity-50">
+            <div class="card-body">
+                <div class="text-secondary small mb-1">Pending PQA</div>
+                <div class="ims-stat-value" style="color:var(--ims-pqa-color)">12</div>
+                <div class="ims-stat-delta mt-1 text-warning-emphasis">&uarr; 3 today</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 border-success border-opacity-50">
+            <div class="card-body">
+                <div class="text-secondary small mb-1">On Floor</div>
+                <div class="ims-stat-value" style="color:var(--ims-floor-color)">278</div>
+                <div class="ims-stat-delta mt-1">Ready to sell</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick actions -->
+<h2 class="h6 fw-bold text-uppercase text-secondary mb-2" style="letter-spacing:.05em; font-size:.7rem;">Quick Actions</h2>
+<div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+    <div class="col">
+        <a href="#" class="ims-quick-action ims-accent w-100">
+            <i class="bi bi-upc-scan"></i> Scan Product
+        </a>
+    </div>
+    <div class="col">
+        <a href="#" class="ims-quick-action w-100">
+            <i class="bi bi-clipboard2-plus"></i> Process Manifest
+        </a>
+    </div>
+    <div class="col">
+        <a href="#" class="ims-quick-action w-100">
+            <i class="bi bi-exclamation-octagon"></i> Flag Damage
+        </a>
+    </div>
+    <div class="col">
+        <a href="#" class="ims-quick-action w-100">
+            <i class="bi bi-arrow-left-right"></i> Transfer Check
+        </a>
+    </div>
+</div>
+
+<!-- Recent damage reports -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h6 fw-bold text-uppercase text-secondary mb-0" style="letter-spacing:.05em; font-size:.7rem;">Recent Damage Reports</h2>
+    <a href="#" class="small text-primary text-decoration-none">View all <i class="bi bi-arrow-right"></i></a>
+</div>
+<div class="card mb-4">
+    <a href="#" class="ims-product-item">
+        <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+        <div class="flex-grow-1 min-width-0">
+            <div class="ims-product-name">Queen Sleigh Bed Frame</div>
+            <div class="ims-product-ids">SKU: 195844 <span>AO#: A006523361</span><span>207-0415</span></div>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+                <span class="badge badge-ims-damaged">Damaged</span>
+                <span class="badge badge-ims-pqa">Pending PQA</span>
+            </div>
+        </div>
+        <div class="ims-product-meta">
+            <span>2h ago</span>
+            <span><i class="bi bi-images"></i> 3</span>
+        </div>
+    </a>
+    <a href="#" class="ims-product-item">
+        <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+        <div class="flex-grow-1 min-width-0">
+            <div class="ims-product-name">5-Drawer Dresser w/ Mirror</div>
+            <div class="ims-product-ids">SKU: 189168 <span>AO#: A006509201</span><span>207-0401</span></div>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+                <span class="badge badge-ims-damaged">Damaged</span>
+                <span class="badge badge-ims-repairable">Repairable</span>
+                <span class="badge badge-ims-bargain">Bargain Center</span>
+            </div>
+        </div>
+        <div class="ims-product-meta">
+            <span>5h ago</span>
+            <span><i class="bi bi-images"></i> 5</span>
+        </div>
+    </a>
+    <a href="#" class="ims-product-item">
+        <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+        <div class="flex-grow-1 min-width-0">
+            <div class="ims-product-name">Sectional Sofa &mdash; Right Arm</div>
+            <div class="ims-product-ids">SKU: 201337 <span>AO#: A006498102</span></div>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+                <span class="badge badge-ims-damaged">Damaged</span>
+                <span class="badge badge-ims-nonrep">Non-Repairable</span>
+            </div>
+        </div>
+        <div class="ims-product-meta">
+            <span>Yesterday</span>
+            <span><i class="bi bi-images"></i> 2</span>
+        </div>
+    </a>
+    <a href="#" class="ims-product-item">
+        <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+        <div class="flex-grow-1 min-width-0">
+            <div class="ims-product-name">King Platform Bed Base</div>
+            <div class="ims-product-ids">SKU: 178052 <span>AO#: A006483781</span></div>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+                <span class="badge badge-ims-damaged">Damaged</span>
+                <span class="badge badge-ims-floor">Floor</span>
+            </div>
+        </div>
+        <div class="ims-product-meta">
+            <span>Yesterday</span>
+            <span><i class="bi bi-images"></i> 1</span>
+        </div>
+    </a>
+    <a href="#" class="ims-product-item">
+        <div class="ims-product-thumb"><i class="bi bi-image"></i></div>
+        <div class="flex-grow-1 min-width-0">
+            <div class="ims-product-name">Dining Table &mdash; 6 Person</div>
+            <div class="ims-product-ids">SKU: 164290 <span>AO#: A006473610</span><span>207-0304</span></div>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+                <span class="badge badge-ims-damaged">Damaged</span>
+                <span class="badge badge-ims-pqa">Pending PQA</span>
+            </div>
+        </div>
+        <div class="ims-product-meta">
+            <span>2 days ago</span>
+            <span><i class="bi bi-images"></i> 4</span>
+        </div>
+    </a>
+    <div class="card-footer text-center py-2">
+        <a href="#" class="btn btn-sm btn-outline-secondary w-100">
+            View All Damage Reports <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
