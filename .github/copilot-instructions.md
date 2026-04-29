@@ -1,5 +1,20 @@
 # mezzio-async Project Guidelines
 
+> **⚠ NOT THE ACTIVE RUNTIME (as of April 28, 2026)**
+>
+> TrueAsync (`php-async` extension) and `mezzio-async` have been **removed from the active
+> application stack** due to current usability issues (SIGABRT crashes, devcontainer
+> instability). The `src/mezzio-async/` package is **retained for future reintegration**.
+>
+> **Active runtime — verified from source files, not assumed:**
+> - Web server: **PHP built-in** (`php -S 0.0.0.0:8080 -t public/`) — confirmed by `public/index.php` (`PHP_SAPI === 'cli-server'`)
+> - Container image: `php:latest` (NOT `php:fpm`) — confirmed by `.devcontainer/docker/php/Dockerfile`
+> - Container command: `sleep infinity` (VS Code attaches) — confirmed by `.devcontainer/docker-compose.yml`
+> - **No PHP-FPM. No nginx.** Both absent from `.devcontainer/docker-compose.yml`.
+> - Port 8080 forwarded — confirmed by `.devcontainer/devcontainer.json`
+>
+> **The guidelines below describe `src/mezzio-async/` — a retained package, not the running server.**
+
 ## What This Project Is
 
 `mezzio-async` provides a Mezzio framework integration for **PHP TrueAsync** (`php-async`
@@ -232,7 +247,15 @@ the new process can bind the port immediately without waiting for the old socket
 
 ## Docker / Runtime
 
+> **⚠ The Dockerfile and compose config below are for the `mezzio-async` package (future use).
+> They are NOT the active devcontainer configuration.**
+>
+> Active devcontainer verified from `.devcontainer/docker-compose.yml` and
+> `.devcontainer/docker/php/Dockerfile`: `php:latest`, `command: sleep infinity`, port 8080,
+> no nginx, no PHP-FPM, no TrueAsync extension installed.
+
 ```dockerfile
+# mezzio-async future target image (NOT active)
 FROM trueasync/php-true-async:latest
 WORKDIR /var/www/app
 CMD ["php", "bin/mezzio-async", "start"]

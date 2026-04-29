@@ -157,12 +157,28 @@ use Override;
 ## Arrays
 
 - Short syntax `[]` always (`array_syntax: short`)
+- **Multiline arrays: one value or one `key => value` pair per line** — never multiple entries on one line
 - Trailing comma on multiline arrays (`trailing_comma_in_multiline: arrays`)
 - No trailing comma in single-line arrays (`no_trailing_comma_in_singleline`)
 - One space after commas (`whitespace_after_comma_in_array`)
 - No space before commas (`no_whitespace_before_comma_in_array`)
 - Trim spaces inside brackets (`trim_array_spaces`)
 - Align `=>` by scope (`binary_operator_spaces`)
+
+```php
+// ✅ Correct — one entry per line
+$middlewareFactory->prepare(
+    [
+        AuthenticationMiddleware::class,
+        DashboardHandler::class,
+    ]
+);
+
+// ❌ Wrong — multiple entries on one line
+$middlewareFactory->prepare(
+    [AuthenticationMiddleware::class, DashboardHandler::class]
+);
+```
 
 ---
 

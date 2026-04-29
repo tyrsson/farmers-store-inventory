@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace AppTest\Handler;
+namespace AppTest\RequestHandler;
 
-use App\Handler\PingHandler;
+use App\RequestHandler\PingHandler;
 use Laminas\Diactoros\Response\JsonResponse;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversMethod;
