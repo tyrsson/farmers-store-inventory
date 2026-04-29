@@ -13,7 +13,8 @@ INSERT INTO role (role_id) VALUES
     ('Warehouse Supervisor'),
     ('Credit Manager'),
     ('DC Warehouse'),
-    ('Manager')
+    ('Manager'),
+    ('Administrator')
 ON DUPLICATE KEY UPDATE role_id = VALUES(role_id);
 
 -- -----------------------------------------------------------------------------

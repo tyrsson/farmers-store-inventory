@@ -81,7 +81,7 @@ final class UserRepository implements UserRepositoryInterface
         $sql    = $this->gateway->getSql();
         $select = $sql->select()
             ->join('role', 'role.id = user.role_id', ['role_name' => 'role_id'])
-            ->order('user.display_name ASC');
+            ->order('user.last_name ASC');
 
         if ($storeId !== null) {
             $select->where(['user.store_id' => $storeId]);
@@ -122,15 +122,15 @@ final class UserRepository implements UserRepositoryInterface
             id:           (int) $row['id'],
             storeId:      (int) $row['store_id'],
             roleId:       (int) $row['role_id'],
-            displayName:  (string) $row['display_name'],
+            firstName:    (string) $row['first_name'],
+            lastName:     (string) $row['last_name'],
             email:        (string) $row['email'],
             passwordHash: (string) $row['password_hash'],
             active:       (bool) $row['active'],
             createdAt:    new DateTimeImmutable((string) $row['created_at']),
             roles:        [(string) $row['role_name']],
             details:      [
-                'store_id'     => (int) $row['store_id'],
-                'display_name' => (string) $row['display_name'],
+                'store_id' => (int) $row['store_id'],
             ],
         );
     }

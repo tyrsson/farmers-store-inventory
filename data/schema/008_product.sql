@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS product (
     specs            VARCHAR(255)       NOT NULL DEFAULT '',
     case_qty         SMALLINT UNSIGNED  NOT NULL DEFAULT 1
                      COMMENT 'Original pieces-per-box from the manifest scan. This row is always one physical piece; case_qty records the box it came from (e.g. 2 for a 2-chair set).',
+    serial_number    VARCHAR(100)       NULL
+                     COMMENT 'Manufacturer serial number; only present on serialised products',
     customer_name    VARCHAR(200)       NULL
                      COMMENT 'Set on ticket removal for anti-fraud record',
     removed_at       DATETIME           NULL
@@ -46,6 +48,7 @@ CREATE TABLE IF NOT EXISTS product (
     KEY idx_product_store_active (store_id, removed_at),
     KEY idx_product_ao (ao_number),
     KEY idx_product_sku (sku),
+    KEY idx_product_serial (serial_number),
     CONSTRAINT fk_product_manifest_item FOREIGN KEY (manifest_item_id) REFERENCES manifest_item (id),
     CONSTRAINT fk_product_store         FOREIGN KEY (store_id)         REFERENCES store          (store_number),
     CONSTRAINT fk_product_sku           FOREIGN KEY (sku)              REFERENCES sku_catalogue  (sku),

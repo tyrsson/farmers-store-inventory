@@ -548,6 +548,20 @@
     border-radius: var(--bs-card-border-radius) 0 0 var(--bs-card-border-radius);
     color: var(--bs-body-color);
 }
+.ims-login-brand-icon {
+    font-size: 3rem;
+}
+.ims-login-brand-tagline {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+.ims-login-brand-features {
+    font-size: 0.82rem;
+    opacity: 0.75;
+}
+.ims-login-footer {
+    font-size: 0.72rem;
+}
 
 /* ── Avatar size variant ─────────────────────────────────── */
 .ims-avatar--lg {
