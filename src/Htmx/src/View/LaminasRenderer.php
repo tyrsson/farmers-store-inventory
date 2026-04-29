@@ -107,21 +107,40 @@ final class LaminasRenderer implements TemplateRendererInterface
 
         $viewModel = $this->mergeViewModel($name, $viewModel);
 
-        $this->body->addChild(child: $viewModel, captureTo: 'content');
+        $body = $this->prepareBody($viewModel);
 
-        $body = $this->renderRecursively($this->body) ?? '';
+        if ($body === false) {
+            // Body layer skipped — render page directly, but still wrap in layout if present
+            $renderedBody = $this->renderer->render($viewModel);
 
-        $layout = $this->prepareLayout($this->body);
+            $layout = $this->prepareLayout($viewModel);
+
+            if ($layout !== false) {
+                $layout = $this->beforeRender($layout);
+                $layout->setVariable('body', $renderedBody);
+                $renderedBody = $this->renderer->render($layout);
+            }
+
+            $this->helpers->resetState();
+
+            return $renderedBody;
+        }
+
+        $body->addChild(child: $viewModel, captureTo: 'content');
+
+        $renderedBody = $this->renderRecursively($body) ?? '';
+
+        $layout = $this->prepareLayout($body);
 
         if ($layout !== false) {
             $layout = $this->beforeRender($layout);
-            $layout->setVariable('body', $body);
-            $body = $this->renderer->render($layout);
+            $layout->setVariable('body', $renderedBody);
+            $renderedBody = $this->renderer->render($layout);
         }
 
         $this->helpers->resetState();
 
-        return $body;
+        return $renderedBody;
     }
 
     /**
@@ -237,5 +256,24 @@ final class LaminasRenderer implements TemplateRendererInterface
         }
 
         return $this->renderer->render($this->beforeRender($model));
+    }
+
+    /**
+     * Prepare the body layer, if any.
+     *
+     * If the page view model contains a 'body' variable explicitly set to false,
+     * the body layer is skipped and the page template is rendered directly.
+     * This mirrors the behaviour of prepareLayout() for the layout layer.
+     */
+    private function prepareBody(ModelInterface $viewModel): ModelInterface|false
+    {
+        /** @psalm-var mixed $providedBody */
+        $providedBody = $viewModel->getVariable('body', null);
+
+        if ($providedBody === false) {
+            return false;
+        }
+
+        return $this->body;
     }
 }

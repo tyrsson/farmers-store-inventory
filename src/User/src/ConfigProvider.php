@@ -39,10 +39,12 @@ final class ConfigProvider
                 Admin\RequestHandler\UpdateUserHandler::class       => Admin\RequestHandler\Container\UpdateUserHandlerFactory::class,
                 Admin\RequestHandler\ToggleUserActiveHandler::class => Admin\RequestHandler\Container\ToggleUserActiveHandlerFactory::class,
                 CommandHandler\SaveUserHandler::class               => CommandHandler\Container\SaveUserHandlerFactory::class,
+                Middleware\RegistrationMiddleware::class             => Middleware\Container\RegistrationMiddlewareFactory::class,
                 Repository\UserRepository::class                    => Repository\UserRepositoryFactory::class,
                 RouteProvider::class                                => Container\RouteProviderFactory::class,
                 RequestHandler\LoginHandler::class                  => RequestHandler\Container\LoginHandlerFactory::class,
                 RequestHandler\LogoutHandler::class                 => RequestHandler\Container\LogoutHandlerFactory::class,
+                RequestHandler\RegistrationHandler::class           => RequestHandler\Container\RegistrationHandlerFactory::class,
                 RequestHandler\UserListHandler::class               => RequestHandler\Container\UserListHandlerFactory::class,
             ],
         ];

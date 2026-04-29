@@ -1,0 +1,62 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Database seeding script.
+ *
+ * Executes all schema and seed SQL files in ascending filename order.
+ * Uses the PhpDb adapter pulled from the service container so that
+ * the same connection configuration used by the application is applied.
+ *
+ * Usage (from project root):
+ *   php bin/db-seed.php
+ */
+
+use PhpDb\Adapter\AdapterInterface;
+
+chdir(dirname(__DIR__));
+
+require 'vendor/autoload.php';
+
+$container = require 'config/container.php';
+
+/** @var AdapterInterface $adapter */
+$adapter = $container->get(AdapterInterface::class);
+
+$files = glob(__DIR__ . '/../data/schema/*.sql');
+
+if ($files === false || $files === []) {
+    echo 'No SQL files found in data/schema/' . PHP_EOL;
+    exit(1);
+}
+
+sort($files);
+
+$ok     = 0;
+$errors = 0;
+
+foreach ($files as $file) {
+    $name = basename($file);
+    $sql  = file_get_contents($file);
+
+    if ($sql === false || trim($sql) === '') {
+        printf("  SKIP  %s (empty or unreadable)%s", $name, PHP_EOL);
+        continue;
+    }
+
+    try {
+        $adapter->query($sql, AdapterInterface::QUERY_MODE_EXECUTE);
+        printf("  OK    %s%s", $name, PHP_EOL);
+        $ok++;
+    } catch (Throwable $e) {
+        printf("  ERROR %s — %s%s", $name, $e->getMessage(), PHP_EOL);
+        $errors++;
+    }
+}
+
+echo PHP_EOL;
+printf("Done. %d file(s) executed, %d error(s).%s", $ok, $errors, PHP_EOL);
+
+exit($errors > 0 ? 1 : 0);

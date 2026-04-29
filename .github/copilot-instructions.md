@@ -233,6 +233,11 @@ the new process can bind the port immediately without waiting for the old socket
 
 ---
 
+## Frontend / Template Rules
+
+- **No inline styles.** Never write `style="..."` in any `.phtml` template. Add a named `.ims-*` CSS class to `public/assets/css/custom.css` instead.
+- **No hardcoded URLs or asset paths.** Always use `$this->url('route.name')` and `$this->basePath()`.
+
 ## What to Avoid
 
 - Do **not** add Swoole-specific classes or type hints (`Swoole\*`)

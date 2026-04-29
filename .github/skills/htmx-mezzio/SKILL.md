@@ -44,6 +44,18 @@ return new HtmlResponse($this->template->render('module::page', ['sidebar' => fa
 
 Pass `'layout' => false` in render params to skip Layer 3 (the full HTML document wrapper). `DetectAjaxRequestMiddleware` does this automatically for all HTMX requests. Helpers (`headLink`, `headScript`, `inlineScript`, etc.) reset their state after each render — so a flag set for one request will not bleed into the next.
 
+## No Inline Styles — Mandatory
+
+**Never use `style="..."` attributes in templates.** All visual styling must live in `public/assets/css/custom.css` as named BEM-style `.ims-*` classes. When a Bootstrap utility class does not exist for the exact value needed, add a new `.ims-*` class to `custom.css` and apply it.
+
+```html
+<!-- WRONG -->
+<div style="font-size:.875rem; opacity:.8;">...</div>
+
+<!-- RIGHT — add .ims-login-brand-tagline to custom.css, use the class here -->
+<div class="ims-login-brand-tagline">...</div>
+```
+
 ## Laminas View Helpers — Mandatory
 
 **Always use Laminas view helpers instead of hardcoded HTML tags for any resource, URL, or asset reference.** Never write raw `<link>`, `<script>`, `<img>`, or `<a href="">` tags when a helper is available.

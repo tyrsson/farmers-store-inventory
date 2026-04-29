@@ -11,21 +11,26 @@ use Override;
 use function array_merge;
 use function array_values;
 
-final readonly class User implements UserInterface
+final class User implements UserInterface
 {
+    public string $displayName {
+        get => $this->firstName . ' ' . $this->lastName;
+    }
+
     public function __construct(
-        public int $id,
-        public int $storeId,
-        public int $roleId,
-        public string $displayName,
-        public string $email,
-        public string $passwordHash,
-        public bool $active,
-        public DateTimeImmutable $createdAt,
+        public readonly int $id,
+        public readonly int $storeId,
+        public readonly int $roleId,
+        public readonly string $firstName,
+        public readonly string $lastName,
+        public readonly string $email,
+        public readonly string $passwordHash,
+        public readonly bool $active,
+        public readonly DateTimeImmutable $createdAt,
         /** @var string[] */
-        private array $roles = [],
+        private readonly array $roles = [],
         /** @var array<string, mixed> */
-        private array $details = [],
+        private readonly array $details = [],
     ) {}
 
     #[Override]
@@ -61,7 +66,8 @@ final readonly class User implements UserInterface
             $this->id,
             $storeId,
             $this->roleId,
-            $this->displayName,
+            $this->firstName,
+            $this->lastName,
             $this->email,
             $this->passwordHash,
             $this->active,
@@ -77,7 +83,8 @@ final readonly class User implements UserInterface
             $this->id,
             $this->storeId,
             $roleId,
-            $this->displayName,
+            $this->firstName,
+            $this->lastName,
             $this->email,
             $this->passwordHash,
             $this->active,
@@ -87,13 +94,31 @@ final readonly class User implements UserInterface
         );
     }
 
-    public function withDisplayName(string $displayName): self
+    public function withFirstName(string $firstName): self
     {
         return new self(
             $this->id,
             $this->storeId,
             $this->roleId,
-            $displayName,
+            $firstName,
+            $this->lastName,
+            $this->email,
+            $this->passwordHash,
+            $this->active,
+            $this->createdAt,
+            $this->roles,
+            $this->details,
+        );
+    }
+
+    public function withLastName(string $lastName): self
+    {
+        return new self(
+            $this->id,
+            $this->storeId,
+            $this->roleId,
+            $this->firstName,
+            $lastName,
             $this->email,
             $this->passwordHash,
             $this->active,
@@ -109,7 +134,8 @@ final readonly class User implements UserInterface
             $this->id,
             $this->storeId,
             $this->roleId,
-            $this->displayName,
+            $this->firstName,
+            $this->lastName,
             $email,
             $this->passwordHash,
             $this->active,
@@ -125,7 +151,8 @@ final readonly class User implements UserInterface
             $this->id,
             $this->storeId,
             $this->roleId,
-            $this->displayName,
+            $this->firstName,
+            $this->lastName,
             $this->email,
             $passwordHash,
             $this->active,
@@ -141,7 +168,8 @@ final readonly class User implements UserInterface
             $this->id,
             $this->storeId,
             $this->roleId,
-            $this->displayName,
+            $this->firstName,
+            $this->lastName,
             $this->email,
             $this->passwordHash,
             $active,
@@ -158,7 +186,8 @@ final readonly class User implements UserInterface
             $this->id,
             $this->storeId,
             $this->roleId,
-            $this->displayName,
+            $this->firstName,
+            $this->lastName,
             $this->email,
             $this->passwordHash,
             $this->active,
@@ -174,7 +203,8 @@ final readonly class User implements UserInterface
             $this->id,
             $this->storeId,
             $this->roleId,
-            $this->displayName,
+            $this->firstName,
+            $this->lastName,
             $this->email,
             $this->passwordHash,
             $this->active,

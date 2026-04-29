@@ -39,6 +39,7 @@ final readonly class ConfigProvider
             ],
             'factories' => [
                 Middleware\DetectAjaxRequestMiddleware::class => Middleware\DetectAjaxRequestMiddlewareFactory::class,
+                Middleware\DisableBodyMiddleware::class        => Middleware\DisableBodyMiddlewareFactory::class,
                 View\LaminasRenderer::class                   => View\LaminasRendererFactory::class,
             ],
         ];
