@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Handler\PingHandler;
+use App\RequestHandler\PingHandler;
 use App\RequestHandler\DashboardHandler;
 use Mezzio\Authentication\AuthenticationMiddleware;
 use Mezzio\MiddlewareFactoryInterface;

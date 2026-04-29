@@ -61,7 +61,7 @@ class ConfigProvider
                 RouteProvider::class                   => Container\RouteProviderFactory::class,
             ],
             'invokables' => [
-                Handler\PingHandler::class => Handler\PingHandler::class,
+                RequestHandler\PingHandler::class => RequestHandler\PingHandler::class,
             ],
         ];
     }
