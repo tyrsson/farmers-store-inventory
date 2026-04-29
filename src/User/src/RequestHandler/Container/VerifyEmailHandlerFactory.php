@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace User\RequestHandler\Container;
+
+use Psr\Container\ContainerInterface;
+use User\Repository\UserRepositoryInterface;
+use User\RequestHandler\VerifyEmailHandler;
+
+final class VerifyEmailHandlerFactory
+{
+    public function __invoke(ContainerInterface $container): VerifyEmailHandler
+    {
+        /** @var array{user: array{verification_token_ttl: int}} $config */
+        $config   = $container->get('config');
+        $tokenTtl = (int) ($config['user']['verification_token_ttl'] ?? 86400);
+
+        return new VerifyEmailHandler(
+            users:    $container->get(UserRepositoryInterface::class),
+            tokenTtl: $tokenTtl,
+        );
+    }
+}

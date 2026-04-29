@@ -2,18 +2,22 @@
 
 declare(strict_types=1);
 
-namespace MezzioTest\Async\Runner;
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use Mezzio\Async\Http\RequestParser;
-use Mezzio\Async\Http\ResponseEmitter;
+namespace AsyncTest\Runner;
+
 use Mezzio\Async\Http\Server;
-use Mezzio\Async\Http\ServerRequestFactory;
-use Mezzio\Async\Http\StaticFileHandler;
 use Mezzio\Async\Runner\AsyncRunner;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\NullLogger;
 
 #[CoversClass(AsyncRunner::class)]
 final class AsyncRunnerTest extends TestCase

@@ -3,6 +3,7 @@
 -- Each AO# staged and confirmed for an outbound transfer.
 -- Depends on: transfer, product, user
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS transfer_item;
 CREATE TABLE IF NOT EXISTS transfer_item (
     id           INT UNSIGNED AUTO_INCREMENT,
@@ -16,3 +17,4 @@ CREATE TABLE IF NOT EXISTS transfer_item (
     CONSTRAINT fk_xferi_product      FOREIGN KEY (product_id)   REFERENCES product  (id),
     CONSTRAINT fk_xferi_confirmed_by FOREIGN KEY (confirmed_by) REFERENCES `user`     (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

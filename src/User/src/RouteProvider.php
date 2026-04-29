@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace User;
 
 use Htmx\Middleware\DisableBodyMiddleware;
@@ -17,6 +27,7 @@ use User\RequestHandler\LoginHandler;
 use User\RequestHandler\LogoutHandler;
 use User\RequestHandler\RegistrationHandler;
 use User\RequestHandler\UserListHandler;
+use User\RequestHandler\VerifyEmailHandler;
 
 final class RouteProvider implements RouteProviderInterface
 {
@@ -70,6 +81,17 @@ final class RouteProvider implements RouteProviderInterface
                 ]
             ),
             'user.register.post'
+        );
+
+        $routeCollector->get(
+            '/verify-email/{token}',
+            $middlewareFactory->prepare(
+                [
+                    DisableBodyMiddleware::class,
+                    VerifyEmailHandler::class,
+                ]
+            ),
+            'user.verify-email'
         );
 
         // All routes below require authentication

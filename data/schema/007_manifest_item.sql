@@ -14,6 +14,7 @@
 --
 -- Depends on: manifest, sku_catalogue, user
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS manifest_item;
 CREATE TABLE IF NOT EXISTS manifest_item (
     id          INT UNSIGNED       AUTO_INCREMENT,
@@ -34,3 +35,4 @@ CREATE TABLE IF NOT EXISTS manifest_item (
     CONSTRAINT fk_mi_sku        FOREIGN KEY (sku)         REFERENCES sku_catalogue (sku),
     CONSTRAINT fk_mi_scanned_by FOREIGN KEY (scanned_by)  REFERENCES `user`          (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

@@ -5,6 +5,7 @@
 -- This system does NOT originate tickets — it processes them.
 -- Depends on: store, user
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS ticket;
 CREATE TABLE IF NOT EXISTS ticket (
     id            INT UNSIGNED      AUTO_INCREMENT,
@@ -26,3 +27,4 @@ CREATE TABLE IF NOT EXISTS ticket (
     CONSTRAINT fk_ticket_completed_by FOREIGN KEY (completed_by) REFERENCES `user`  (id),
     CONSTRAINT fk_ticket_created_by   FOREIGN KEY (created_by)  REFERENCES `user`  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

@@ -2,7 +2,17 @@
 
 declare(strict_types=1);
 
-namespace MezzioTest\Async\Http;
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace AsyncTest\Http;
 
 use AppTest\InMemoryContainer;
 use Mezzio\Async\HotCodeReload\Watcher;
@@ -10,12 +20,14 @@ use Mezzio\Async\Http\Server;
 use Mezzio\Async\Http\ServerFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 #[CoversClass(ServerFactory::class)]
 final class ServerFactoryTest extends TestCase
 {
     private InMemoryContainer $container;
+
     private ServerFactory $factory;
 
     protected function setUp(): void
@@ -27,7 +39,7 @@ final class ServerFactoryTest extends TestCase
     public function testReturnsServerInstance(): void
     {
         $this->container->setService('config', []);
-        $this->container->setService(\Psr\Log\LoggerInterface::class, new NullLogger());
+        $this->container->setService(LoggerInterface::class, new NullLogger());
 
         $server = ($this->factory)($this->container);
 
@@ -44,7 +56,7 @@ final class ServerFactoryTest extends TestCase
                 ],
             ],
         ]);
-        $this->container->setService(\Psr\Log\LoggerInterface::class, new NullLogger());
+        $this->container->setService(LoggerInterface::class, new NullLogger());
 
         $server = ($this->factory)($this->container);
 
@@ -59,7 +71,7 @@ final class ServerFactoryTest extends TestCase
                 'port' => 8080,
             ],
         ]);
-        $this->container->setService(\Psr\Log\LoggerInterface::class, new NullLogger());
+        $this->container->setService(LoggerInterface::class, new NullLogger());
 
         $server = ($this->factory)($this->container);
 
@@ -68,7 +80,7 @@ final class ServerFactoryTest extends TestCase
 
     public function testUsesDefaultsWhenNoConfigPresent(): void
     {
-        $this->container->setService(\Psr\Log\LoggerInterface::class, new NullLogger());
+        $this->container->setService(LoggerInterface::class, new NullLogger());
 
         $server = ($this->factory)($this->container);
 
@@ -78,7 +90,7 @@ final class ServerFactoryTest extends TestCase
     public function testHotReloadDisabledByDefault(): void
     {
         $this->container->setService('config', []);
-        $this->container->setService(\Psr\Log\LoggerInterface::class, new NullLogger());
+        $this->container->setService(LoggerInterface::class, new NullLogger());
 
         // No Watcher service registered — factory must not try to resolve it.
         $server = ($this->factory)($this->container);
@@ -96,7 +108,7 @@ final class ServerFactoryTest extends TestCase
                 'hot-reload' => ['enabled' => true],
             ],
         ]);
-        $this->container->setService(\Psr\Log\LoggerInterface::class, $logger);
+        $this->container->setService(LoggerInterface::class, $logger);
         $this->container->setService(Watcher::class, $watcher);
 
         $server = ($this->factory)($this->container);

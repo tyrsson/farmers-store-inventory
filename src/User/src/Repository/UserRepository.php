@@ -2,11 +2,22 @@
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace User\Repository;
 
 use DateTimeImmutable;
 use Mezzio\Authentication\UserInterface;
 use PhpDb\Adapter\AdapterInterface;
+use PhpDb\Sql\Sql;
 use PhpDb\TableGateway\TableGateway;
 use User\Entity\User;
 
@@ -17,7 +28,7 @@ final class UserRepository implements UserRepositoryInterface
     private readonly TableGateway $gateway;
 
     public function __construct(
-        AdapterInterface $adapter,
+        private readonly AdapterInterface $adapter,
         /** @var callable(string, string[], array<string,mixed>): UserInterface */
         private readonly mixed $userFactory,
     ) {
@@ -115,21 +126,48 @@ final class UserRepository implements UserRepositoryInterface
         $sql->prepareStatementForSqlObject($update)->execute();
     }
 
+    public function findByVerificationToken(string $token): ?User
+    {
+        $sql    = $this->gateway->getSql();
+        $select = $sql->select()
+            ->join('role', 'role.id = user.role_id', ['role_name' => 'role_id'])
+            ->where(['user.verification_token' => $token])
+            ->limit(1);
+
+        $row = $sql->prepareStatementForSqlObject($select)->execute()->current();
+        if ($row === null) {
+            return null;
+        }
+
+        return $this->hydrate((array) $row);
+    }
+
+    public function findRoleIdByName(string $roleName): ?int
+    {
+        $sql    = new Sql($this->adapter);
+        $select = $sql->select('role')->columns(['id'])->where(['role_id' => $roleName])->limit(1);
+        $row    = $sql->prepareStatementForSqlObject($select)->execute()->current();
+
+        return $row !== null ? (int) $row['id'] : null;
+    }
+
     /** @param array<string, mixed> $row */
     private function hydrate(array $row): User
     {
         return new User(
-            id:           (int) $row['id'],
-            storeId:      (int) $row['store_id'],
-            roleId:       (int) $row['role_id'],
-            firstName:    (string) $row['first_name'],
-            lastName:     (string) $row['last_name'],
-            email:        (string) $row['email'],
+            id: (int) $row['id'],
+            storeId: (int) $row['store_id'],
+            roleId: (int) $row['role_id'],
+            firstName: (string) $row['first_name'],
+            lastName: (string) $row['last_name'],
+            email: (string) $row['email'],
             passwordHash: (string) $row['password_hash'],
-            active:       (bool) $row['active'],
-            createdAt:    new DateTimeImmutable((string) $row['created_at']),
-            roles:        [(string) $row['role_name']],
-            details:      [
+            active: (bool) $row['active'],
+            createdAt: new DateTimeImmutable((string) $row['created_at']),
+            verificationToken: isset($row['verification_token']) ? (string) $row['verification_token'] : null,
+            tokenCreatedAt: isset($row['token_created_at']) ? new DateTimeImmutable((string) $row['token_created_at']) : null,
+            roles: [(string) $row['role_name']],
+            details: [
                 'store_id' => (int) $row['store_id'],
             ],
         );

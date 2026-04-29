@@ -6,13 +6,34 @@
  * Provides IDE-level type information for the `async` PHP extension.
  *
  * @since      8.6
- * @version    1.0.0
- * @link       https://github.com/true-async/php-async
+ *
+ * @see       https://github.com/true-async/php-async
  */
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Async;
+
+use Cancellation;
+use Closure;
+use Countable;
+use Error;
+use Exception;
+use Iterator;
+use IteratorAggregate;
+use Override;
+use RuntimeException;
+use Throwable;
 
 // ---------------------------------------------------------------------------
 // Exceptions & Errors
@@ -26,7 +47,7 @@ namespace Async;
  *
  * @since 8.6
  */
-class AsyncCancellation extends \Cancellation {}
+class AsyncCancellation extends Cancellation {}
 
 /**
  * Exception thrown when an awaited operation is cancelled by a cancellation token.
@@ -44,7 +65,7 @@ class OperationCanceledException extends AsyncCancellation {}
  *
  * @since 8.6
  */
-class AsyncException extends \Exception {}
+class AsyncException extends Exception {}
 
 /**
  * General exception for input/output operations.
@@ -53,35 +74,35 @@ class AsyncException extends \Exception {}
  *
  * @since 8.6
  */
-class InputOutputException extends \Exception {}
+class InputOutputException extends Exception {}
 
 /**
  * Exception for DNS-related errors: getaddrinfo and getnameinfo.
  *
  * @since 8.6
  */
-class DnsException extends \Exception {}
+class DnsException extends Exception {}
 
 /**
  * Exception thrown when an operation exceeds its time limit.
  *
  * @since 8.6
  */
-class TimeoutException extends \Exception {}
+class TimeoutException extends Exception {}
 
 /**
  * Exception thrown when a poll operation fails.
  *
  * @since 8.6
  */
-class PollException extends \Exception {}
+class PollException extends Exception {}
 
 /**
  * Error thrown when a deadlock is detected.
  *
  * @since 8.6
  */
-class DeadlockError extends \Error {}
+class DeadlockError extends Error {}
 
 /**
  * Exception thrown when a service is unavailable.
@@ -99,20 +120,20 @@ class ServiceUnavailableException extends AsyncException {}
  *
  * @since 8.6
  */
-final class CompositeException extends \Exception
+final class CompositeException extends Exception
 {
-    /** @var \Throwable[] */
+    /** @var Throwable[] */
     private array $exceptions;
 
     /**
      * Add an exception to the composite.
      */
-    public function addException(\Throwable $exception): void {}
+    public function addException(Throwable $exception): void {}
 
     /**
      * Get all aggregated exceptions.
      *
-     * @return \Throwable[]
+     * @return Throwable[]
      */
     public function getExceptions(): array {}
 }
@@ -194,8 +215,8 @@ interface SpawnStrategy extends ScopeProvider
      * Called before the coroutine is enqueued.
      *
      * @param Coroutine $coroutine The coroutine about to be enqueued.
-     * @param Scope     $scope     The owning scope.
-     * @return array               Arbitrary metadata passed to afterCoroutineEnqueue.
+     * @param Scope $scope The owning scope.
+     * @return array Arbitrary metadata passed to afterCoroutineEnqueue.
      */
     public function beforeCoroutineEnqueue(Coroutine $coroutine, Scope $scope): array;
 
@@ -203,7 +224,7 @@ interface SpawnStrategy extends ScopeProvider
      * Called immediately after the coroutine has been enqueued.
      *
      * @param Coroutine $coroutine The enqueued coroutine.
-     * @param Scope     $scope     The owning scope.
+     * @param Scope $scope The owning scope.
      */
     public function afterCoroutineEnqueue(Coroutine $coroutine, Scope $scope): void;
 }
@@ -290,10 +311,10 @@ interface CircuitBreakerStrategy
     /**
      * Called when an operation fails.
      *
-     * @param mixed      $source The object reporting the event (e.g., {@see Pool}).
-     * @param \Throwable $error  The error that occurred.
+     * @param mixed $source The object reporting the event (e.g., {@see Pool}).
+     * @param Throwable $error The error that occurred.
      */
-    public function reportFailure(mixed $source, \Throwable $error): void;
+    public function reportFailure(mixed $source, Throwable $error): void;
 
     /**
      * Check if the circuit should attempt to recover.
@@ -348,52 +369,38 @@ final class Context
 {
     /**
      * Find a value by key, searching the current context and all ancestors.
-     *
-     * @param string|object $key
      */
     public function find(string|object $key): mixed {}
 
     /**
      * Get a value by key from the current context only.
-     *
-     * @param string|object $key
      */
     public function get(string|object $key): mixed {}
 
     /**
      * Check if a key exists in the current context or any ancestor.
-     *
-     * @param string|object $key
      */
     public function has(string|object $key): bool {}
 
     /**
      * Find a value by key in the local (non-inherited) context only.
-     *
-     * @param string|object $key
      */
     public function findLocal(string|object $key): mixed {}
 
     /**
      * Get a value by key from the local context only.
-     *
-     * @param string|object $key
      */
     public function getLocal(string|object $key): mixed {}
 
     /**
      * Check if a key exists in the local context only.
-     *
-     * @param string|object $key
      */
     public function hasLocal(string|object $key): bool {}
 
     /**
      * Return a new Context with the given key-value pair set.
      *
-     * @param string|object $key
-     * @param mixed         $value
-     * @param bool          $replace Allow replacing an existing key.
+     * @param bool $replace Allow replacing an existing key.
      * @return Context A new Context instance.
      */
     public function set(string|object $key, mixed $value, bool $replace = false): Context {}
@@ -401,7 +408,6 @@ final class Context
     /**
      * Return a new Context with the given key removed.
      *
-     * @param string|object $key
      * @return Context A new Context instance.
      */
     public function unset(string|object $key): Context {}
@@ -449,7 +455,7 @@ final class Coroutine implements Completable
      *
      * If the coroutine was cancelled, returns an {@see AsyncCancellation}.
      *
-     * @throws \RuntimeException If the coroutine is still running.
+     * @throws RuntimeException If the coroutine is still running.
      */
     public function getException(): mixed {}
 
@@ -457,7 +463,7 @@ final class Coroutine implements Completable
      * Return the backtrace of the suspended coroutine, or null if it is not suspended.
      *
      * @param int $options {@see DEBUG_BACKTRACE_PROVIDE_OBJECT}, {@see DEBUG_BACKTRACE_IGNORE_ARGS}
-     * @param int $limit   Maximum number of stack frames (0 = unlimited).
+     * @param int $limit Maximum number of stack frames (0 = unlimited).
      * @return array<int, array<string, mixed>>|null
      */
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT, int $limit = 0): ?array {}
@@ -538,9 +544,9 @@ final class Coroutine implements Completable
     /**
      * Register a callback to be executed when the coroutine finishes.
      *
-     * @param \Closure $callback Invoked with no arguments after the coroutine completes.
+     * @param Closure $callback Invoked with no arguments after the coroutine completes.
      */
-    public function finally(\Closure $callback): void {}
+    public function finally(Closure $callback): void {}
 }
 
 // ---------------------------------------------------------------------------
@@ -558,23 +564,20 @@ final class Coroutine implements Completable
 final class Scope implements ScopeProvider
 {
     /**
+     * Create a new root Scope.
+     */
+    public function __construct() {}
+
+    /**
      * Create a new Scope that inherits from the given parent scope.
      *
      * If no parent is provided, the new scope inherits from the current one.
-     *
-     * @param Scope|null $parentScope
-     * @return Scope
      */
     public static function inherit(?Scope $parentScope = null): Scope {}
 
     /** @inheritDoc */
-    #[\Override]
+    #[Override]
     public function provideScope(): Scope {}
-
-    /**
-     * Create a new root Scope.
-     */
-    public function __construct() {}
 
     /**
      * Mark the scope as "not safely disposable" and return it.
@@ -586,11 +589,11 @@ final class Scope implements ScopeProvider
     /**
      * Spawn a new coroutine inside this scope.
      *
-     * @param \Closure  $callable Coroutine body.
-     * @param mixed     ...$params Arguments forwarded to the closure.
+     * @param Closure $callable Coroutine body.
+     * @param mixed ...$params Arguments forwarded to the closure.
      * @return Coroutine The new coroutine.
      */
-    public function spawn(\Closure $callable, mixed ...$params): Coroutine {}
+    public function spawn(Closure $callable, mixed ...$params): Coroutine {}
 
     /**
      * Cancel all coroutines owned by this scope.
@@ -633,8 +636,6 @@ final class Scope implements ScopeProvider
 
     /**
      * Set a handler invoked when a child coroutine propagates an unhandled exception.
-     *
-     * @param callable $exceptionHandler
      */
     public function setExceptionHandler(callable $exceptionHandler): void {}
 
@@ -642,17 +643,13 @@ final class Scope implements ScopeProvider
      * Set an exception handler for child scopes.
      *
      * Setting this handler prevents the exception from propagating further up.
-     *
-     * @param callable $exceptionHandler
      */
     public function setChildScopeExceptionHandler(callable $exceptionHandler): void {}
 
     /**
      * Register a callback to be executed when the scope finishes.
-     *
-     * @param \Closure $callback
      */
-    public function finally(\Closure $callback): void {}
+    public function finally(Closure $callback): void {}
 
     /**
      * Cancel and dispose of the scope immediately.
@@ -709,6 +706,7 @@ final class Scope implements ScopeProvider
  * ```
  *
  * @template T
+ *
  * @since 8.6
  */
 final class FutureState
@@ -724,10 +722,8 @@ final class FutureState
 
     /**
      * Reject the Future with an error.
-     *
-     * @param \Throwable $throwable
      */
-    public function error(\Throwable $throwable): void {}
+    public function error(Throwable $throwable): void {}
 
     /**
      * Return true if the Future has already been resolved or rejected.
@@ -780,14 +776,23 @@ final class FutureState
  * awaited inside a coroutine via {@see await()}.
  *
  * @template-covariant T
+ *
  * @since 8.6
  */
 final class Future implements Completable
 {
     /**
+     * Create a Future backed by the given FutureState.
+     *
+     * @param FutureState<T> $state
+     */
+    public function __construct(FutureState $state) {}
+
+    /**
      * Create an already-resolved Future.
      *
      * @template Tv
+     *
      * @param Tv $value
      * @return Future<Tv>
      */
@@ -798,14 +803,7 @@ final class Future implements Completable
      *
      * @return Future<never>
      */
-    public static function failed(\Throwable $throwable): Future {}
-
-    /**
-     * Create a Future backed by the given FutureState.
-     *
-     * @param FutureState<T> $state
-     */
-    public function __construct(FutureState $state) {}
+    public static function failed(Throwable $throwable): Future {}
 
     /**
      * Return true if the Future has been resolved or rejected.
@@ -819,8 +817,6 @@ final class Future implements Completable
 
     /**
      * Request cancellation of the Future.
-     *
-     * @param AsyncCancellation|null $cancellation
      */
     public function cancel(?AsyncCancellation $cancellation = null): void {}
 
@@ -838,6 +834,7 @@ final class Future implements Completable
      * if $map throws.
      *
      * @template Tr
+     *
      * @param callable(T): Tr $map
      * @return Future<Tr>
      */
@@ -850,7 +847,8 @@ final class Future implements Completable
      * re-rejects if $catch throws.
      *
      * @template Tr
-     * @param callable(\Throwable): Tr $catch
+     *
+     * @param callable(Throwable): Tr $catch
      * @return Future<Tr>
      */
     public function catch(callable $catch): Future {}
@@ -872,8 +870,8 @@ final class Future implements Completable
      *
      * @param Completable|null $cancellation Optional cancellation token.
      * @return T
-     * @throws \Throwable If the Future was rejected.
      * @throws OperationCanceledException If the cancellation token fires.
+     * @throws Throwable If the Future was rejected.
      */
     public function await(?Completable $cancellation = null): mixed {}
 
@@ -941,15 +939,17 @@ final class Timeout implements Completable
 /**
  * Wraps an exception that originated in a child thread.
  * The original exception is accessible via getRemoteException().
+ *
  * @since 8.6
  */
 class RemoteException extends AsyncException
 {
-    private ?\Throwable $remoteException = null;
+    private ?Throwable $remoteException = null;
+
     private string $remoteClass = '';
 
     /** Get the original exception from the child thread. */
-    public function getRemoteException(): ?\Throwable {}
+    public function getRemoteException(): ?Throwable {}
 
     /** Get the class name of the original exception in the child thread. */
     public function getRemoteClass(): string {}
@@ -957,6 +957,7 @@ class RemoteException extends AsyncException
 
 /**
  * Thrown when data transfer between threads fails.
+ *
  * @since 8.6
  */
 class ThreadTransferException extends AsyncException {}
@@ -1017,7 +1018,7 @@ final class Thread implements Completable
     /**
      * Define a callback to be executed when the thread is finished.
      */
-    public function finally(\Closure $callback): void {}
+    public function finally(Closure $callback): void {}
 }
 
 // ---------------------------------------------------------------------------
@@ -1051,7 +1052,7 @@ class ThreadChannelException extends AsyncException {}
  *
  * @since 8.6
  */
-final class ThreadChannel implements Awaitable, \Countable
+final class ThreadChannel implements Awaitable, Countable
 {
     /**
      * Create a new thread-safe channel.
@@ -1066,11 +1067,10 @@ final class ThreadChannel implements Awaitable, \Countable
      * Suspends the current coroutine until buffer space is available (if the
      * buffer is full). The value is deep-copied into persistent shared memory.
      *
-     * @param mixed            $value
      * @param Completable|null $cancellationToken Optional cancellation token.
-     * @throws ThreadChannelException      If the channel is closed.
-     * @throws ThreadTransferException     If the value cannot be transferred.
-     * @throws OperationCanceledException  If the cancellation token fires.
+     * @throws OperationCanceledException If the cancellation token fires.
+     * @throws ThreadChannelException If the channel is closed.
+     * @throws ThreadTransferException If the value cannot be transferred.
      */
     public function send(mixed $value, ?Completable $cancellationToken = null): void {}
 
@@ -1082,8 +1082,8 @@ final class ThreadChannel implements Awaitable, \Countable
      *
      * @param Completable|null $cancellationToken Optional cancellation token.
      * @return mixed The received value (copied into the current thread's heap).
-     * @throws ThreadChannelException      If the channel is closed and empty.
-     * @throws OperationCanceledException  If the cancellation token fires.
+     * @throws OperationCanceledException If the cancellation token fires.
+     * @throws ThreadChannelException If the channel is closed and empty.
      */
     public function recv(?Completable $cancellationToken = null): mixed {}
 
@@ -1135,7 +1135,7 @@ final class ThreadChannel implements Awaitable, \Countable
  *
  * @since 8.6
  */
-class ThreadPoolException extends \Exception {}
+class ThreadPoolException extends Exception {}
 
 /**
  * Fixed-size pool of reusable OS worker threads for CPU-bound tasks.
@@ -1165,7 +1165,7 @@ final class ThreadPool
      * Workers start immediately. Destroying the ThreadPool object without
      * calling close() or cancel() first triggers a graceful shutdown.
      *
-     * @param int $workers   Number of worker threads (typically = CPU core count).
+     * @param int $workers Number of worker threads (typically = CPU core count).
      * @param int $queueSize Maximum number of tasks that may wait in the queue.
      *                       0 = default (workers × 4). When the queue is full,
      *                       submit() suspends the caller until a slot opens.
@@ -1179,10 +1179,10 @@ final class ThreadPool
      * Returns a Future that resolves with the callable's return value, or
      * rejects if the callable throws.
      *
-     * @param callable $task    The callable to execute in a worker thread.
-     * @param mixed    ...$args Extra arguments passed to the callable.
+     * @param callable $task The callable to execute in a worker thread.
+     * @param mixed ...$args Extra arguments passed to the callable.
      * @return Future<mixed>
-     * @throws ThreadPoolException     If the pool is closed.
+     * @throws ThreadPoolException If the pool is closed.
      * @throws ThreadTransferException If the callable or args cannot be transferred.
      */
     public function submit(callable $task, mixed ...$args): Future {}
@@ -1194,8 +1194,8 @@ final class ThreadPool
      * coroutine until all tasks complete. Results are returned in the same
      * order as the input array.
      *
-     * @param array    $items Input array.
-     * @param callable $task  Called with each element; return value is collected.
+     * @param array $items Input array.
+     * @param callable $task Called with each element; return value is collected.
      * @return array Results indexed the same as $items.
      * @throws ThreadPoolException If the pool is closed.
      */
@@ -1260,7 +1260,7 @@ final class ThreadPool
  *
  * @since 8.6
  */
-final class Channel implements Awaitable, \IteratorAggregate, \Countable
+final class Channel implements Awaitable, IteratorAggregate, Countable
 {
     /**
      * Create a new Channel.
@@ -1275,7 +1275,6 @@ final class Channel implements Awaitable, \IteratorAggregate, \Countable
      * Suspends the current coroutine until the value is consumed (unbuffered)
      * or until a buffer slot is available (buffered).
      *
-     * @param mixed            $value
      * @param Completable|null $cancellationToken Optional cancellation token (e.g. timeout(ms)).
      * @throws ChannelException If the channel is closed.
      * @throws OperationCanceledException If the cancellation token fires.
@@ -1285,7 +1284,6 @@ final class Channel implements Awaitable, \IteratorAggregate, \Countable
     /**
      * Try to send a value without blocking.
      *
-     * @param mixed $value
      * @return bool True if the value was accepted; false if the channel is full or closed.
      */
     public function sendAsync(mixed $value): bool {}
@@ -1350,9 +1348,9 @@ final class Channel implements Awaitable, \IteratorAggregate, \Countable
      * Yields each received value in order. Iteration ends when the channel
      * is closed and empty.
      *
-     * @return \Iterator<int, mixed>
+     * @return Iterator<int, mixed>
      */
-    public function getIterator(): \Iterator {}
+    public function getIterator(): Iterator {}
 }
 
 // ---------------------------------------------------------------------------
@@ -1367,13 +1365,13 @@ final class Channel implements Awaitable, \IteratorAggregate, \Countable
  *
  * @since 8.6
  */
-final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
+final class TaskGroup implements Awaitable, Countable, IteratorAggregate
 {
     /**
      * Create a new TaskGroup.
      *
-     * @param int|null   $concurrency Maximum concurrent coroutines; null = unlimited.
-     * @param Scope|null $scope       Parent scope; null = current scope.
+     * @param int|null $concurrency Maximum concurrent coroutines; null = unlimited.
+     * @param Scope|null $scope Parent scope; null = current scope.
      */
     public function __construct(?int $concurrency = null, ?Scope $scope = null) {}
 
@@ -1383,8 +1381,6 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
      * If the concurrency limit is not reached, a coroutine starts immediately;
      * otherwise the callable is queued.
      *
-     * @param callable $task
-     * @param mixed    ...$args
      * @throws AsyncException If the group is sealed or cancelled.
      */
     public function spawn(callable $task, mixed ...$args): void {}
@@ -1392,9 +1388,7 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
     /**
      * Spawn a task with an explicit key.
      *
-     * @param string|int $key  Result key (must be unique within the group).
-     * @param callable   $task
-     * @param mixed      ...$args
+     * @param int|string $key Result key (must be unique within the group).
      * @throws AsyncException If the group is sealed, cancelled, or the key is a duplicate.
      */
     public function spawnWithKey(string|int $key, callable $task, mixed ...$args): void {}
@@ -1403,7 +1397,7 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
      * Return a Future that resolves with all task results when every task completes.
      *
      * @param bool $ignoreErrors If false, rejects with {@see CompositeException} on any error.
-     * @return Future<array<string|int, mixed>>
+     * @return Future<array<int|string, mixed>>
      */
     public function all(bool $ignoreErrors = false): Future {}
 
@@ -1431,14 +1425,14 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
     /**
      * Return results of already-completed tasks.
      *
-     * @return array<string|int, mixed>
+     * @return array<int|string, mixed>
      */
     public function getResults(): array {}
 
     /**
      * Return errors of failed tasks and mark them as handled.
      *
-     * @return array<string|int, \Throwable>
+     * @return array<int|string, Throwable>
      */
     public function getErrors(): array {}
 
@@ -1451,8 +1445,6 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
      * Cancel all running coroutines and discard queued tasks.
      *
      * Implicitly calls {@see seal()}.
-     *
-     * @param AsyncCancellation|null $cancellation
      */
     public function cancel(?AsyncCancellation $cancellation = null): void {}
 
@@ -1500,9 +1492,9 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
      *
      * If the group is already in that state, the callback is invoked immediately.
      *
-     * @param \Closure $callback Receives the TaskGroup as its argument.
+     * @param Closure $callback Receives the TaskGroup as its argument.
      */
-    public function finally(\Closure $callback): void {}
+    public function finally(Closure $callback): void {}
 
     /**
      * Return an iterator that yields results as tasks complete.
@@ -1512,9 +1504,9 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
      * delivery. Iteration ends when the group is sealed and all tasks are
      * delivered.
      *
-     * @return \Iterator<string|int, array{mixed, \Throwable|null}>
+     * @return Iterator<int|string, array{mixed, Throwable|null}>
      */
-    public function getIterator(): \Iterator {}
+    public function getIterator(): Iterator {}
 }
 
 // ---------------------------------------------------------------------------
@@ -1531,13 +1523,13 @@ final class TaskGroup implements Awaitable, \Countable, \IteratorAggregate
  *
  * @since 8.6
  */
-final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
+final class TaskSet implements Awaitable, Countable, IteratorAggregate
 {
     /**
      * Create a new TaskSet.
      *
-     * @param int|null   $concurrency Maximum concurrent coroutines; null = unlimited.
-     * @param Scope|null $scope       Parent scope; null = current scope.
+     * @param int|null $concurrency Maximum concurrent coroutines; null = unlimited.
+     * @param Scope|null $scope Parent scope; null = current scope.
      */
     public function __construct(?int $concurrency = null, ?Scope $scope = null) {}
 
@@ -1547,8 +1539,6 @@ final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
      * If the concurrency limit is not reached, a coroutine starts immediately;
      * otherwise the callable is queued.
      *
-     * @param callable $task
-     * @param mixed    ...$args
      * @throws AsyncException If the set is sealed or cancelled.
      */
     public function spawn(callable $task, mixed ...$args): void {}
@@ -1556,9 +1546,7 @@ final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
     /**
      * Spawn a task with an explicit key.
      *
-     * @param string|int $key  Result key (must be unique within the set).
-     * @param callable   $task
-     * @param mixed      ...$args
+     * @param int|string $key Result key (must be unique within the set).
      * @throws AsyncException If the set is sealed, cancelled, or the key is a duplicate.
      */
     public function spawnWithKey(string|int $key, callable $task, mixed ...$args): void {}
@@ -1592,7 +1580,7 @@ final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
      * All entries are automatically removed from the set after delivery.
      *
      * @param bool $ignoreErrors If false, rejects with {@see CompositeException} on any error.
-     * @return Future<array<string|int, mixed>>
+     * @return Future<array<int|string, mixed>>
      */
     public function joinAll(bool $ignoreErrors = false): Future {}
 
@@ -1600,8 +1588,6 @@ final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
      * Cancel all running coroutines and discard queued tasks.
      *
      * Implicitly calls {@see seal()}.
-     *
-     * @param AsyncCancellation|null $cancellation
      */
     public function cancel(?AsyncCancellation $cancellation = null): void {}
 
@@ -1651,9 +1637,9 @@ final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
      *
      * If the set is already in that state, the callback is invoked immediately.
      *
-     * @param \Closure $callback Receives the TaskSet as its argument.
+     * @param Closure $callback Receives the TaskSet as its argument.
      */
-    public function finally(\Closure $callback): void {}
+    public function finally(Closure $callback): void {}
 
     /**
      * Return an iterator that yields results as tasks complete.
@@ -1663,9 +1649,9 @@ final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
      * removed from the set. Iteration ends when the set is sealed and all
      * tasks are delivered.
      *
-     * @return \Iterator<string|int, array{mixed, \Throwable|null}>
+     * @return Iterator<int|string, array{mixed, Throwable|null}>
      */
-    public function getIterator(): \Iterator {}
+    public function getIterator(): Iterator {}
 }
 
 // ---------------------------------------------------------------------------
@@ -1680,21 +1666,21 @@ final class TaskSet implements Awaitable, \Countable, \IteratorAggregate
  *
  * @since 8.6
  */
-final class Pool implements \Countable, CircuitBreaker
+final class Pool implements Countable, CircuitBreaker
 {
     /**
      * Create a new resource pool.
      *
-     * @param callable      $factory             Creates a new resource: `fn(): mixed`
-     * @param callable|null $destructor          Destroys a resource: `fn(mixed $resource): void`
-     * @param callable|null $healthcheck         Background health check: `fn(mixed $resource): bool`
-     * @param callable|null $beforeAcquire       Pre-acquire check: `fn(mixed $resource): bool`
-     *                                           (false = destroy and fetch next)
-     * @param callable|null $beforeRelease       Pre-release hook: `fn(mixed $resource): bool`
-     *                                           (false = destroy instead of returning to pool)
-     * @param int           $min                 Minimum idle resources pre-created on startup.
-     * @param int           $max                 Maximum total resources (idle + active).
-     * @param int           $healthcheckInterval Background health-check interval in ms; 0 = disabled.
+     * @param callable $factory Creates a new resource: `fn(): mixed`
+     * @param callable|null $destructor Destroys a resource: `fn(mixed $resource): void`
+     * @param callable|null $healthcheck Background health check: `fn(mixed $resource): bool`
+     * @param callable|null $beforeAcquire Pre-acquire check: `fn(mixed $resource): bool`
+     *                                     (false = destroy and fetch next)
+     * @param callable|null $beforeRelease Pre-release hook: `fn(mixed $resource): bool`
+     *                                     (false = destroy instead of returning to pool)
+     * @param int $min Minimum idle resources pre-created on startup.
+     * @param int $max Maximum total resources (idle + active).
+     * @param int $healthcheckInterval Background health-check interval in ms; 0 = disabled.
      */
     public function __construct(
         callable $factory,
@@ -1761,8 +1747,6 @@ final class Pool implements \Countable, CircuitBreaker
 
     /**
      * Attach a circuit breaker strategy to control service availability.
-     *
-     * @param CircuitBreakerStrategy|null $strategy
      */
     public function setCircuitBreakerStrategy(?CircuitBreakerStrategy $strategy): void {}
 
@@ -1815,14 +1799,14 @@ final readonly class FileSystemEvent
  *
  * @since 8.6
  */
-final class FileSystemWatcher implements Awaitable, \IteratorAggregate
+final class FileSystemWatcher implements Awaitable, IteratorAggregate
 {
     /**
      * Create a watcher and start monitoring immediately.
      *
-     * @param string $path      Absolute or relative path to watch.
-     * @param bool   $recursive Watch subdirectories recursively.
-     * @param bool   $coalesce  Merge events per file (true) or deliver every event (false).
+     * @param string $path Absolute or relative path to watch.
+     * @param bool $recursive Watch subdirectories recursively.
+     * @param bool $coalesce Merge events per file (true) or deliver every event (false).
      */
     public function __construct(string $path, bool $recursive = false, bool $coalesce = true) {}
 
@@ -1845,9 +1829,9 @@ final class FileSystemWatcher implements Awaitable, \IteratorAggregate
      * Suspends when no events are pending; resumes on the next event.
      * Ends when {@see close()} is called or the owning scope is cancelled.
      *
-     * @return \Iterator<int, FileSystemEvent>
+     * @return Iterator<int, FileSystemEvent>
      */
-    public function getIterator(): \Iterator {}
+    public function getIterator(): Iterator {}
 }
 
 // ---------------------------------------------------------------------------
@@ -1857,8 +1841,8 @@ final class FileSystemWatcher implements Awaitable, \IteratorAggregate
 /**
  * Spawn a new coroutine in the current scope.
  *
- * @param callable $task     The coroutine body.
- * @param mixed    ...$args  Arguments forwarded to `$task`.
+ * @param callable $task The coroutine body.
+ * @param mixed ...$args Arguments forwarded to `$task`.
  * @return Coroutine The newly created coroutine (already enqueued).
  */
 function spawn(callable $task, mixed ...$args): Coroutine {}
@@ -1867,9 +1851,8 @@ function spawn(callable $task, mixed ...$args): Coroutine {}
  * Spawn a new coroutine using a custom {@see ScopeProvider}.
  *
  * @param ScopeProvider $provider Provides the target scope.
- * @param callable      $task     The coroutine body.
- * @param mixed         ...$args  Arguments forwarded to `$task`.
- * @return Coroutine
+ * @param callable $task The coroutine body.
+ * @param mixed ...$args Arguments forwarded to `$task`.
  */
 function spawn_with(ScopeProvider $provider, callable $task, mixed ...$args): Coroutine {}
 
@@ -1903,16 +1886,16 @@ function spawn_with(ScopeProvider $provider, callable $task, mixed ...$args): Co
  * Non-transferable: stdClass, PHP references, resources — these throw
  * {@see ThreadTransferException}.
  *
- * @param \Closure      $task       The closure to execute in the new thread.
- * @param bool          $inherit    If true (default), inherit the parent's function/class tables
- *                                  into the child thread. If false, only the closure and
- *                                  autoloaders are transferred.
- * @param \Closure|null $bootloader Optional closure executed in the thread before $task.
- *                                  Use it to set up autoloaders, initialize DI, etc.
+ * @param Closure $task The closure to execute in the new thread.
+ * @param bool $inherit If true (default), inherit the parent's function/class tables
+ *                      into the child thread. If false, only the closure and
+ *                      autoloaders are transferred.
+ * @param Closure|null $bootloader Optional closure executed in the thread before $task.
+ *                                 Use it to set up autoloaders, initialize DI, etc.
  * @return Thread A thread handle implementing Completable.
  * @throws ThreadTransferException If the closure captures non-transferable values.
  */
-function spawn_thread(\Closure $task, bool $inherit = true, ?\Closure $bootloader = null): Thread {}
+function spawn_thread(Closure $task, bool $inherit = true, ?Closure $bootloader = null): Thread {}
 
 /**
  * Yield control to the scheduler, allowing other coroutines to run.
@@ -1924,21 +1907,19 @@ function suspend(): void {}
  *
  * Any cancellation requests are deferred until after the closure returns.
  *
- * @param \Closure $closure
  * @return mixed The return value of `$closure`.
  */
-function protect(\Closure $closure): mixed {}
+function protect(Closure $closure): mixed {}
 
 /**
  * Await the completion of a {@see Completable}.
  *
  * Suspends the current coroutine until `$awaitable` settles.
  *
- * @param Completable      $awaitable
  * @param Completable|null $cancellation Optional cancellation token.
  * @return mixed The resolved value.
- * @throws \Throwable If `$awaitable` was rejected.
  * @throws OperationCanceledException If the cancellation token fires.
+ * @throws Throwable If `$awaitable` was rejected.
  */
 function await(Completable $awaitable, ?Completable $cancellation = null): mixed {}
 
@@ -1946,10 +1927,9 @@ function await(Completable $awaitable, ?Completable $cancellation = null): mixed
  * Await the first trigger to settle; throw if it fails.
  *
  * @param iterable<Awaitable> $triggers
- * @param Awaitable|null      $cancellation
  * @return mixed The value of the first settled trigger.
- * @throws \Throwable If the settled trigger was rejected.
  * @throws OperationCanceledException If the cancellation token fires.
+ * @throws Throwable If the settled trigger was rejected.
  */
 function await_any_or_fail(iterable $triggers, ?Awaitable $cancellation = null): mixed {}
 
@@ -1959,10 +1939,9 @@ function await_any_or_fail(iterable $triggers, ?Awaitable $cancellation = null):
  * Errors are skipped until a successful result is found.
  *
  * @param iterable<Awaitable> $triggers
- * @param Awaitable|null      $cancellation
  * @return mixed The first successful result.
- * @throws \Throwable If all triggers fail.
  * @throws OperationCanceledException If the cancellation token fires.
+ * @throws Throwable If all triggers fail.
  */
 function await_first_success(iterable $triggers, ?Awaitable $cancellation = null): mixed {}
 
@@ -1970,11 +1949,10 @@ function await_first_success(iterable $triggers, ?Awaitable $cancellation = null
  * Await all triggers; throw if any fails.
  *
  * @param iterable<Awaitable> $triggers
- * @param Awaitable|null      $cancellation
- * @param bool                $preserveKeyOrder Preserve the original key order.
+ * @param bool $preserveKeyOrder Preserve the original key order.
  * @return array<mixed> Resolved values.
- * @throws \Throwable On the first failed trigger.
  * @throws OperationCanceledException If the cancellation token fires.
+ * @throws Throwable On the first failed trigger.
  */
 function await_all_or_fail(iterable $triggers, ?Awaitable $cancellation = null, bool $preserveKeyOrder = true): array {}
 
@@ -1982,9 +1960,7 @@ function await_all_or_fail(iterable $triggers, ?Awaitable $cancellation = null, 
  * Await all triggers, collecting both results and errors.
  *
  * @param iterable<Awaitable> $triggers
- * @param Awaitable|null      $cancellation
- * @param bool                $preserveKeyOrder
- * @param bool                $fillNull         Fill failed slots with null instead of skipping.
+ * @param bool $fillNull Fill failed slots with null instead of skipping.
  * @return array<mixed>
  * @throws OperationCanceledException If the cancellation token fires.
  */
@@ -1993,24 +1969,17 @@ function await_all(iterable $triggers, ?Awaitable $cancellation = null, bool $pr
 /**
  * Await exactly `$count` triggers; throw if fewer than `$count` succeed.
  *
- * @param int                 $count
  * @param iterable<Awaitable> $triggers
- * @param Awaitable|null      $cancellation
- * @param bool                $preserveKeyOrder
  * @return array<mixed>
- * @throws \Throwable If fewer than `$count` triggers succeed.
  * @throws OperationCanceledException If the cancellation token fires.
+ * @throws Throwable If fewer than `$count` triggers succeed.
  */
 function await_any_of_or_fail(int $count, iterable $triggers, ?Awaitable $cancellation = null, bool $preserveKeyOrder = true): array {}
 
 /**
  * Await up to `$count` triggers, collecting results without throwing.
  *
- * @param int                 $count
  * @param iterable<Awaitable> $triggers
- * @param Awaitable|null      $cancellation
- * @param bool                $preserveKeyOrder
- * @param bool                $fillNull
  * @return array<mixed>
  * @throws OperationCanceledException If the cancellation token fires.
  */
@@ -2026,36 +1995,27 @@ function delay(int $ms): void {}
 /**
  * Create a {@see Timeout} that fires after `$ms` milliseconds.
  *
- * @param int $ms
  * @return Awaitable A Timeout instance.
  */
 function timeout(int $ms): Awaitable {}
 
 /**
  * Return the current coroutine's context.
- *
- * @return Context
  */
 function current_context(): Context {}
 
 /**
  * Return the context of the root coroutine in the current coroutine hierarchy.
- *
- * @return Context
  */
 function coroutine_context(): Context {}
 
 /**
  * Return the currently executing coroutine.
- *
- * @return Coroutine
  */
 function current_coroutine(): Coroutine {}
 
 /**
  * Return the root context of the scheduler.
- *
- * @return Context
  */
 function root_context(): Context {}
 
@@ -2076,10 +2036,9 @@ function get_coroutines(): array {}
  * callback are cancelled when iteration finishes. If false, the function
  * waits for all spawned coroutines to complete.
  *
- * @param iterable  $iterable
- * @param callable  $callback     `fn(mixed $value, mixed $key): mixed`
- * @param int       $concurrency  Maximum concurrent callback invocations; 0 = unlimited.
- * @param bool      $cancelPending Cancel pending coroutines when done.
+ * @param callable $callback `fn(mixed $value, mixed $key): mixed`
+ * @param int $concurrency Maximum concurrent callback invocations; 0 = unlimited.
+ * @param bool $cancelPending Cancel pending coroutines when done.
  */
 function iterate(iterable $iterable, callable $callback, int $concurrency = 0, bool $cancelPending = true): void {}
 
@@ -2096,8 +2055,6 @@ function graceful_shutdown(?AsyncCancellation $cancellationError = null): void {
  * Returns a Future that resolves with the {@see Signal} enum case when the
  * specified signal is received.
  *
- * @param Signal           $signal
- * @param Completable|null $cancellation
  * @return Future<Signal>
  * @throws OperationCanceledException If the cancellation token fires.
  */

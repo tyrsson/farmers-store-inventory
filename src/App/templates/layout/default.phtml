@@ -65,9 +65,10 @@ $this->inlineScript()
         </main>
         <div id="systemMessage" class="toast-container position-fixed bottom-0 end-0 p-4">
             <template id="toastTemplate">
-                <div class="toast toast-simple" role="status" aria-live="polite" aria-atomic="true" data-bs-delay="3000">
-                    <div class="toast-body">
-                        <span class="toast-message"></span>
+                <div class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
+                    <div class="d-flex">
+                        <div class="toast-body toast-message"></div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
                 </div>
             </template>

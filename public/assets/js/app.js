@@ -28,3 +28,24 @@
   });
 
 })();
+
+// code previously used for fixing Tracy debugger during htmx boosted request
+(function () {
+    let tracyEl = null;
+
+    document.addEventListener('htmx:beforeSwap', function () {
+        tracyEl = document.getElementById('tracy-debug');
+        if (tracyEl) {
+            tracyEl.remove(); // detach before HTMX replaces body innerHTML
+        }
+    });
+
+    // Use htmx:afterSwap (not afterSettle) to re-attach as early as possible,
+    // before Tracy's async _tracy_bar script can fire and call loadAjax().
+    document.addEventListener('htmx:afterSwap', function () {
+        if (tracyEl) {
+            document.body.appendChild(tracyEl);
+            tracyEl = null;
+        }
+    });
+})();

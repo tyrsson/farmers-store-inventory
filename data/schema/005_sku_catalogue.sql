@@ -5,6 +5,7 @@
 -- This auto-filling lookup eliminates re-entry of known SKUs over time.
 -- Depends on: major_code
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS sku_catalogue;
 CREATE TABLE IF NOT EXISTS sku_catalogue (
     sku           MEDIUMINT UNSIGNED NOT NULL COMMENT '6-digit Farmers SKU',
@@ -17,3 +18,4 @@ CREATE TABLE IF NOT EXISTS sku_catalogue (
     PRIMARY KEY (sku),
     CONSTRAINT fk_sku_major_code FOREIGN KEY (major_code_id) REFERENCES major_code (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

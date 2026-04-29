@@ -6,6 +6,7 @@
 -- Valid names: Sales, Warehouse, Warehouse Supervisor, Credit Manager,
 --              DC Warehouse, Manager, Administrator
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS role;
 CREATE TABLE IF NOT EXISTS role (
     id      TINYINT UNSIGNED AUTO_INCREMENT,
@@ -13,3 +14,4 @@ CREATE TABLE IF NOT EXISTS role (
     PRIMARY KEY (id),
     UNIQUE KEY uq_role_id (role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

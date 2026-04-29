@@ -6,6 +6,7 @@
 -- inventory.
 -- Depends on: product, user
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS product_image;
 CREATE TABLE IF NOT EXISTS product_image (
     id          INT UNSIGNED AUTO_INCREMENT,
@@ -18,3 +19,4 @@ CREATE TABLE IF NOT EXISTS product_image (
     CONSTRAINT fk_pi_product     FOREIGN KEY (product_id)  REFERENCES product (id),
     CONSTRAINT fk_pi_uploaded_by FOREIGN KEY (uploaded_by) REFERENCES `user`    (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

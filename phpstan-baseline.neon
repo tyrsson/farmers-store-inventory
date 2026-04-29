@@ -1,1 +1,547 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Instantiated class App\\Handler\\HomePageHandler not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/App/src/Container/HomePageHandlerFactory.php
 
+		-
+			message: '#^Method App\\Container\\HomePageHandlerFactory\:\:__invoke\(\) should return Psr\\Http\\Server\\RequestHandlerInterface but returns App\\Handler\\HomePageHandler\.$#'
+			identifier: return.type
+			count: 1
+			path: src/App/src/Container/HomePageHandlerFactory.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Binary operation "\*" between mixed and 1000 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Binary operation "\-" between \(float\|int\<1, max\>\) and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Binary operation "\.\=" between mixed and string results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Call to method getProfiler\(\) on an unknown class Laminas\\Db\\Adapter\\AdapterInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Call to method getProfiles\(\) on an unknown class Laminas\\Db\\Adapter\\Profiler\\Profiler\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Cannot access offset string\|null on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Cannot use array destructuring on mixed\.$#'
+			identifier: offsetAccess.nonArray
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Class Laminas\\Db\\Adapter\\AdapterInterface not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Class Laminas\\Db\\Adapter\\Profiler\\Profiler not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Method App\\Debug\:\:dbDebug\(\) should return string but returns Laminas\\Db\\Adapter\\Profiler\\Profiler\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Method App\\Debug\:\:dump\(\) has parameter \$showFullPath with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Method App\\Debug\:\:getSapi\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Method App\\Debug\:\:setSapi\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Offset ''file'' might not exist on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 2
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Offset ''line'' might not exist on array\{function\: string, line\?\: int, file\?\: string, class\?\: class\-string, type\?\: ''\-\>''\|''\:\:'', args\?\: list\<mixed\>, object\?\: object\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(string;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 141 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^PHPDoc tag @return has invalid value \(void;\)\: Unexpected token ";", expected TOKEN_HORIZONTAL_WS at offset 163 on line 6$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^PHPDoc tag @var contains unknown class Laminas\\Db\\Adapter\\Profiler\\Profiler\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^PHPDoc tag @var with type Laminas\\Db\\Adapter\\Profiler\\Profiler is not subtype of native type ''''\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Parameter \#1 \$string of function htmlspecialchars expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Parameter \$adapter of method App\\Debug\:\:dbDebug\(\) has invalid type Laminas\\Db\\Adapter\\AdapterInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/App/src/Debug.php
+
+		-
+			message: '#^Parameter \$template of class App\\RequestHandler\\DashboardHandler constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/App/src/RequestHandler/Container/DashboardHandlerFactory.php
+
+		-
+			message: '#^Method Htmx\\ConfigProvider\:\:__invoke\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/ConfigProvider.php
+
+		-
+			message: '#^Method Htmx\\ConfigProvider\:\:getDependencies\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/ConfigProvider.php
+
+		-
+			message: '#^Method Htmx\\ConfigProvider\:\:getTemplates\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/ConfigProvider.php
+
+		-
+			message: '#^Method Htmx\\Middleware\\DetectAjaxRequestMiddleware\:\:__construct\(\) has parameter \$htmxConfig with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/Middleware/DetectAjaxRequestMiddleware.php
+
+		-
+			message: '#^Property Htmx\\Middleware\\DetectAjaxRequestMiddleware\:\:\$htmxConfig is never read, only written\.$#'
+			identifier: property.onlyWritten
+			count: 1
+			path: src/Htmx/src/Middleware/DetectAjaxRequestMiddleware.php
+
+		-
+			message: '#^Parameter \#1 \$template of class Htmx\\Middleware\\DetectAjaxRequestMiddleware constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Htmx/src/Middleware/DetectAjaxRequestMiddlewareFactory.php
+
+		-
+			message: '#^Parameter \#2 \$htmxConfig of class Htmx\\Middleware\\DetectAjaxRequestMiddleware constructor expects array, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Htmx/src/Middleware/DetectAjaxRequestMiddlewareFactory.php
+
+		-
+			message: '#^Parameter \#1 \$template of class Htmx\\Middleware\\DisableBodyMiddleware constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Htmx/src/Middleware/DisableBodyMiddlewareFactory.php
+
+		-
+			message: '#^Method Htmx\\Request\\Header\:\:names\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/Request/Header.php
+
+		-
+			message: '#^Method Htmx\\Request\\Header\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/Request/Header.php
+
+		-
+			message: '#^Call to an undefined static method Htmx\\Request\\Header\:\:toArray\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Htmx/src/Request/ServerRequestFilter.php
+
+		-
+			message: '#^Parameter \#1 \$array of function array_flip expects array\<int\|string\>, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Htmx/src/Request/ServerRequestFilter.php
+
+		-
+			message: '#^Trait Htmx\\RequestHandlerTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Htmx/src/RequestHandlerTrait.php
+
+		-
+			message: '#^Method Htmx\\Response\\Header\:\:names\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/Response/Header.php
+
+		-
+			message: '#^Method Htmx\\Response\\Header\:\:values\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/Response/Header.php
+
+		-
+			message: '#^Trait Htmx\\Response\\ResponseTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Htmx/src/Response/ResponseTrait.php
+
+		-
+			message: '#^Trait Htmx\\TriggerTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Htmx/src/TriggerTrait.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: src/Htmx/src/View/LaminasRenderer.php
+
+		-
+			message: '#^Method Htmx\\View\\LaminasRenderer\:\:prepareBody\(\) should return Laminas\\View\\Model\\ModelInterface\|false but returns Laminas\\View\\Model\\ModelInterface\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Htmx/src/View/LaminasRenderer.php
+
+		-
+			message: '#^Method Htmx\\View\\LaminasRenderer\:\:render\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Htmx/src/View/LaminasRenderer.php
+
+		-
+			message: '#^Cannot access offset ''body'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Htmx/src/View/LaminasRendererFactory.php
+
+		-
+			message: '#^Cannot access offset ''default_body'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Htmx/src/View/LaminasRendererFactory.php
+
+		-
+			message: '#^Cannot access offset ''default_layout'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: src/Htmx/src/View/LaminasRendererFactory.php
+
+		-
+			message: '#^Cannot access offset ''layout'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Htmx/src/View/LaminasRendererFactory.php
+
+		-
+			message: '#^Parameter \#1 \$renderer of class Htmx\\View\\LaminasRenderer constructor expects Laminas\\View\\Renderer\\RendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Htmx/src/View/LaminasRendererFactory.php
+
+		-
+			message: '#^Parameter \#2 \$helpers of class Htmx\\View\\LaminasRenderer constructor expects Laminas\\View\\HelperPluginManagerInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Htmx/src/View/LaminasRendererFactory.php
+
+		-
+			message: '#^Parameter \$template of class User\\Admin\\RequestHandler\\CreateUserHandler constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Admin/RequestHandler/Container/CreateUserHandlerFactory.php
+
+		-
+			message: '#^Parameter \$users of class User\\Admin\\RequestHandler\\ToggleUserActiveHandler constructor expects User\\Repository\\UserRepositoryInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Admin/RequestHandler/Container/ToggleUserActiveHandlerFactory.php
+
+		-
+			message: '#^Parameter \$template of class User\\Admin\\RequestHandler\\UpdateUserHandler constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Admin/RequestHandler/Container/UpdateUserHandlerFactory.php
+
+		-
+			message: '#^Parameter \$users of class User\\Admin\\RequestHandler\\UpdateUserHandler constructor expects User\\Repository\\UserRepositoryInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Admin/RequestHandler/Container/UpdateUserHandlerFactory.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/User/src/Admin/RequestHandler/EditUserHandler.php
+
+		-
+			message: '#^Access to an undefined property User\\Entity\\User\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/User/src/Admin/RequestHandler/ToggleUserActiveHandler.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/User/src/Admin/RequestHandler/ToggleUserActiveHandler.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/User/src/Admin/RequestHandler/UpdateUserHandler.php
+
+		-
+			message: '#^Parameter \$users of class User\\CommandHandler\\SaveUserHandler constructor expects User\\Repository\\UserRepositoryInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/CommandHandler/Container/SaveUserHandlerFactory.php
+
+		-
+			message: '#^Method User\\ConfigProvider\:\:__invoke\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/User/src/ConfigProvider.php
+
+		-
+			message: '#^Method User\\ConfigProvider\:\:getAuthenticationConfig\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/User/src/ConfigProvider.php
+
+		-
+			message: '#^Method User\\ConfigProvider\:\:getDependencies\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/User/src/ConfigProvider.php
+
+		-
+			message: '#^Method User\\ConfigProvider\:\:getRouteProviders\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/User/src/ConfigProvider.php
+
+		-
+			message: '#^Method User\\ConfigProvider\:\:getTemplates\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/User/src/ConfigProvider.php
+
+		-
+			message: '#^Parameter \#10 \$verificationToken of class User\\Entity\\User constructor expects string\|null, array\<string\> given\.$#'
+			identifier: argument.type
+			count: 8
+			path: src/User/src/Entity/User.php
+
+		-
+			message: '#^Parameter \#10 \$verificationToken of class User\\Entity\\User constructor expects string\|null, list\<string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Entity/User.php
+
+		-
+			message: '#^Parameter \#11 \$tokenCreatedAt of class User\\Entity\\User constructor expects DateTimeImmutable\|null, array\<string, mixed\> given\.$#'
+			identifier: argument.type
+			count: 9
+			path: src/User/src/Entity/User.php
+
+		-
+			message: '#^Parameter \$mailer of class User\\Listener\\SendVerificationEmailListener constructor expects Axleus\\Mailer\\MailerInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Listener/Container/SendVerificationEmailListenerFactory.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 1
+			path: src/User/src/Listener/SendVerificationEmailListener.php
+
+		-
+			message: '#^Parameter \#1 \$commandBus of class User\\Middleware\\RegistrationMiddleware constructor expects Webware\\CommandBus\\CommandBusInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Middleware/Container/RegistrationMiddlewareFactory.php
+
+		-
+			message: '#^Parameter \#2 \$template of class User\\Middleware\\RegistrationMiddleware constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Middleware/Container/RegistrationMiddlewareFactory.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/User/src/Middleware/RegistrationMiddleware.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 4
+			path: src/User/src/Middleware/RegistrationMiddleware.php
+
+		-
+			message: '#^Argument of an invalid type PhpDb\\Adapter\\Driver\\ResultInterface\|null supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/User/src/Repository/UserRepository.php
+
+		-
+			message: '#^Cannot access offset ''id'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/User/src/Repository/UserRepository.php
+
+		-
+			message: '#^Cannot call method current\(\) on PhpDb\\Adapter\\Driver\\ResultInterface\|null\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: src/User/src/Repository/UserRepository.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 5
+			path: src/User/src/Repository/UserRepository.php
+
+		-
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 8
+			path: src/User/src/Repository/UserRepository.php
+
+		-
+			message: '#^Parameter \#1 \$row of method User\\Repository\\UserRepository\:\:hydrate\(\) expects array\<string, mixed\>, array\<mixed, mixed\> given\.$#'
+			identifier: argument.type
+			count: 4
+			path: src/User/src/Repository/UserRepository.php
+
+		-
+			message: '#^Parameter \$adapter of class User\\Repository\\UserRepository constructor expects PhpDb\\Adapter\\AdapterInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Repository/UserRepositoryFactory.php
+
+		-
+			message: '#^Parameter \$userFactory of class User\\Repository\\UserRepository constructor expects callable\(string, array\<string\>, array\<string, mixed\>\)\: Mezzio\\Authentication\\UserInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/Repository/UserRepositoryFactory.php
+
+		-
+			message: '#^Parameter \#1 \$template of class User\\RequestHandler\\LoginHandler constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/RequestHandler/Container/LoginHandlerFactory.php
+
+		-
+			message: '#^Parameter \#1 \$template of class User\\RequestHandler\\RegistrationHandler constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/RequestHandler/Container/RegistrationHandlerFactory.php
+
+		-
+			message: '#^Parameter \$template of class User\\RequestHandler\\UserListHandler constructor expects Mezzio\\Template\\TemplateRendererInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/RequestHandler/Container/UserListHandlerFactory.php
+
+		-
+			message: '#^Parameter \$users of class User\\RequestHandler\\UserListHandler constructor expects User\\Repository\\UserRepositoryInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/RequestHandler/Container/UserListHandlerFactory.php
+
+		-
+			message: '#^Parameter \$users of class User\\RequestHandler\\VerifyEmailHandler constructor expects User\\Repository\\UserRepositoryInterface, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/User/src/RequestHandler/Container/VerifyEmailHandlerFactory.php
+
+		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: src/User/src/RequestHandler/LoginHandler.php
+
+		-
+			message: '#^Cannot call method clear\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/User/src/RequestHandler/LogoutHandler.php
+
+		-
+			message: '#^Cannot call method getStatus\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/User/src/RequestHandler/RegistrationHandler.php

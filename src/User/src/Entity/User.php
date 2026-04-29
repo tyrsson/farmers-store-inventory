@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace User\Entity;
 
 use DateTimeImmutable;
@@ -27,6 +37,8 @@ final class User implements UserInterface
         public readonly string $passwordHash,
         public readonly bool $active,
         public readonly DateTimeImmutable $createdAt,
+        public readonly ?string $verificationToken = null,
+        public readonly ?DateTimeImmutable $tokenCreatedAt = null,
         /** @var string[] */
         private readonly array $roles = [],
         /** @var array<string, mixed> */
