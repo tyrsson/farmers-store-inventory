@@ -1,5 +1,5 @@
 {
-    "name": "webware/farmers-store-inventory",
+    "name": "webware/inventory-management-system",
     "description": "Warehouse inventory management system built with Mezzio and True Async.",
     "license": "BSD-3-Clause",
     "keywords": [
@@ -34,7 +34,7 @@
         "mezzio/mezzio-fastroute": "^3.14",
         "mezzio/mezzio-helpers": "^5.20",
         "mezzio/mezzio-laminasviewrenderer": "^3.0",
-        "mezzio/mezzio-valinor": "^1.0",
+        "webware/command-bus": "0.5.x-dev",
         "webware/commandbus-event": "0.1.x-dev"
     },
     "require-dev": {
@@ -58,7 +58,7 @@
     "autoload-dev": {
         "psr-4": {
             "AppTest\\": "test/AppTest/",
-            "MezzioTest\\Async\\": "test/MezzioTest/Async/"
+            "AsyncTest\\": "test/AsyncTest/"
         }
     },
     "minimum-stability": "dev",
@@ -70,7 +70,7 @@
         }
     },
     "scripts": {
-        "check": [
+        "check-all": [
             "@cs-check",
             "@sa",
             "@test"

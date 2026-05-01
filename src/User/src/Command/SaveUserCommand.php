@@ -2,9 +2,18 @@
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace User\Command;
 
-use CuyZ\Valinor\Mapper\Http\FromBody;
 use Webware\CommandBus\Command\NamedCommandInterface;
 use Webware\CommandBus\Command\NamedCommandTrait;
 
@@ -12,18 +21,11 @@ final readonly class SaveUserCommand implements NamedCommandInterface
 {
     use NamedCommandTrait;
 
-    /**
-     * @param non-empty-string $firstName
-     * @param non-empty-string $lastName
-     * @param non-empty-string $email
-     * @param non-empty-string $password
-     * @param positive-int $storeId
-     */
     public function __construct(
-        #[FromBody] public string $firstName,
-        #[FromBody] public string $lastName,
-        #[FromBody] public string $email,
-        #[FromBody] public string $password,
-        #[FromBody] public int $storeId,
+        public string $firstName,
+        public string $lastName,
+        public string $email,
+        public string $password,
+        public int $storeId,
     ) {}
 }

@@ -5,6 +5,7 @@
 -- not via a DB trigger.
 -- Depends on: ticket, product, user
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS ticket_item;
 CREATE TABLE IF NOT EXISTS ticket_item (
     id           INT UNSIGNED AUTO_INCREMENT,
@@ -18,3 +19,4 @@ CREATE TABLE IF NOT EXISTS ticket_item (
     CONSTRAINT fk_ti_product      FOREIGN KEY (product_id)  REFERENCES product (id),
     CONSTRAINT fk_ti_confirmed_by FOREIGN KEY (confirmed_by) REFERENCES `user`   (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

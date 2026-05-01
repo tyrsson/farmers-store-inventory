@@ -12,20 +12,23 @@
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@zend.com so we can send you a copy immediately.
- *
- * @category   Zend
- * @package    Zend_Debug
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Debug.php 24594 2012-01-05 21:27:01Z matthew $
  */
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace App;
 
 use Exception;
-use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Adapter\AdapterInterface;
 use Laminas\Db\Adapter\Profiler\Profiler;
 use RuntimeException;
@@ -46,13 +49,7 @@ use const PHP_SAPI;
 
 /**
  * Concrete class for generating debug dumps related to the output source.
- *
- * @category   Zend
- * @package    Zend_Debug
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-
 class Debug
 {
     /** @var string */
@@ -69,6 +66,7 @@ class Debug
         if (self::$_sapi === null) {
             self::$_sapi = PHP_SAPI;
         }
+
         return self::$_sapi;
     }
 
@@ -89,9 +87,9 @@ class Debug
      * the <pre /> tags, cleans up newlines and indents, and runs
      * htmlentities() before output.
      *
-     * @param  mixed  $var   The variable to dump.
-     * @param  string $label OPTIONAL Label to prepend to output.
-     * @param  bool   $outputBuffered  OPTIONAL Echo output if true.
+     * @param mixed $var The variable to dump.
+     * @param string $label OPTIONAL Label to prepend to output.
+     * @param bool $outputBuffered OPTIONAL Echo output if true.
      * @return string
      */
     public static function dump($var, $label = '', $showFullPath = false, bool $outputBuffered = false)
@@ -116,7 +114,7 @@ class Debug
         $output = ob_get_clean();
 
         // neaten the newlines and indents
-        $output = preg_replace("/\]\=\>\n(\s+)/m", "] => ", $output);
+        $output = preg_replace("/\]\=\>\n(\s+)/m", '] => ', $output);
         if (self::getSapi() === 'cli') {
             $output = PHP_EOL . $label
                     . PHP_EOL . $output
@@ -135,23 +133,25 @@ class Debug
         if ($outputBuffered) {
             echo $output;
         }
+
         return $output;
     }
 
     public static function timer(?string $name = null): string|float
     {
         static $time = [];
-        $now = hrtime(true);
-        $delta = isset($time[$name]) ? $now - $time[$name] : 0;
+        $now         = hrtime(true);
+        $delta       = isset($time[$name]) ? $now - $time[$name] : 0;
         $time[$name] = $now;
-        $elapsed = $delta / 1e+6;
+        $elapsed     = $delta / 1e+6;
+
         return '<pre> ' . $name . ' ' . $elapsed . ' ms</pre>';
     }
 
     public static function dbDebug(AdapterInterface $adapter, bool $outputBuffered = true): string
     {
         /** @var Profiler */
-        $output = '';
+        $output   = '';
         $profiler = $adapter->getProfiler();
         if (! $profiler instanceof Profiler) {
             throw new RuntimeException(AdapterInterface::class . ' Must have a composed ' . Profiler::class . ' instance before calling dbDebug.');
@@ -161,7 +161,7 @@ class Debug
 
             $output .= static::dump(
                 [
-                    'sql' => $sql,
+                    'sql'          => $sql,
                     'elapsed-time' => number_format($elapse * 1000, 5, '.', "\u{202f}") . ' ms',
                 ],
                 'Query Profile:',
@@ -169,6 +169,7 @@ class Debug
                 $outputBuffered
             );
         }
+
         return $output;
     }
 }

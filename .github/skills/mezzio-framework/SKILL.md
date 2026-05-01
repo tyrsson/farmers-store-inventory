@@ -141,3 +141,15 @@ Config key: `mezzio-authorization-acl` with `roles`, `resources` (= route names)
 | `mezzio/mezzio-authorization-acl` | Laminas ACL driver |
 | `mezzio/mezzio-valinor` | Value object input mapping via CuyZ/Valinor |
 | `laminas/laminas-view` | Template renderer (used with Htmx module's custom renderer) |
+
+## DI Alias Rule
+
+**Always map a service to its interface when one exists.** Register the concrete class under its interface name as an alias:
+
+```php
+'aliases' => [
+    SomeInterface::class => SomeConcreteClass::class,
+],
+```
+
+Third-party packages key their container lookups to the interface (`$container->has(SomeInterface::class)`). If only the concrete class is registered, those lookups fail silently and features (panels, delegators, etc.) are skipped. This rule applies to every service in every module — factories, invokables, and delegator targets alike.

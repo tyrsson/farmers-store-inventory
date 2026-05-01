@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Axleus\Message\Middleware\MessageMiddleware;
+use Htmx\Middleware\DetectAjaxRequestMiddleware;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
 use Mezzio\Handler\NotFoundHandler;
@@ -13,6 +15,7 @@ use Mezzio\Router\Middleware\ImplicitHeadMiddleware;
 use Mezzio\Router\Middleware\ImplicitOptionsMiddleware;
 use Mezzio\Router\Middleware\MethodNotAllowedMiddleware;
 use Mezzio\Router\Middleware\RouteMiddleware;
+use Axleus\Log\Middleware\MonologMiddleware;
 use Mezzio\Session\SessionMiddleware;
 use Psr\Container\ContainerInterface;
 use Webware\Traccio\Middleware\TracyDebuggerMiddleware;
@@ -27,7 +30,10 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
         : $app->pipe(ErrorHandler::class);
 
     $app->pipe(ServerUrlMiddleware::class);
+    $app->pipe(MonologMiddleware::class);
     $app->pipe(SessionMiddleware::class);
+    $app->pipe(DetectAjaxRequestMiddleware::class);
+    $app->pipe(MessageMiddleware::class);
 
     // Pipe more middleware here that you want to execute on every request:
     // - bootstrapping

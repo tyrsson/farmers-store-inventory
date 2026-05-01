@@ -2,8 +2,19 @@
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace User\RequestHandler;
 
+use Axleus\Message\SystemMessengerInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Mezzio\Authentication\UserInterface;
@@ -29,6 +40,12 @@ final class LoginHandler implements RequestHandlerInterface
             return new RedirectResponse('/');
         }
 
-        return new HtmlResponse($this->template->render('user::login'));
+        /** @var SystemMessengerInterface|null $messenger */
+        $messenger = $request->getAttribute(SystemMessengerInterface::class);
+        $messages  = $messenger?->getMessages() ?? [];
+
+        return new HtmlResponse($this->template->render('user::login', [
+            'flashMessages' => $messages,
+        ]));
     }
 }

@@ -60,6 +60,12 @@ switch ($flag) {
             exit(1);
         }
 
+        $cacheFile = 'data/cache/config-cache.php';
+        if (file_exists($cacheFile)) {
+            unlink($cacheFile);
+            echo 'Config cache cleared.' . PHP_EOL;
+        }
+
         echo 'Development mode ENABLED.' . PHP_EOL;
         exit(0);
 

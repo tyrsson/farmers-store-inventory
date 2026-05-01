@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of the Webware Mezzio Bleeding Edge package.
+ * This file is part of the Webware Farmers Store Inventory package.
  *
  * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
  * and contributors.
@@ -14,8 +14,8 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\RequestHandler\PingHandler;
 use App\RequestHandler\DashboardHandler;
+use App\RequestHandler\PingHandler;
 use Mezzio\Authentication\AuthenticationMiddleware;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;

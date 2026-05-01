@@ -35,6 +35,16 @@ $this->headTitle('Create Account');
                         <h1 class="h4 fw-bold mb-1">Create Account</h1>
                         <p class="text-secondary small mb-4">Fill in your details to request access.</p>
 
+                        <?php if (!empty($this->errors)): ?>
+                        <div class="alert alert-danger" role="alert">
+                            <ul class="mb-0 ps-3">
+                                <?php foreach ($this->errors as $error): ?>
+                                <li><?= $this->escapeHtml($error) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                        <?php endif; ?>
+
                         <form action="<?= $this->url('user.register.post') ?>" method="post" novalidate>
 
                             <div class="row g-3 mb-3">
@@ -149,6 +159,7 @@ $this->headTitle('Create Account');
 </div>
 <?php
 $this->inlineScript()->appendScript(<<<'JS'
+(function () {
 const pwInput   = document.getElementById('reg-password');
 const confirm   = document.getElementById('reg-confirm');
 const toggleBtn = document.getElementById('toggle-password');
@@ -175,4 +186,5 @@ document.querySelector('form').addEventListener('submit', (e) => {
         confirm.focus();
     }
 });
+})();
 JS);

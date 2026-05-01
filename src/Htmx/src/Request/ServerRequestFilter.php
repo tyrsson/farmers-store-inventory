@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of the Tyrsson Webinertia package.
+ * This file is part of the Webware Farmers Store Inventory package.
  *
  * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
  * and contributors.
@@ -25,6 +25,7 @@ final class ServerRequestFilter implements FilterServerRequestInterface
         // maintain default behavior
         $request = FilterUsingXForwardedHeaders::trustReservedSubnets()($request);
 
+        /** @var array<string, string[]> $headers */
         $headers     = $request->getHeaders();
         $htmxHeaders = array_flip(Header::toArray(
             normalize: true,

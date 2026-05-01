@@ -2,6 +2,16 @@
 
 declare(strict_types=1);
 
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace User;
 
 use Mezzio\Authentication\AuthenticationInterface;
@@ -39,14 +49,15 @@ final class ConfigProvider
                 Admin\RequestHandler\UpdateUserHandler::class       => Admin\RequestHandler\Container\UpdateUserHandlerFactory::class,
                 Admin\RequestHandler\ToggleUserActiveHandler::class => Admin\RequestHandler\Container\ToggleUserActiveHandlerFactory::class,
                 CommandHandler\SaveUserHandler::class               => CommandHandler\Container\SaveUserHandlerFactory::class,
-                Middleware\RegistrationMiddleware::class             => Middleware\Container\RegistrationMiddlewareFactory::class,
+                Middleware\RegistrationMiddleware::class            => Middleware\Container\RegistrationMiddlewareFactory::class,
                 Repository\UserRepository::class                    => Repository\UserRepositoryFactory::class,
                 RouteProvider::class                                => Container\RouteProviderFactory::class,
                 RequestHandler\LoginHandler::class                  => RequestHandler\Container\LoginHandlerFactory::class,
                 RequestHandler\LogoutHandler::class                 => RequestHandler\Container\LogoutHandlerFactory::class,
                 RequestHandler\RegistrationHandler::class           => RequestHandler\Container\RegistrationHandlerFactory::class,
-                RequestHandler\UserListHandler::class               => RequestHandler\Container\UserListHandlerFactory::class,
-            ],
+                RequestHandler\ResendVerificationHandler::class     => RequestHandler\Container\ResendVerificationHandlerFactory::class,
+                RequestHandler\UserListHandler::class               => RequestHandler\Container\UserListHandlerFactory::class,                RequestHandler\VerifyEmailHandler::class             => RequestHandler\Container\VerifyEmailHandlerFactory::class,
+                Listener\SendVerificationEmailListener::class        => Listener\Container\SendVerificationEmailListenerFactory::class,            ],
         ];
     }
 

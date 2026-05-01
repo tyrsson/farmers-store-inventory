@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of the Tyrsson Webinertia package.
+ * This file is part of the Webware Farmers Store Inventory package.
  *
  * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
  * and contributors.
@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Htmx\Response;
 
-use App\EnumTrait;
+use Htmx\EnumTrait;
 
 /**
  * @see https://htmx.org/reference/#response_headers

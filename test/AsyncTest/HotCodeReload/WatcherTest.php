@@ -2,7 +2,17 @@
 
 declare(strict_types=1);
 
-namespace MezzioTest\Async\HotCodeReload;
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace AsyncTest\HotCodeReload;
 
 use Mezzio\Async\HotCodeReload\Watcher;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -15,9 +25,9 @@ final class WatcherTest extends TestCase
     public function testCanBeInstantiated(): void
     {
         $watcher = new Watcher(
-            paths:     ['/tmp'],
+            paths: ['/tmp'],
             recursive: false,
-            logger:    new NullLogger(),
+            logger: new NullLogger(),
         );
 
         self::assertInstanceOf(Watcher::class, $watcher);
@@ -30,9 +40,9 @@ final class WatcherTest extends TestCase
         }
 
         $watcher = new Watcher(
-            paths:     ['/tmp'],
+            paths: ['/tmp'],
             recursive: false,
-            logger:    new NullLogger(),
+            logger: new NullLogger(),
         );
 
         // Without the extension, Async\Scope and FileSystemWatcher are not

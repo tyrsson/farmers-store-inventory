@@ -3,6 +3,7 @@
 -- Each user belongs to exactly one store and has one role.
 -- Depends on: store, role
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
     id            INT UNSIGNED      AUTO_INCREMENT,
@@ -11,9 +12,11 @@ CREATE TABLE IF NOT EXISTS `user` (
     first_name    VARCHAR(75)        NOT NULL,
     last_name     VARCHAR(75)        NOT NULL,
     email         VARCHAR(255)      NOT NULL,
-    password_hash VARCHAR(255)      NOT NULL COMMENT 'bcrypt hash; never store plain text',
-    active        TINYINT(1)        NOT NULL DEFAULT 1,
-    created_at    DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    password_hash      VARCHAR(255)      NOT NULL COMMENT 'bcrypt hash; never store plain text',
+    active             TINYINT(1)        NOT NULL DEFAULT 0,
+    verification_token VARCHAR(36)        NULL,
+    token_created_at   DATETIME          NULL,
+    created_at         DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY uq_user_email (email),
     CONSTRAINT fk_user_store FOREIGN KEY (store_id) REFERENCES store (store_number),

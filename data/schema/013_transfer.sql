@@ -6,6 +6,7 @@
 -- v1.
 -- Depends on: store, user
 -- =============================================================================
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS transfer;
 CREATE TABLE IF NOT EXISTS transfer (
     id            INT UNSIGNED      AUTO_INCREMENT,
@@ -26,3 +27,4 @@ CREATE TABLE IF NOT EXISTS transfer (
     CONSTRAINT fk_xfer_completed_by FOREIGN KEY (completed_by)  REFERENCES `user`  (id),
     CONSTRAINT fk_xfer_created_by   FOREIGN KEY (created_by)    REFERENCES `user`  (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of the Tyrsson Webinertia package.
+ * This file is part of the Webware Farmers Store Inventory package.
  *
  * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
  * and contributors.
@@ -39,7 +39,7 @@ final readonly class ConfigProvider
             ],
             'factories' => [
                 Middleware\DetectAjaxRequestMiddleware::class => Middleware\DetectAjaxRequestMiddlewareFactory::class,
-                Middleware\DisableBodyMiddleware::class        => Middleware\DisableBodyMiddlewareFactory::class,
+                Middleware\DisableBodyMiddleware::class       => Middleware\DisableBodyMiddlewareFactory::class,
                 View\LaminasRenderer::class                   => View\LaminasRendererFactory::class,
             ],
         ];
