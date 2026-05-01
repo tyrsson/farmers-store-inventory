@@ -1,5 +1,5 @@
 {
-    "name": "webware/farmers-store-inventory",
+    "name": "webware/inventory-management-system",
     "description": "Warehouse inventory management system built with Mezzio and True Async.",
     "license": "BSD-3-Clause",
     "keywords": [

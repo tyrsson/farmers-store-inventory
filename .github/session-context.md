@@ -1,5 +1,5 @@
 # Session Context — Farmers IMS
-_Last updated: April 28, 2026_
+_Last updated: May 1, 2026_
 
 > **⚠ Runtime environment changed (April 28, 2026):** TrueAsync (`php-async` extension) has been **removed** from the active stack. After 3 hours rebuilding the Docker environment and the VS Code devcontainer, the project now runs as a standard Mezzio application served by the **PHP built-in web server** (`php -S`) inside a `php:latest` Docker container. There is **no PHP-FPM and no nginx** in the active devcontainer stack. The decision was driven by current usability issues in TrueAsync (SIGABRT crashes, `proc_open` incompatibility inside coroutines, devcontainer instability). The `src/mezzio-async/` source tree and all TrueAsync planning docs (`docs/planning/php-async-api.md`, `docs/planning/trueasync-bugs.md`) are **retained** for future reintegration once the extension matures.
 >
@@ -156,7 +156,8 @@ the full Reporting nav section. This is intentional (these are detail pages).
 - All ConfigProviders injected into `config/config.php`
 
 ### Database Schema (`data/schema/`)
-- 14 table files (001–014) + `999_seed.sql`
+- 15 table files (001–015) + `999_seed.sql`
+- **`015_log.sql`** — `log` table for DB-level Monolog logging. Columns: `id BIGINT AUTO_INCREMENT`, `channel VARCHAR(64)`, `level VARCHAR(20)`, `uuid VARCHAR(36)`, `message TEXT`, `time INT UNSIGNED`, `user_identifier VARCHAR(255)`, `context JSON NULL`. Indexes on `level`, `channel`, `time`.
 - All files have `DROP TABLE IF EXISTS` for clean reimport
 - `user` is backticked everywhere (reserved word)
 - **`role` table**: `id TINYINT UNSIGNED AUTO_INCREMENT` + `role_id VARCHAR(50)` (was `name`)
@@ -188,6 +189,27 @@ Key decisions made:
 ### Query Conventions
 All DML queries must use `PhpDb\Sql\*` via `TableGateway::getSql()`.
 See `.github/instructions/phpdb-sql-queries.instructions.md`.
+
+### Logging (`axleus/axleus-log`)
+- **`MonologMiddleware`** is in `config/pipeline.php` (added after `ServerUrlMiddleware`).
+- **`PhpDbHandler`** (`vendor/axleus/axleus-log/src/Handler/PhpDbHandler.php`) — Monolog handler that writes to the `log` DB table using `PhpDb\Sql\Sql` directly (not TableGateway). Fields: `channel`, `level`, `uuid`, `message`, `time`, `user_identifier`, `context` (JSON).
+- **`PhpDbHandlerFactory`** reads `config[ConfigProvider::class]['table']` and `PhpDb\Adapter\AdapterInterface` from the container.
+- **`LogFactory`** pushes `PhpDbHandler`. Processors: `RamseyUuidProcessor`, `PsrLogMessageProcessor`.
+- Config cache must be cleared after any pipeline change: `rm -f data/cache/config-cache.php`.
+
+### Tracy / SQL Profiler
+- **`ProfilingDelegator`** (`Webware\\Traccio\\PhpDb\\ProfilingDelegator`) is registered as a delegator for `AdapterInterface` in `config/autoload/development.local.php` (dev-only). Attaches `Profiler` to the DB adapter, enabling `SqlProfilerPanel` in Tracy (dev mode only).
+- `ProfilerInterface::class => Profiler::class` alias also added to `development.local.php` — `TracyDebuggerMiddlewareFactory` calls `$container->has(ProfilerInterface::class)` to decide whether to render the SQL panel; without the alias, it always returns `false`.
+
+### Htmx Module — EnumTrait
+- `src/Htmx/src/EnumTrait.php` — utility trait for backed enums: `tryFromName`, `fromName`, `names`, `values`, `toArray(bool $normalize, string|callable|null $valueTreatment)`. Namespace `Htmx`.
+- `src/App/src/EnumTrait.php` — **deleted**. Both `Htmx\Request\Header` and `Htmx\Response\Header` now `use Htmx\EnumTrait`.
+
+### RegistrationHandler — pending fix
+- `src/User/src/RequestHandler/RegistrationHandler.php` still uses `$request->hasHeader(HtmxRequestHeader::Request->value)`. Should use `$request->getAttribute(HtmxRequestHeader::Request->value)` because `ServerRequestFilter` maps HTMX headers to attributes. **Not yet changed** — confirm before applying.
+
+### phpdb Skill
+- `.github/skills/phpdb/SKILL.md` — created. Covers: `Sql` direct vs `TableGateway`, all DML patterns, last-insert-id, `Profiler` shape, `ProfilingDelegator` wiring, `mysql.local.php` config shape.
 
 ### Hot-Reload
 ~~Disabled via `config/autoload/development.local.php` (`mezzio-async.hot-reload.enabled = false`)
@@ -222,7 +244,7 @@ have a `$name` property. Planned fix: rename to `$commandName` in the command-bu
 
 ## Repo Info
 - Repository: `tyrsson/farmers-store-inventory`
-- Branch: `master`
+- Branch: `complete-registration` (active), `master` (default)
 - Workspace: `/workspaces/farmers-store-inventory`
 - v2 mockup path: `resources/ui-mockup/v2/`
 - Planning docs: `docs/planning/farmers-store-inventory/`

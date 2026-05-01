@@ -243,6 +243,29 @@ from the container back to the host automatically. Do not change to `host.docker
 
 ---
 
+## Tracy vs Xdebug — Disabling Development Mode
+
+Tracy registers its own error/exception handlers via `Debugger::enable()`. When development
+mode is active, Tracy intercepts exceptions before Xdebug can break on them, causing
+breakpoints to be silently skipped.
+
+**To use Xdebug breakpoints, disable development mode first:**
+
+```bash
+php bin/development-mode disable
+```
+
+**To re-enable Tracy / development mode:**
+
+```bash
+php bin/development-mode enable
+```
+
+Do NOT manually edit `config/autoload/development.local.php` — use the script.  
+The script creates/removes that file, which is what toggles the `debug` flag and Tracy.
+
+---
+
 ## Running the App (Dev Server)
 
 Inside the devcontainer terminal — PHP built-in server, **no nginx needed** for dev:

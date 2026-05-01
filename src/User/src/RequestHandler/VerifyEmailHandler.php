@@ -16,10 +16,10 @@ namespace User\RequestHandler;
 
 use Axleus\Message\SystemMessengerInterface;
 use DateTimeImmutable;
-use Htmx\Request\Header as HtmxRequestHeader;
-use Htmx\Response\Header as HtmxResponseHeader;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
+use Mezzio\Template\TemplateRendererInterface;
+use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -30,45 +30,45 @@ use function is_string;
 final class VerifyEmailHandler implements RequestHandlerInterface
 {
     public function __construct(
+        private readonly TemplateRendererInterface $template,
         private readonly UserRepositoryInterface $users,
         private readonly int $tokenTtl,
     ) {}
 
+    #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $tokenAttr = $request->getAttribute('token');
         $token     = is_string($tokenAttr) ? $tokenAttr : '';
 
-        /** @var SystemMessengerInterface|null $messenger */
-        $messenger = $request->getAttribute(SystemMessengerInterface::class);
-
         if ($token === '') {
-            $messenger?->danger('Invalid verification link.', hops: 1, now: false);
-
-            return $request->hasHeader(HtmxRequestHeader::Request->value)
-                ? new HtmlResponse('', 200, [HtmxResponseHeader::Location->value => '/login'])
-                : new RedirectResponse('/login');
+            return new HtmlResponse(
+                $this->template->render('user::verify-email', [
+                    'error' => 'Invalid verification link.',
+                ])
+            );
         }
 
         $user = $this->users->findByVerificationToken($token);
 
         if ($user === null) {
-            $messenger?->danger('Invalid or already used verification link.', hops: 1, now: false);
-
-            return $request->hasHeader(HtmxRequestHeader::Request->value)
-                ? new HtmlResponse('', 200, [HtmxResponseHeader::Location->value => '/login'])
-                : new RedirectResponse('/login');
+            return new HtmlResponse(
+                $this->template->render('user::verify-email', [
+                    'error' => 'Invalid or already used verification link.',
+                ])
+            );
         }
 
         if ($user->tokenCreatedAt !== null) {
             $age = (new DateTimeImmutable())->getTimestamp() - $user->tokenCreatedAt->getTimestamp();
 
             if ($age > $this->tokenTtl) {
-                $messenger?->danger('Verification link has expired. Please register again.', hops: 1, now: false);
-
-                return $request->hasHeader(HtmxRequestHeader::Request->value)
-                    ? new HtmlResponse('', 200, [HtmxResponseHeader::Location->value => '/register'])
-                    : new RedirectResponse('/register');
+                return new HtmlResponse(
+                    $this->template->render('user::verify-email', [
+                        'error'   => 'Your verification link has expired.',
+                        'expired' => true,
+                    ])
+                );
             }
         }
 
@@ -78,10 +78,10 @@ final class VerifyEmailHandler implements RequestHandlerInterface
             'token_created_at'   => null,
         ]);
 
+        /** @var SystemMessengerInterface|null $messenger */
+        $messenger = $request->getAttribute(SystemMessengerInterface::class);
         $messenger?->success('Email verified! You may now sign in.', hops: 1, now: false);
 
-        return $request->hasHeader(HtmxRequestHeader::Request->value)
-            ? new HtmlResponse('', 200, [HtmxResponseHeader::Location->value => '/login'])
-            : new RedirectResponse('/login');
+        return new RedirectResponse('/login');
     }
 }

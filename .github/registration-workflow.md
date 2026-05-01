@@ -1,4 +1,4 @@
-# Registration Workflow — Session State (April 29, 2026)
+# Registration Workflow — Session State (May 1, 2026)
 
 ## What Works
 - Registration form submits → `RegistrationMiddleware` → `SaveUserHandler` → UUID7 token generated, user inserted with `active=0`
@@ -7,20 +7,16 @@
 - `PostHandleMiddleware` now runs and dispatches `PostHandleEvent`
 - `SendVerificationEmailListener` fires, email is sent via Mailpit (confirmed)
 - Verification link in email hits `VerifyEmailHandler`, token validated, user activated
+- **`VerifyEmailHandler` success path**: issues `302 RedirectResponse('/login')` + `SystemMessenger->success('Email verified! You may now sign in.', hops: 1, now: false)`
+- **`LoginHandler` GET**: reads `SystemMessenger->getMessages()` and passes as `flashMessages` to template
+- **`login.phtml`**: renders inline Bootstrap alert for each flash message level (dismissible `.alert-{level}`)
+- Flash message is visible on full-page 302 redirect (non-HTMX) ✅
 
-## What Is NOT Working
-- **No toast notification** shown after email verification redirect to `/login`
-- Flash message is set via `$messenger?->success(...)` with `hops: 1, now: false` then redirect
+## What Is NOT Working / Pending
+- **`RegistrationHandler`** still uses `$request->hasHeader(HtmxRequestHeader::Request->value)`. Should use `$request->getAttribute(...)` because `ServerRequestFilter` maps HTMX headers to request attributes. **Not yet changed.**
 
-## Open Questions (to investigate)
-1. Does the toast system render on **normal page loads** (non-HTMX `302` redirects)?
-   - The verify email link is clicked directly in the browser — no `HX-Request` header
-   - `HX-Location` response header only applies to HTMX requests
-   - `RedirectResponse` fallback is used — does the login page render queued flash messages on a full page load?
-2. If toasts only render during HTMX navigations, the verify email flow needs a different UX approach — e.g. render a dedicated "email verified" page instead of redirecting with a flash message.
-
-## Current State of VerifyEmailHandler
-- Updated to check `HX-Request` header and return `HtmlResponse('', 200, [HtmxResponseHeader::Location->value => '/login'])` for HTMX, `RedirectResponse('/login')` for plain browser requests
+## Resolved
+- ~~No toast notification shown after email verification redirect to `/login`~~ — resolved: 302 + flash + inline Bootstrap alert instead of `HX-Location` / `HX-Trigger` (which only fire on HTMX-intercepted requests, not browser navigations).
 - File: `src/User/src/RequestHandler/VerifyEmailHandler.php`
 
 ## Vendor Fixes Made (local only — need upstream push)
@@ -40,7 +36,7 @@ Pipeline order (by priority): Pre(100) → CommandHandler(1) → Post(-100)
 - `EmptyPipelineHandler` — receives `CommandResult` at end of chain, returns it directly (local fix)
 
 ## Files Created/Modified
-- `src/User/src/RequestHandler/VerifyEmailHandler.php` — NEW
+- `src/User/src/RequestHandler/VerifyEmailHandler.php` — NEW; success path: `302 RedirectResponse('/login')` + `SystemMessenger->success(...)`
 - `src/User/src/RequestHandler/Container/VerifyEmailHandlerFactory.php` — NEW
 - `src/User/src/Listener/SendVerificationEmailListener.php` — NEW
 - `src/User/src/Listener/Container/SendVerificationEmailListenerFactory.php` — NEW
@@ -49,9 +45,12 @@ Pipeline order (by priority): Pre(100) → CommandHandler(1) → Post(-100)
 - `src/User/src/CommandHandler/SaveUserHandler.php` — UUID7 token, `active=0`, returns token as result
 - `src/User/src/Entity/User.php` — added `verificationToken`, `tokenCreatedAt` nullable fields
 - `src/User/src/Repository/UserRepository.php` — `findByVerificationToken()` + `hydrate()` update
+- `src/User/src/RequestHandler/LoginHandler.php` — reads `SystemMessenger->getMessages()`, passes as `flashMessages` to template; removed `HX-Trigger` approach
+- `src/User/templates/user/login.phtml` — inline Bootstrap dismissible alert block for flash messages
 - `config/autoload/commandbus-event.global.php` — NEW: wires `SendVerificationEmailListener` to `PostHandleEvent`
 - `config/autoload/user.global.php` — NEW: `base_url`, `from_email`, `from_name`, `verification_token_ttl`
 - `config/autoload/mailer.local.php` — NEW: SMTP config pointing at `mailpit:1025`
 - `data/schema/003_user.sql` — added `verification_token VARCHAR(36) NULL`, `token_created_at DATETIME NULL`, `active DEFAULT 0`
+- `data/schema/015_log.sql` — NEW: `log` table for Monolog DB handler
 - `docker-compose.yml` — added `mailpit` service (ports 8025/1025)
 - `docs/planning/upstream-fixes-needed.md` — NEW: documents `EmptyPipelineHandler` fix needed upstream

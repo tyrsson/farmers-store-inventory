@@ -55,6 +55,7 @@ final class ConfigProvider
                 RequestHandler\LoginHandler::class                  => RequestHandler\Container\LoginHandlerFactory::class,
                 RequestHandler\LogoutHandler::class                 => RequestHandler\Container\LogoutHandlerFactory::class,
                 RequestHandler\RegistrationHandler::class           => RequestHandler\Container\RegistrationHandlerFactory::class,
+                RequestHandler\ResendVerificationHandler::class     => RequestHandler\Container\ResendVerificationHandlerFactory::class,
                 RequestHandler\UserListHandler::class               => RequestHandler\Container\UserListHandlerFactory::class,                RequestHandler\VerifyEmailHandler::class             => RequestHandler\Container\VerifyEmailHandlerFactory::class,
                 Listener\SendVerificationEmailListener::class        => Listener\Container\SendVerificationEmailListenerFactory::class,            ],
         ];

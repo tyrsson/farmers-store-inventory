@@ -26,6 +26,7 @@ use User\Middleware\RegistrationMiddleware;
 use User\RequestHandler\LoginHandler;
 use User\RequestHandler\LogoutHandler;
 use User\RequestHandler\RegistrationHandler;
+use User\RequestHandler\ResendVerificationHandler;
 use User\RequestHandler\UserListHandler;
 use User\RequestHandler\VerifyEmailHandler;
 
@@ -92,6 +93,18 @@ final class RouteProvider implements RouteProviderInterface
                 ]
             ),
             'user.verify-email'
+        );
+
+        $routeCollector->route(
+            '/resend-verification',
+            $middlewareFactory->prepare(
+                [
+                    DisableBodyMiddleware::class,
+                    ResendVerificationHandler::class,
+                ]
+            ),
+            ['GET', 'POST'],
+            'user.verify-email.resend'
         );
 
         // All routes below require authentication

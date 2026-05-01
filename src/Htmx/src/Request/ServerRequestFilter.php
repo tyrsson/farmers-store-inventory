@@ -25,6 +25,7 @@ final class ServerRequestFilter implements FilterServerRequestInterface
         // maintain default behavior
         $request = FilterUsingXForwardedHeaders::trustReservedSubnets()($request);
 
+        /** @var array<string, string[]> $headers */
         $headers     = $request->getHeaders();
         $htmxHeaders = array_flip(Header::toArray(
             normalize: true,

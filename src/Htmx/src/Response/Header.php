@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Htmx\Response;
 
-use App\EnumTrait;
+use Htmx\EnumTrait;
 
 /**
  * @see https://htmx.org/reference/#response_headers

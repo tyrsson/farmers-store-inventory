@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This file is part of the Webware Farmers Store Inventory package.
+ *
+ * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
+ * and contributors.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace User\RequestHandler\Container;
+
+use Axleus\Mailer\MailerInterface;
+use Mezzio\Template\TemplateRendererInterface;
+use Psr\Container\ContainerInterface;
+use User\Repository\UserRepositoryInterface;
+use User\RequestHandler\ResendVerificationHandler;
+
+final class ResendVerificationHandlerFactory
+{
+    public function __invoke(ContainerInterface $container): ResendVerificationHandler
+    {
+        /** @var array{user: array{from_email: string, from_name: string, base_url: string}} $config */
+        $config   = $container->get('config');
+        $userConf = $config['user'] ?? [];
+
+        return new ResendVerificationHandler(
+            template:  $container->get(TemplateRendererInterface::class),
+            users:     $container->get(UserRepositoryInterface::class),
+            mailer:    $container->get(MailerInterface::class),
+            fromEmail: (string) ($userConf['from_email'] ?? 'noreply@farmers-ims.local'),
+            fromName:  (string) ($userConf['from_name']  ?? 'Farmers IMS'),
+            baseUrl:   (string) ($userConf['base_url']   ?? 'http://localhost:8080'),
+        );
+    }
+}
