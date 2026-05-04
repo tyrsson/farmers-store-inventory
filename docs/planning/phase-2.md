@@ -3,6 +3,8 @@
 Features deferred from v0.1.0. None of these should be built until the Phase 1
 (must-have) feature set is stable and in production.
 
+> **Runtime note:** Phase 2 geocoding background jobs are documented below as async coroutines. If TrueAsync is reintegrated by the time Phase 2 starts, use `Async\Scope` / `spawn`. If still on the synchronous runtime, implement as a queued CLI job or use a process supervisor.
+
 ---
 
 ## Delivery Route Builder

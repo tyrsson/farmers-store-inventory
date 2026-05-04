@@ -65,7 +65,7 @@ final class ResendVerificationHandler implements RequestHandlerInterface
         $user = $this->users->findByEmail($email);
 
         // Already-active users have no business here — send them to login.
-        if ($user !== null && $user->active !== 0) {
+        if ($user !== null && $user->active === true) {
             return new RedirectResponse('/login');
         }
 

@@ -1,5 +1,7 @@
 # TrueAsync (php-async) API Reference
 
+> **Status (May 2026):** TrueAsync is a **future** target runtime for this project. The active application runs synchronously on the PHP built-in web server. This reference is retained for reintegration planning. See `src/mezzio-async/` for the retained async server package.
+
 This document summarises the PHP TrueAsync extension API as it applies to `mezzio-async`
 development. Canonical documentation: [TrueAsync documentation](https://true-async.github.io/en/docs.html)
 

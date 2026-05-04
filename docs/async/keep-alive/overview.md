@@ -1,5 +1,7 @@
 # HTTP Keep-Alive Refactor — Overview
 
+> **Status (May 2026):** This refactor targets the `mezzio-async` HTTP server, which is a **future** runtime. The active application runs on the PHP built-in web server (synchronous). This planning is retained for when TrueAsync is reintegrated.
+
 ## Motivation
 
 Load testing (`max-rps-no-db-v2.js`, 2026-04-21) showed that the no-DB endpoint

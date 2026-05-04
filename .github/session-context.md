@@ -1,4 +1,4 @@
-# Session Context — Farmers IMS
+# Session Context — Inventory Management System
 _Last updated: May 1, 2026_
 
 > **⚠ Runtime environment changed (April 28, 2026):** TrueAsync (`php-async` extension) has been **removed** from the active stack. After 3 hours rebuilding the Docker environment and the VS Code devcontainer, the project now runs as a standard Mezzio application served by the **PHP built-in web server** (`php -S`) inside a `php:latest` Docker container. There is **no PHP-FPM and no nginx** in the active devcontainer stack. The decision was driven by current usability issues in TrueAsync (SIGABRT crashes, `proc_open` incompatibility inside coroutines, devcontainer instability). The `src/mezzio-async/` source tree and all TrueAsync planning docs (`docs/planning/php-async-api.md`, `docs/planning/trueasync-bugs.md`) are **retained** for future reintegration once the extension matures.
@@ -9,7 +9,7 @@ _Last updated: May 1, 2026_
 
 ## Project Overview
 
-**Farmers IMS** — Inventory Management System for Farmers Home Furniture stores.
+**Inventory Management System (IMS)** — Warehouse operations platform for furniture distribution stores.
 Built for store-floor staff: receiving manifests from the DC, scanning SKU barcodes,
 recording and photographing damage, submitting items for PQA assessment.
 
@@ -73,7 +73,7 @@ Each product item displays three identifiers:
 ```
 SKU: 195844 · AO#: A006523361 · 207-0401
 ```
-- **SKU** — 6-digit integer (Farmers/DC internal catalogue number)
+- **SKU** — 6-digit integer (DC internal catalogue number)
 - **AO#** — per-unit unique ID (format: `A` + 9 digits); encoded in Code 128B barcode on SKU card
 - **Manifest ID** — format `{store}-{MMDD}` e.g. `207-0401`; the date = DC load date (consignment date)
 
@@ -93,7 +93,7 @@ Manifest ID is shown on all product list items, manifest detail rows, damage det
 - No ApexCharts dependency — Chart.js was chosen for bundle size and simplicity
 
 ### PQA Email
-- Each store has a `pqa_email` field (e.g. `pqa@farmers-store207.com`)
+- Each store has a `pqa_email` field (e.g. `pqa@store207.example.com`)
 - "Send Images to PQA" on damage-detail triggers a Bootstrap modal pre-filled with:
   - To: store PQA email
   - Subject: `Damage Report — AO# … — {Product Name}`
@@ -231,11 +231,11 @@ have a `$name` property. Planned fix: rename to `$commandName` in the command-bu
 
 - **Mezzio app**: PHP built-in server on port 8080 (forwarded by devcontainer)
   ```bash
-  php -S 0.0.0.0:8080 -t /workspaces/farmers-store-inventory/public/
+  php -S 0.0.0.0:8080 -t /workspaces/inventory-management-system/public/
   ```
 - **v2 mockup**: PHP built-in server on port 7655
   ```bash
-  php -S 0.0.0.0:7655 -t /workspaces/farmers-store-inventory/resources/ui-mockup/v2/ &
+  php -S 0.0.0.0:7655 -t /workspaces/inventory-management-system/resources/ui-mockup/v2/ &
   ```
 - **v1 mockup**: port 7654 (python3 http.server or PHP)
 - Files also browseable directly via Windows→WSL2 filesystem bridge (`file://`)
@@ -243,8 +243,10 @@ have a `$name` property. Planned fix: rename to `$commandName` in the command-bu
 ---
 
 ## Repo Info
-- Repository: `tyrsson/farmers-store-inventory`
-- Branch: `complete-registration` (active), `master` (default)
-- Workspace: `/workspaces/farmers-store-inventory`
+- Repository: `tyrsson/inventory-management-system`
+- Branch: `finish-up-registration` (active), `0.1.x` (default)
+- Workspace: `/workspaces/inventory-management-system`
 - v2 mockup path: `resources/ui-mockup/v2/`
-- Planning docs: `docs/planning/farmers-store-inventory/`
+- Planning docs: `docs/planning/`
+- Async future docs: `docs/async/`
+- Architecture blueprint: `docs/Project_Architecture_Blueprint.md`

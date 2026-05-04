@@ -22,8 +22,8 @@ ON DUPLICATE KEY UPDATE role_id = VALUES(role_id);
 -- Replace pqa_email values with real addresses before deploying.
 -- -----------------------------------------------------------------------------
 INSERT INTO store (store_number, city, state, pqa_email) VALUES
-    (207, 'Leeds',      'AL', 'pqa-207@farmers-store.com'),
-    (112, 'Birmingham', 'AL', 'pqa-112@farmers-store.com')
+    (207, 'Leeds',      'AL', 'pqa-207@example.com'),
+    (112, 'Birmingham', 'AL', 'pqa-112@example.com')
 ON DUPLICATE KEY UPDATE
     city      = VALUES(city),
     state     = VALUES(state),

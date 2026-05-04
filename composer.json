@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
-        "axleus/axleus-log": "0.0.x-dev",
+        "axleus/axleus-log": "^0.1.1",
         "axleus/axleus-mailer": "dev-master",
         "axleus/axleus-message": "dev-master",
         "laminas/laminas-component-installer": "^3.7",

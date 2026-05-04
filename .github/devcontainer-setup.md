@@ -1,4 +1,4 @@
-# Dev Container Setup — Farmers IMS
+# Dev Container Setup — Inventory Management System
 _Last verified working: April 28, 2026_
 
 ---
@@ -79,7 +79,7 @@ COPY docker/php/conf.d/upload.ini /usr/local/etc/php/conf.d/upload.ini
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-WORKDIR /workspaces/farmers-store-inventory
+WORKDIR /workspaces/inventory-management-system
 ```
 
 **Key points:**
@@ -101,7 +101,7 @@ services:
       dockerfile: .devcontainer/docker/php/Dockerfile
     command: ["sleep", "infinity"]
     volumes:
-      - .:/workspaces/farmers-store-inventory
+      - .:/workspaces/inventory-management-system
   mysql:
     build:
       context: .
@@ -113,7 +113,7 @@ services:
 **Key points:**
 - `context: .` is the **repo root** — not `.devcontainer/`. This is required so `COPY docker/php/conf.d/...` works.
 - `command: ["sleep", "infinity"]` keeps the container alive (VS Code attaches to it).
-- Volume mounts repo root to `/workspaces/farmers-store-inventory`.
+- Volume mounts repo root to `/workspaces/inventory-management-system`.
 - mysql and phpmyadmin here override/extend the root `docker-compose.yml` services.
 
 ---
@@ -128,9 +128,9 @@ services:
         ports:
             - 3306:3306
         environment:
-            - MYSQL_DATABASE=${MYSQL_DB:-farmers_store}
-            - MYSQL_USER=${MYSQL_USER:-farmers}
-            - MYSQL_PASSWORD=${MYSQL_PASSWORD:-farmers}
+            - MYSQL_DATABASE=${MYSQL_DB:-ims_db}
+            - MYSQL_USER=${MYSQL_USER:-ims}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD:-ims}
             - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
@@ -158,7 +158,7 @@ services:
 `.devcontainer/devcontainer.json`:
 ```json
 {
-    "name": "Farmers Store Inventory",
+    "name": "Inventory Management System",
     "dockerComposeFile": [
         "../docker-compose.yml",
         "docker-compose.yml"
@@ -200,9 +200,9 @@ services:
 #!/bin/bash
 set -e
 
-git config --global --add safe.directory /workspaces/farmers-store-inventory
+git config --global --add safe.directory /workspaces/inventory-management-system
 
-cd /workspaces/farmers-store-inventory
+cd /workspaces/inventory-management-system
 composer update --no-interaction --ignore-platform-req=php
 ```
 
@@ -288,9 +288,9 @@ The nginx config at `docker/nginx/nginx.conf` exists for **production/staging de
 ```
 host: mysql       (Docker service name — NOT localhost)
 port: 3306
-database: farmers_store
-user: farmers
-password: farmers
+database: ims_db
+user: ims
+password: ims
 root password: root
 ```
 

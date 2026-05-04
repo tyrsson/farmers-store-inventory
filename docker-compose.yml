@@ -4,10 +4,12 @@ services:
         ports:
             - 3306:3306
         environment:
-            - MYSQL_DATABASE=${MYSQL_DB:-farmers_store}
-            - MYSQL_USER=${MYSQL_USER:-farmers}
-            - MYSQL_PASSWORD=${MYSQL_PASSWORD:-farmers}
+            - MYSQL_DATABASE=${MYSQL_DB:-inventory_management_system}
+            - MYSQL_USER=${MYSQL_USER:-ims}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD:-ims}
             - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+        volumes:
+            - mysql_data:/var/lib/mysql
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
             interval: 30s
@@ -31,3 +33,7 @@ services:
         ports:
             - 8025:8025  # web UI
             - 1025:1025  # SMTP
+
+volumes:
+    mysql_data:
+        name: ims_mysql_data

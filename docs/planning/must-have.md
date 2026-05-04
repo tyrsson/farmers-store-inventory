@@ -1,9 +1,8 @@
-# Main
+# Must-Have Requirements
 
-This project will be an inventory managment system for Farmers Funiture. It must track all products primarily by SKU
-and the AO number. The AO is more or less farmers in house serial number. They are all unique. SKU numbers just identify the particular type of product.
+This project is an Inventory Management System (IMS) for furniture distribution warehouse operations. It must track all products primarily by SKU and the AO number. The AO number is the DC's internal per-unit serial number — all AO numbers are unique. SKU numbers identify the product type.
 
-Each farmers warehouse will be identified by two pieces of data. The store number which are unique and the city in which the store is located. The primary id for each store will be its store number ie Store #207 Leeds, AL.
+Each warehouse store location will be identified by two pieces of data: the store number (unique) and the city in which the store is located. The primary ID for each store will be its store number (e.g. Store #207, Leeds AL).
 
 Each store row will be related to multiple users. Common user roles will be Manager, Credit Manager, DC_Warehouse, Warehouse Supervisor, Warehouse, Sales. Warehouse Supervisor and above will be able to edit inventory. Warehouse will have a limited subset of tools available.
 
@@ -22,11 +21,11 @@ Each store record must have a configurable `pqa_email` field. When a damage repo
 
 ## Project Motivation
 
-Farmers currently has an "inventory system" (built via sharepoint or celerant, I think, it sucks), but it does not provide a means to track the huge amount of product that each store gets that is damaged which leads to store managers wasting a huge amount of time when trying to get needed product from another location. There is 254 locations in the south east US. We are building this application to provide a means for each store that is registered to easily track which products arrive damaged and which are in good order and can be sold or transferred to another location if needed.
+The existing inventory system (a general-purpose third-party platform) does not provide a means to track the volume of product that each store receives damaged. This leads to store managers wasting significant time when trying to source product from other locations. This application provides each registered store location a focused tool to easily track which products arrive damaged and which are in good order and can be sold or transferred to another location if needed.
 
 Each product that is marked as damaged should also have images attached since it is possible for a product to be slightly damaged and still be sold at a discount, but store managers need to be able to see the damage so they can determine if they want to transfer the product before sending warehouse personel to pick the product up.
 
-Ultimately it would also be useful if a user with the role DC_Warehouse could log in and generate reporting around what % of product has been recieved by each store that is damaged. This will hopefully provide insight to how well the Distrubution Center personel are handling the product during loading prior to shipping to each location; and if they are actively screening product for signs of damage before sending it to each location.
+Ultimately it would also be useful if a user with the role `DC_Warehouse` could log in and generate reporting around what percentage of product received by each store is damaged. This provides insight into how well DC personnel are handling product during loading prior to shipment, and whether they are actively screening product for damage before shipping.
 
 The prefered workflow is when a DC incoming shipment is processed at each location the application will provide a means to scan the barcode on each product (we will need to identify a php library that provides that functionality). I have images of a sample SKU card which has the SKU id and the Tag ID on every product that gets shipped. Once the manifest is processed then the store inventory can be updated, or possibly it can be updated in real time each time a product is scanned. Then once the product is being prepped for delivery or prepared to go to the sales floor if a damaged product is found then one can be modified and marked as damaged, pictures taken and it flagged as damaged. When the product is flagged as damaged a notification should be sent to the Manager for that location so that a PQA process can be started so that the store can be issued a credit on that particular product from the corporate office. The PQA process is outside the scope of this project.
 
@@ -36,31 +35,31 @@ SKU cards use **Code 128B** barcodes encoding the AO# (e.g. `A006523361`). Scann
 
 **Initial deployment:** mobile camera only. Warehouse staff point their phone camera at the SKU card barcode during manifest processing; the decoded AO# is sent directly to the scan input field and handled identically to a typed entry.
 
-**Future:** if the company adopts dedicated USB HID or Bluetooth wedge scanners, no library changes are needed — hardware scanners act as keyboards and emit keystrokes straight into the focused `<input>`, so the same handler works without modification.
+**Future:** if hardware USB HID or Bluetooth wedge scanners are adopted, no library changes are needed — hardware scanners act as keyboards and emit keystrokes straight into the focused `<input>`, so the same handler works without modification.
 
-**SKU Card — all data is Farmers/DC internal:**  
-The DC prints and applies these cards to every product as it is loaded for shipment. Every field on the card originates from Farmers' DC system:
+**SKU Card — all data is DC-internal:**  
+The DC prints and applies these cards to every product as it is loaded for shipment. Every field on the card originates from the DC system:
 
 | Field | Example | Description |
 |---|---|---|
-| AO# | `A006523361` | Per-unit unique ID (Farmers internal) |
-| SKU | `195844` | 6-digit integer product-type ID (Farmers internal) |
+| AO# | `A006523361` | Per-unit unique ID (DC internal) |
+| SKU | `195844` | 6-digit integer product-type ID (DC internal) |
 | VSN | `P0ZZ266457` | Vendor Stock Number |
 | Vendor | `EMBY` | Vendor abbreviation |
 | Vendor Model | `SM590NS` | Vendor model number |
 | Description | `NIGHTSTAND` | Product description |
 | Finish/Cover/Size/ST | *(varies)* | Customer configuration specs |
 
-The barcode almost certainly encodes the **AO#** since that is the DC's primary per-unit tracking identifier. This should be confirmed by scanning a card (Google Lens shows the raw decoded value).
+The barcode encodes the **AO#** — the DC's primary per-unit tracking identifier (confirmed by barcode scan).
 
-**Future integration opportunity:** Since all this data originates in the DC's system, a data feed (CSV export, API, or EDI) from the DC could allow manifests to be pre-populated with full product details before the shipment even arrives at the store — eliminating all manual entry entirely.
+**Future integration opportunity:** Since all this data originates in the DC's system, a data feed (CSV export, API, or EDI) from the DC could allow manifests to be pre-populated with full product details before the shipment arrives at each store, eliminating manual entry entirely.
 
 **Data available from a successful scan:**
 - AO# pre-filled from barcode scan
 - SKU, vendor, description, specs entered manually on first encounter; auto-filled on repeat SKUs as the local catalogue grows
 
 **Phase 1 — manual entry with AO pre-fill:**  
-The AO# is populated automatically from the scan. The user manually enters any remaining fields on first encounter. Over time the system builds a product catalogue keyed by **Farmers SKU** (6-digit integer) — once a SKU has been seen, future scans can auto-fill vendor, vendor model, description, and specs, reducing manual input progressively.
+The AO# is populated automatically from the scan. The user manually enters any remaining fields on first encounter. Over time the system builds a product catalogue keyed by **SKU** (6-digit integer) — once a SKU has been seen, future scans can auto-fill vendor, vendor model, description, and specs, reducing manual input progressively.
 
 **Future — full lookup:**  
 Once a sufficient product catalogue exists (or a DC data feed is established), scanning can resolve the full product record server-side with no manual entry required.
@@ -69,9 +68,9 @@ The scan input must remain focused after each confirmation so the user can scan 
 
 ### Project dependecies
 
-This project will be built using my custom bleeding edge mezzio skeleton, which is already present. It will leverage the True Async runtime and the mezzio-async package we developed in another project to provide mezzio support for the true async runtime. Those parts are in working order. It will use HTMX for the front end client side code and we will use laminas view as the template layer. We will leverage SSE via HTMX for notifications. It will use Bootstrap 5.3+ for the css framework. We will be using mezzio/mezzio-auth backed by php sessions. We will be using the mezzio/mezzio-authorize package with laminas-acl support for access control list. I have custom packages that will provide that support and will handle the integration of those packages myself.
+This project is built on a custom Mezzio skeleton. The **active runtime is the PHP built-in web server** (`php -S 0.0.0.0:8080`) — standard synchronous PHP. The TrueAsync runtime (`src/mezzio-async/`) is retained for future reintegration once the extension stabilises.
 
-We will also be using webware/command-bus.
+Front-end: HTMX + Laminas View templates. Notifications via SSE/HTMX (planned). CSS framework: Bootstrap 5.3+. Auth: `mezzio/mezzio-authentication` backed by PHP sessions. Authorisation: `mezzio/mezzio-authorization` with `laminas-acl`. Command bus: `webware/command-bus`.
 
 #### Database Choice
 
@@ -79,7 +78,7 @@ We will be using PhpDb for the database abstraction layer since I am one of the 
 
 ##### Code Requirements
 
-True Async is 8.6.0-dev php build which is based on php 8.5 so we should have all 8.5 features available. We will use proper abstraction at all times and we will prefer composition over inheritance where its possible. We will avoid static usage when possible. We will enforce PER 3.0 and webware/coding-standard syntax throughout the project. The complicating factor there is that php-cs-fixer does not support true async.
+PHP 8.5+ features are available (devcontainer runs PHP 8.5.5; `composer.json` declares `^8.6` for future async compatibility). Proper abstraction throughout; composition over inheritance; avoid static usage. Enforce PER 3.0 and `webware/coding-standard` throughout. Note: `php-cs-fixer` does not support TrueAsync syntax — not a concern for the current synchronous runtime.
 
 ##### Architecture
 
@@ -107,7 +106,7 @@ We will be using a "module" architecture in the sense that each namespace we add
 
 5. Transfer workflow is handled outside of this system, this system will just be used to provide the needed information as to whether the product is viable for transfer based on its condition.
 
-6. Celerant provides the primary customer tracking we are just providing additional data that celerant does not track but should. Celerant is a "general purpose" inventory management system that Farmers uses. This application is a focused, company specific tool targeting the gaps in process left by Celerants missing features.
+6. The external platform (Celerant) provides primary customer tracking. This IMS provides additional data that the external system does not track. This application is a focused warehouse operations tool targeting gaps left by general-purpose inventory systems.
 
 7. Managers can view other stores inventory and each products status, but they can not modify another stores inventory or another stores products status.
 

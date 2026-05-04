@@ -63,38 +63,7 @@ $this->inlineScript()
         <main id="app">
             <?= $this->body ?>
         </main>
-        <div id="systemMessage" class="toast-container position-fixed bottom-0 end-0 p-4">
-            <template id="toastTemplate">
-                <div class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
-                    <div class="d-flex">
-                        <div class="toast-body toast-message"></div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
-                </div>
-            </template>
-        </div>
+        <div id="systemMessage" class="toast-container position-fixed bottom-0 end-0 p-4" aria-live="polite" aria-atomic="false"></div>
         <?= $this->inlineScript() ?>
-        <!-- Menu Script -->
-        <script>
-            // Set .active on the matching side-nav link; never touches mobile nav links
-            function setActiveNav() {
-                const currentPath = window.location.pathname;
-                document.querySelectorAll('#side-nav .side-nav-items .side-nav-item a').forEach(function(link) {
-                    link.classList.toggle('active', link.pathname === currentPath);
-                });
-            }
-
-            function initPage() {
-                setActiveNav();
-            }
-
-            document.addEventListener('DOMContentLoaded', initPage);
-
-            // Re-init after every HTMX content swap (boosted navigation).
-            document.addEventListener('htmx:afterSettle', initPage);
-
-            // Re-init when HTMX restores a page from the history cache (back/forward).
-            document.addEventListener('htmx:historyRestore', initPage);
-        </script>
     </body>
 </html>

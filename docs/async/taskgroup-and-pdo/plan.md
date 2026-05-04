@@ -1,5 +1,7 @@
 # Plan: TaskGroup Refactor & phpdb-async PDO Support
 
+> **Status (May 2026):** Targets the TrueAsync runtime — a **future** integration. Active application is synchronous. Retained for reintegration planning.
+
 ## Status
 
 | Phase | Status |
