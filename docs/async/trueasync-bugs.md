@@ -1,5 +1,7 @@
 # TrueAsync Known Bugs / Issues to Report
 
+> **Status (May 2026):** TrueAsync is a future target runtime. The active application runs on the PHP built-in web server (synchronous). These bugs are documented for future reintegration planning.
+
 ## FileSystemWatcher — recursive mode does not deliver subdirectory events
 
 **Discovered:** April 2026  
@@ -23,9 +25,9 @@ foreach ($watcher as $event) {
 
 ### Confirmed Steps
 
-1. Start a watcher on `/workspaces/farmers-store-inventory` with `recursive: true`
-2. `touch /workspaces/farmers-store-inventory/test.php` → event fires ✓
-3. `touch /workspaces/farmers-store-inventory/src/test.php` → no event ✗
+1. Start a watcher on `/workspaces/inventory-management-system` with `recursive: true`
+2. `touch /workspaces/inventory-management-system/test.php` → event fires ✓
+3. `touch /workspaces/inventory-management-system/src/test.php` → no event ✗
 
 ### Impact
 

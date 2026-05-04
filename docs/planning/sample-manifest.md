@@ -1,9 +1,11 @@
-# Dist DC Truck Manifest - Live
+# Sample DC Truck Manifest
 
-**Company:** WAREHOUSE HOME FURNISHINGS DISTRIBUTORS, INC  
+This is a representative sample of a real DC truck manifest, provided as a data reference for schema and import design. Company-identifying details have been generalised.
+
+**Company:** WAREHOUSE HOME FURNISHINGS DISTRIBUTORS  
 **Consignment:** 207-0401  
 **From DC:** 841  
-**Printed by:** FARMERS\Store207cm on 4/1/2026 6:15:02 PM  
+**Printed by:** Store207-cm on 4/1/2026 6:15:02 PM  
 **Page:** 1 of 2
 
 ---

@@ -1,5 +1,7 @@
 # Keep-Alive Refactor — k6 Test Plan
 
+> **Status (May 2026):** Targets `mezzio-async` HTTP server (future runtime). Active stack is synchronous. Retained for reintegration.
+
 ## Goal
 
 Confirm that HTTP keep-alive increases throughput for the no-DB endpoint beyond the
@@ -79,10 +81,10 @@ The refactor is working correctly if:
 Before running the ceiling test, run the existing scripts to confirm no regression:
 
 ```bash
-# 1. No-DB regression — same profile as before, should match prior numbers
+# 1. No-DB regression
 k6 run --out json=docs/load-testing/results/.../max-rps-no-db-regression.json test/k6/max-rps-no-db.js
 
-# 2. pgsql concurrent — keep-alive should also help here (less TCP overhead per request)
+# 2. pgsql concurrent
 k6 run --out json=docs/load-testing/results/.../ramp-pgsql-keepalive.json test/k6/ramp-pgsql.js
 
 # 3. Keep-alive ceiling

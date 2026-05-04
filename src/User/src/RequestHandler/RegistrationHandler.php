@@ -14,8 +14,6 @@ declare(strict_types=1);
 
 namespace User\RequestHandler;
 
-use Htmx\Request\Header as HtmxRequestHeader;
-use Htmx\Response\Header as HtmxResponseHeader;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Mezzio\Template\TemplateRendererInterface;
@@ -37,10 +35,6 @@ final class RegistrationHandler implements RequestHandlerInterface
         $result = $request->getAttribute('registration_result');
 
         if ($result !== null && $result->getStatus() === CommandStatus::Success) {
-            if ($request->hasHeader(HtmxRequestHeader::Request->value)) {
-                return new HtmlResponse('', 200, [HtmxResponseHeader::Location->value => '/login']);
-            }
-
             return new RedirectResponse('/login');
         }
 

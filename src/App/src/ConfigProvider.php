@@ -45,6 +45,7 @@ class ConfigProvider
             'dependencies' => $this->getDependencies(),
             'router'       => $this->getRouteProviders(),
             'templates'    => $this->getTemplates(),
+            'view_helpers' => $this->getViewHelpers(),
         ];
     }
 
@@ -57,8 +58,9 @@ class ConfigProvider
     {
         return [
             'factories'  => [
-                RequestHandler\DashboardHandler::class => RequestHandler\Container\DashboardHandlerFactory::class,
-                RouteProvider::class                   => Container\RouteProviderFactory::class,
+                Middleware\ImsMessengerMiddleware::class => Middleware\ImsMessengerMiddlewareFactory::class,
+                RequestHandler\DashboardHandler::class  => RequestHandler\Container\DashboardHandlerFactory::class,
+                RouteProvider::class                    => Container\RouteProviderFactory::class,
             ],
             'invokables' => [
                 RequestHandler\PingHandler::class => RequestHandler\PingHandler::class,
@@ -76,6 +78,18 @@ class ConfigProvider
         return [
             'route-providers' => [
                 RouteProvider::class,
+            ],
+        ];
+    }
+
+    public function getViewHelpers(): array
+    {
+        return [
+            'aliases'   => [
+                'imsMessenger' => View\Helper\ImsMessenger::class,
+            ],
+            'factories' => [
+                View\Helper\ImsMessenger::class => View\Helper\ImsMessengerFactory::class,
             ],
         ];
     }

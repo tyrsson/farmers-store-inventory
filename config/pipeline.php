@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Axleus\Message\Middleware\MessageMiddleware;
 use Htmx\Middleware\DetectAjaxRequestMiddleware;
 use Laminas\Stratigility\Middleware\ErrorHandler;
 use Mezzio\Application;
@@ -33,7 +32,7 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
     $app->pipe(MonologMiddleware::class);
     $app->pipe(SessionMiddleware::class);
     $app->pipe(DetectAjaxRequestMiddleware::class);
-    $app->pipe(MessageMiddleware::class);
+    $app->pipe(\App\Middleware\ImsMessengerMiddleware::class);
 
     // Pipe more middleware here that you want to execute on every request:
     // - bootstrapping

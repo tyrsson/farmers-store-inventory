@@ -5,7 +5,7 @@ services:
       dockerfile: .devcontainer/docker/php/Dockerfile
     command: ["sleep", "infinity"]
     volumes:
-      - .:/workspaces/farmers-store-inventory
+      - .:/workspaces/inventory-management-system
   mysql:
     build:
       context: .
