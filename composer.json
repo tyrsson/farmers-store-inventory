@@ -52,7 +52,8 @@
             "Htmx\\": "src/Htmx/src/",
             "Mezzio\\Async\\": "src/mezzio-async/src/",
             "PhpDb\\Async\\": "src/phpdb-async/src/",
-            "User\\": "src/User/src/"
+            "User\\": "src/User/src/",
+            "Webware\\Acl\\": "src/webware-acl/src/"
         }
     },
     "autoload-dev": {

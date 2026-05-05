@@ -29,6 +29,7 @@ use User\RequestHandler\RegistrationHandler;
 use User\RequestHandler\ResendVerificationHandler;
 use User\RequestHandler\UserListHandler;
 use User\RequestHandler\VerifyEmailHandler;
+use Webware\Acl\Acl\AuthorizationMiddleware;
 
 final class RouteProvider implements RouteProviderInterface
 {
@@ -36,12 +37,13 @@ final class RouteProvider implements RouteProviderInterface
         RouteCollectorInterface $routeCollector,
         MiddlewareFactoryInterface $middlewareFactory,
     ): void {
-        // Login routes — no AuthenticationMiddleware (would cause redirect loop)
+        // Login routes — AclMiddleware runs before Auth (login/register are guest grants)
         $routeCollector->get(
             '/login',
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
+                    AuthorizationMiddleware::class,
                     LoginHandler::class,
                 ]
             ),
@@ -53,6 +55,7 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
+                    AuthorizationMiddleware::class,
                     AuthenticationMiddleware::class,
                     LoginHandler::class,
                 ]
@@ -60,12 +63,13 @@ final class RouteProvider implements RouteProviderInterface
             'user.login.post'
         );
 
-        // Registration routes — no authentication required
+        // Registration routes
         $routeCollector->get(
             '/register',
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
+                    AuthorizationMiddleware::class,
                     RegistrationHandler::class,
                 ]
             ),
@@ -77,6 +81,7 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
+                    AuthorizationMiddleware::class,
                     RegistrationMiddleware::class,
                     RegistrationHandler::class,
                 ]
@@ -89,6 +94,7 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
+                    AuthorizationMiddleware::class,
                     VerifyEmailHandler::class,
                 ]
             ),
@@ -100,6 +106,7 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
+                    AuthorizationMiddleware::class,
                     ResendVerificationHandler::class,
                 ]
             ),
@@ -107,12 +114,11 @@ final class RouteProvider implements RouteProviderInterface
             'user.verify-email.resend'
         );
 
-        // All routes below require authentication
         $routeCollector->get(
             '/logout',
             $middlewareFactory->prepare(
                 [
-                    AuthenticationMiddleware::class,
+                    AuthorizationMiddleware::class,
                     LogoutHandler::class,
                 ]
             ),
@@ -124,7 +130,7 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/user',
             $middlewareFactory->prepare(
                 [
-                    AuthenticationMiddleware::class,
+                    AuthorizationMiddleware::class,
                     UserListHandler::class,
                 ]
             ),
@@ -135,7 +141,7 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/create/user',
             $middlewareFactory->prepare(
                 [
-                    AuthenticationMiddleware::class,
+                    AuthorizationMiddleware::class,
                     CreateUserHandler::class,
                 ]
             ),
@@ -147,7 +153,7 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/update/user/{id:\d+}',
             $middlewareFactory->prepare(
                 [
-                    AuthenticationMiddleware::class,
+                    AuthorizationMiddleware::class,
                     UpdateUserHandler::class,
                 ]
             ),
@@ -159,7 +165,7 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/toggle/user/{id:\d+}',
             $middlewareFactory->prepare(
                 [
-                    AuthenticationMiddleware::class,
+                    AuthorizationMiddleware::class,
                     ToggleUserActiveHandler::class,
                 ]
             ),

@@ -22,8 +22,12 @@ final class LoginHandlerFactory
 {
     public function __invoke(ContainerInterface $container): LoginHandler
     {
+        $config   = $container->get('config');
+        $baseRole = $config['webware-acl']['base_role'] ?? 'guest';
+
         return new LoginHandler(
             $container->get(TemplateRendererInterface::class),
+            $baseRole,
         );
     }
 }
