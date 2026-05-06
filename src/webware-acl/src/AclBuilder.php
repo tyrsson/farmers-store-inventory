@@ -12,9 +12,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Acl;
+namespace Webware\Acl;
 
-use Laminas\Permissions\Acl\Acl;
+use Laminas\Permissions\Acl\Acl as LaminasAcl;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Webware\Acl\Cache\AclCacheInterface;
 use Webware\Acl\Event\AclBuildStartedEvent;
@@ -30,6 +30,7 @@ use function array_keys;
 use function array_map;
 use function array_values;
 use function count;
+use function implode;
 use function sprintf;
 
 /**
@@ -55,14 +56,13 @@ final class AclBuilder
         private readonly AclRepositoryInterface $repository,
         private readonly AclCacheInterface $cache,
         private readonly ?EventDispatcherInterface $events = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Returns a fully built Laminas Acl instance.
      * Reads from cache when the version matches; re-hydrates from DB otherwise.
      */
-    public function build(): Acl
+    public function build(): LaminasAcl
     {
         $currentVersion = $this->repository->fetchVersion();
         $cached         = $this->cache->get();
@@ -124,9 +124,9 @@ final class AclBuilder
      *
      * @param array<string, mixed> $data
      */
-    private function buildFromArrays(array $data): Acl
+    private function buildFromArrays(array $data): LaminasAcl
     {
-        $acl = new Acl();
+        $acl = new LaminasAcl();
 
         $this->dispatch(new AclBuildStartedEvent($acl));
 
@@ -177,7 +177,7 @@ final class AclBuilder
      * @param array<int, string>  $pkToRoleId  Map of role PK → role_id string
      * @param array<int, int[]>   $parentMap   Map of child role PK → list of parent PKs
      */
-    private function addRolesInOrder(Acl $acl, array $pkToRoleId, array $parentMap): void
+    private function addRolesInOrder(LaminasAcl $acl, array $pkToRoleId, array $parentMap): void
     {
         $added   = [];
         $pending = array_keys($pkToRoleId);
@@ -188,7 +188,7 @@ final class AclBuilder
 
         while (! empty($pending) && $iteration++ < $maxIterations) {
             foreach ($pending as $key => $pk) {
-                $parentPks    = $parentMap[$pk] ?? [];
+                $parentPks     = $parentMap[$pk] ?? [];
                 $parentRoleIds = array_map(static fn($ppk) => $pkToRoleId[$ppk], $parentPks);
 
                 // Only add this role once all its parents are already in the Acl

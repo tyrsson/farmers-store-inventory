@@ -12,7 +12,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Authentication;
+namespace Webware\Acl\Middleware;
 
 use Mezzio\Authentication\UserInterface;
 use Mezzio\Session\SessionMiddleware;

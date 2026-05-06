@@ -12,10 +12,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Repository;
+namespace Webware\Acl\Container;
 
 use PhpDb\Adapter\AdapterInterface;
 use Psr\Container\ContainerInterface;
+use Webware\Acl\Repository\AclRepository;
 
 final class AclRepositoryFactory
 {

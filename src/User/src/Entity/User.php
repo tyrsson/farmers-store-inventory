@@ -84,6 +84,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             $this->details,
         );
@@ -101,6 +103,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             $this->details,
         );
@@ -118,6 +122,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             $this->details,
         );
@@ -135,6 +141,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             $this->details,
         );
@@ -152,6 +160,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             $this->details,
         );
@@ -169,6 +179,8 @@ final class User implements UserInterface
             $passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             $this->details,
         );
@@ -186,6 +198,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             $this->details,
         );
@@ -204,6 +218,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             array_values($roles),
             $this->details,
         );
@@ -221,6 +237,8 @@ final class User implements UserInterface
             $this->passwordHash,
             $this->active,
             $this->createdAt,
+            $this->verificationToken,
+            $this->tokenCreatedAt,
             $this->roles,
             array_merge($this->details, [$name => $value]),
         );

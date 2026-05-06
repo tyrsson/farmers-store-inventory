@@ -29,7 +29,7 @@ use User\RequestHandler\RegistrationHandler;
 use User\RequestHandler\ResendVerificationHandler;
 use User\RequestHandler\UserListHandler;
 use User\RequestHandler\VerifyEmailHandler;
-use Webware\Acl\Acl\AuthorizationMiddleware;
+use Webware\Acl\Middleware\AuthorizationMiddleware;
 
 final class RouteProvider implements RouteProviderInterface
 {

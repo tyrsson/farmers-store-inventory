@@ -17,7 +17,7 @@ use Mezzio\Router\Middleware\RouteMiddleware;
 use Axleus\Log\Middleware\MonologMiddleware;
 use Mezzio\Session\SessionMiddleware;
 use Psr\Container\ContainerInterface;
-use Webware\Acl\Authentication\IdentityMiddleware;
+use Webware\Acl\Middleware\IdentityMiddleware;
 use Webware\Traccio\Middleware\TracyDebuggerMiddleware;
 
 // Setup middleware pipeline:

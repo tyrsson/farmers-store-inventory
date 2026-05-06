@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace Webware\Acl;
 
 use Mezzio\Authentication\UserInterface;
-use Webware\Acl\Acl\AclBuilder;
-use Webware\Acl\Acl\AclBuilderFactory;
-use Webware\Acl\Acl\AuthorizationMiddleware;
-use Webware\Acl\Acl\AuthorizationMiddlewareFactory;
+use Webware\Acl\Acl;
+use Webware\Acl\AclBuilder;
+use Webware\Acl\AclInterface;
 use Webware\Acl\Authentication\DefaultUserFactory;
-use Webware\Acl\Authentication\IdentityMiddleware;
-use Webware\Acl\Authentication\IdentityMiddlewareFactory;
 use Webware\Acl\Cache\AclCacheInterface;
 use Webware\Acl\Cache\FileAclCache;
-use Webware\Acl\Cache\FileAclCacheFactory;
+use Webware\Acl\Container\AclBuilderFactory;
+use Webware\Acl\Container\AclFactory;
+use Webware\Acl\Container\AclRepositoryFactory;
+use Webware\Acl\Container\AuthorizationMiddlewareFactory;
+use Webware\Acl\Container\FileAclCacheFactory;
+use Webware\Acl\Container\IdentityMiddlewareFactory;
+use Webware\Acl\Middleware\AuthorizationMiddleware;
+use Webware\Acl\Middleware\IdentityMiddleware;
 use Webware\Acl\Repository\AclRepository;
-use Webware\Acl\Repository\AclRepositoryFactory;
 use Webware\Acl\Repository\AclRepositoryInterface;
 
 final class ConfigProvider
@@ -40,13 +43,13 @@ final class ConfigProvider
             'aliases'   => [
                 AclRepositoryInterface::class => AclRepository::class,
                 AclCacheInterface::class      => FileAclCache::class,
-                Acl\AclInterface::class       => Acl\Acl::class,
+                AclInterface::class           => Acl::class,
             ],
             'factories' => [
-                Acl\Acl::class                 => Acl\AclFactory::class,
+                Acl::class                     => AclFactory::class,
+                AclBuilder::class              => AclBuilderFactory::class,
                 AclRepository::class           => AclRepositoryFactory::class,
                 FileAclCache::class            => FileAclCacheFactory::class,
-                AclBuilder::class              => AclBuilderFactory::class,
                 AuthorizationMiddleware::class => AuthorizationMiddlewareFactory::class,
                 IdentityMiddleware::class      => IdentityMiddlewareFactory::class,
                 // Replaces Mezzio\Authentication\DefaultUserFactory so that

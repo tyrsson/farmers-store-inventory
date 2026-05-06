@@ -12,9 +12,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Acl;
+namespace Webware\Acl\Container;
 
 use Psr\Container\ContainerInterface;
+use Webware\Acl\AclInterface;
+use Webware\Acl\Middleware\AuthorizationMiddleware;
 
 final class AuthorizationMiddlewareFactory
 {

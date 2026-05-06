@@ -12,11 +12,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Acl;
+namespace Webware\Acl\Container;
 
-use Phly\EventDispatcher\EventDispatcher;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Webware\Acl\AclBuilder;
 use Webware\Acl\Cache\AclCacheInterface;
 use Webware\Acl\Repository\AclRepositoryInterface;
 

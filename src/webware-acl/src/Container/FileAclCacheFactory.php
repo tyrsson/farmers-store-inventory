@@ -12,9 +12,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Cache;
+namespace Webware\Acl\Container;
 
 use Psr\Container\ContainerInterface;
+use Webware\Acl\Cache\FileAclCache;
 
 final class FileAclCacheFactory
 {

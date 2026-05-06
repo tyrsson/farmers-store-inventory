@@ -19,7 +19,7 @@ use App\RequestHandler\PingHandler;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
-use Webware\Acl\Acl\AuthorizationMiddleware;
+use Webware\Acl\Middleware\AuthorizationMiddleware;
 
 final class RouteProvider implements RouteProviderInterface
 {

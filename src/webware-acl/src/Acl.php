@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Webware\Acl\Acl;
+namespace Webware\Acl;
 
 use Laminas\Permissions\Acl\AclInterface as LaminasAclInterface;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
@@ -62,5 +62,4 @@ final class Acl implements AclInterface
 
         return $this->isAllowed($roles, $mapping['resource_id'], $mapping['privilege_id']);
     }
-
 }

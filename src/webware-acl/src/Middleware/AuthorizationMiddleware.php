@@ -12,7 +12,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Acl;
+namespace Webware\Acl\Middleware;
 
 use Axleus\Message\SystemMessengerInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
@@ -22,6 +22,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Webware\Acl\AclInterface;
 
 /**
  * Checks whether the current user is allowed to access the matched route.
@@ -38,8 +39,7 @@ final class AuthorizationMiddleware implements MiddlewareInterface
     public function __construct(
         private readonly AclInterface $acl,
         private readonly string $loginPath,
-    ) {
-    }
+    ) {}
 
     #[Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

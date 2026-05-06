@@ -1,5 +1,5 @@
 # Session Context — Inventory Management System
-_Last updated: May 1, 2026_
+_Last updated: May 6, 2026_
 
 > **⚠ Runtime environment changed (April 28, 2026):** TrueAsync (`php-async` extension) has been **removed** from the active stack. After 3 hours rebuilding the Docker environment and the VS Code devcontainer, the project now runs as a standard Mezzio application served by the **PHP built-in web server** (`php -S`) inside a `php:latest` Docker container. There is **no PHP-FPM and no nginx** in the active devcontainer stack. The decision was driven by current usability issues in TrueAsync (SIGABRT crashes, `proc_open` incompatibility inside coroutines, devcontainer instability). The `src/mezzio-async/` source tree and all TrueAsync planning docs (`docs/planning/php-async-api.md`, `docs/planning/trueasync-bugs.md`) are **retained** for future reintegration once the extension matures.
 >
@@ -130,22 +130,48 @@ the full Reporting nav section. This is intentional (these are detail pages).
 
 ---
 
-## Next Steps (not yet started)
-1. **Start Mezzio handler/template layer** — use the `htmx-mezzio` SKILL.md for the
-   3-layer rendering stack (layout / body / page).
-2. **Integrate ZXing-js** into `process-manifest` for real camera scanning.
-3. **Analytics endpoint** — JSON response for Chart.js data arrays.
-4. **Analytics — date range switching** — the 30d/90d/6mo buttons in the topbar are
-   wired visually but not yet functional; will need an HTMX swap on the chart data.
-5. **mezzio-authorization-acl config** — create `config/autoload/authorization.global.php`
-   with `mezzio-authorization-acl` block (roles, resources = route names, allow rules).
-   Add `AuthorizationInterface::class => LaminasAcl::class` alias.
-6. **Template stubs** — `src/User/templates/user/` (login, list-users, create-user, edit-user).
-7. **Manifest, Inventory, Fulfilment modules** — not started.
+## Next Steps
+
+### Immediate (todo list)
+1. ~~**Wire `LoginCommand` into login flow`**~~ — **superseded**. Auth audit logging is
+   handled by dispatching `LogEvent(LogChannel::Security)` from `UserRepository::authenticate()`.
+   `src/User/src/Command/LoginCommand.php` stub is still empty; can be removed or kept.
+2. **Migrate password requirements validator** — user has one in another project; needs
+   adaptation for this codebase.
+3. **Phase 5 — RouteMapManager management UI** ← **NEXT** — Admin UI for managing
+   route→resource+privilege mappings in `acl_route_map` table. The `webware-acl` module
+   will also register a PSR-14 listener for `CollectDashboardWidgetsEvent` that contributes
+   an **ACL overview widget** to the admin dashboard. The widget provides navigation links
+   to the ACL management pages (route map, roles, resources, rules) and overview counts
+   (e.g. roles, resources, rules). Needs: handler, template, route (`admin.acl.routes`),
+   ACL grant for Administrator role, `AclDashboardWidget` + `CollectAclWidgetListener`
+   in `webware-acl`. Load `htmx-mezzio` SKILL before implementing templates.
+
+### Authorization phases
+4. **Phase 5 — RouteMapManager management UI** — Admin UI for managing
+   route→resource+privilege mappings in `acl_route_map` table. Needs handler, template,
+   route, and ACL grant for Admin role. Load `htmx-mezzio` SKILL before implementing.
+5. **Phase 6 — Role/Resource/Rule management UI** — Admin CRUD for `acl_role`,
+   `acl_resource`, `acl_privilege`, `acl_rule` tables. Must invalidate ACL cache
+   (increment `acl_version`) on any change.
+6. **Phase 7 — CommandBus privilege integration** — wire privilege checks into CommandBus
+   so commands can be authorized via ACL.
+
+### Other work (not yet started)
+7. **Migrate password requirements validator** — user has one in another project; needs
+   adaptation for this codebase.
+8. **Wire admin dashboard route** — once Phase 5 widget is in place, add
+   `CollectDashboardWidgetsMiddleware` to the admin dashboard route. See
+   `src/webware-admin/docs/dashboard-widget-system.md`.
+9. **Integrate ZXing-js** into `process-manifest` for real camera scanning.
+9. **Analytics endpoint** — JSON response for Chart.js data arrays.
+10. **Analytics — date range switching** — the 30d/90d/6mo buttons are wired visually but
+    not yet functional; will need an HTMX swap on chart data.
+11. **Manifest, Inventory, Fulfilment modules** — not started.
 
 ---
 
-## Application Layer Status (as of April 27, 2026)
+## Application Layer Status (as of May 5, 2026)
 
 ### Packages Installed
 - `mezzio/mezzio-authentication ^1.13`
@@ -208,6 +234,117 @@ See `.github/instructions/phpdb-sql-queries.instructions.md`.
 ### RegistrationHandler — pending fix
 - `src/User/src/RequestHandler/RegistrationHandler.php` still uses `$request->hasHeader(HtmxRequestHeader::Request->value)`. Should use `$request->getAttribute(HtmxRequestHeader::Request->value)` because `ServerRequestFilter` maps HTMX headers to attributes. **Not yet changed** — confirm before applying.
 
+### Authorization / ACL (`src/webware-acl/src/`) — ✅ Namespace refactor complete (May 6, 2026)
+
+Full authorization system was implemented in the May 5 session. On May 6 the entire
+namespace was reorganised — the `Webware\Acl\Acl\*` double-segment was eliminated.
+
+**Current file layout:**
+
+```
+src/webware-acl/src/
+  Acl.php                          Webware\Acl\Acl
+  AclBuilder.php                   Webware\Acl\AclBuilder
+  AclInterface.php                 Webware\Acl\AclInterface
+  ConfigProvider.php
+  Authentication/
+    DefaultUserFactory.php         Webware\Acl\Authentication\DefaultUserFactory
+  Cache/
+    AclCacheInterface.php
+    FileAclCache.php
+  Container/                       ← ALL factories live here
+    AclBuilderFactory.php
+    AclFactory.php
+    AclRepositoryFactory.php
+    AuthorizationMiddlewareFactory.php
+    FileAclCacheFactory.php
+    IdentityMiddlewareFactory.php
+  Entity/
+  Event/
+  Exception/
+  Middleware/                      ← ALL middleware live here
+    AuthorizationMiddleware.php    Webware\Acl\Middleware\AuthorizationMiddleware
+    IdentityMiddleware.php         Webware\Acl\Middleware\IdentityMiddleware
+  Repository/
+    AclRepository.php
+    AclRepositoryInterface.php
+```
+
+**Consumer files updated:**
+- `src/User/src/RouteProvider.php` — `use Webware\Acl\Middleware\AuthorizationMiddleware`
+- `src/App/src/RouteProvider.php` — `use Webware\Acl\Middleware\AuthorizationMiddleware`
+- `config/pipeline.php` — `use Webware\Acl\Middleware\IdentityMiddleware`
+
+**Config shape (unchanged):**
+```php
+'webware-acl' => [
+    'base_role'  => 'guest',
+    'login_path' => '/login',
+]
+```
+
+### Auth Audit Logging — ✅ Complete (May 6, 2026)
+`UserRepository::authenticate()` dispatches a `LogEvent(LogChannel::Security, Level::Info)`
+on successful authentication. `EventDispatcherInterface` injected via constructor.
+`UserRepositoryFactory` updated to inject it. No vendor modification required.
+
+### `User\Entity\User` — Bug fixed (May 6, 2026)
+All 9 `with*()` methods were missing `$this->verificationToken, $this->tokenCreatedAt`
+arguments (constructor positions 10–11). `$this->roles` was landing in the
+`verificationToken` slot. All methods now pass the full 13-argument constructor correctly.
+
+### Admin Dashboard Widget System (`src/webware-admin/src/`) — ✅ Complete (May 6, 2026)
+
+PSR-14 event-driven widget system for the admin dashboard. Modules contribute widgets
+by registering a single PSR-14 listener — zero changes to `webware-admin` per module.
+
+**File layout:**
+```
+src/webware-admin/src/
+  ConfigProvider.php
+  Container/
+    CollectDashboardWidgetsMiddlewareFactory.php
+    DashboardHandlerFactory.php
+  Event/
+    CollectDashboardWidgetsEvent.php   mutable collect event; addWidget() / getIterator()
+  Middleware/
+    CollectDashboardWidgetsMiddleware.php  dispatches event, filters, sets request attr
+  RequestHandler/
+    DashboardHandler.php               reads 'widgets' request attribute, renders template
+  Widget/
+    WidgetInterface.php                PHP 8.4 get-hooked props; extends ResourceInterface
+    AclWidgetFilterIterator.php        FilterIterator — calls acl->isAllowed() per widget
+```
+
+**`WidgetInterface` contract:**
+```php
+interface WidgetInterface extends ResourceInterface
+{
+    public string $title      { get; }
+    public string $resourceId { get; }   // ACL resource — also satisfies getResourceId()
+    public string $privilege  { get; }
+    public string $template   { get; }   // e.g. 'product::admin-widget'
+    public int    $order      { get; }
+}
+```
+
+**Flow:** `CollectDashboardWidgetsMiddleware` dispatches `CollectDashboardWidgetsEvent` →
+listeners call `addWidget()` → `AclWidgetFilterIterator` wraps sorted `ArrayIterator` and
+filters by `acl->isAllowed($roles, $widget->resourceId, $widget->privilege)` → iterator
+set as `CollectDashboardWidgetsEvent::class` request attribute → `DashboardHandler` passes
+it to `admin::dashboard` template → template calls `$this->partial($widget->template, $widget)`.
+
+**Docs:** `src/webware-admin/docs/dashboard-widget-system.md`
+
+**Wiring the route (still TODO):**
+```php
+$app->get('/admin', [
+    AuthorizationMiddleware::class,
+    CollectDashboardWidgetsMiddleware::class,
+    DashboardHandler::class,
+], 'admin.dashboard');
+```
+
 ### phpdb Skill
 - `.github/skills/phpdb/SKILL.md` — created. Covers: `Sql` direct vs `TableGateway`, all DML patterns, last-insert-id, `Profiler` shape, `ProfilingDelegator` wiring, `mysql.local.php` config shape.
 
@@ -244,7 +381,8 @@ have a `$name` property. Planned fix: rename to `$commandName` in the command-bu
 
 ## Repo Info
 - Repository: `tyrsson/inventory-management-system`
-- Branch: `finish-up-registration` (active), `0.1.x` (default)
+- Branch: `build-authorization` (active), `0.1.x` (default)
+- Active PR: #12 — "Initial commit of webware-acl setup and wiring"
 - Workspace: `/workspaces/inventory-management-system`
 - v2 mockup path: `resources/ui-mockup/v2/`
 - Planning docs: `docs/planning/`
