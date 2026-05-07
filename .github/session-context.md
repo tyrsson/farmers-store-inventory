@@ -1,5 +1,5 @@
 # Session Context — Inventory Management System
-_Last updated: May 6, 2026_
+_Last updated: May 7, 2026_
 
 > **⚠ Runtime environment changed (April 28, 2026):** TrueAsync (`php-async` extension) has been **removed** from the active stack. After 3 hours rebuilding the Docker environment and the VS Code devcontainer, the project now runs as a standard Mezzio application served by the **PHP built-in web server** (`php -S`) inside a `php:latest` Docker container. There is **no PHP-FPM and no nginx** in the active devcontainer stack. The decision was driven by current usability issues in TrueAsync (SIGABRT crashes, `proc_open` incompatibility inside coroutines, devcontainer instability). The `src/mezzio-async/` source tree and all TrueAsync planning docs (`docs/planning/php-async-api.md`, `docs/planning/trueasync-bugs.md`) are **retained** for future reintegration once the extension matures.
 >
@@ -138,40 +138,75 @@ the full Reporting nav section. This is intentional (these are detail pages).
    `src/User/src/Command/LoginCommand.php` stub is still empty; can be removed or kept.
 2. **Migrate password requirements validator** — user has one in another project; needs
    adaptation for this codebase.
-3. **Phase 5 — RouteMapManager management UI** ← **NEXT** — Admin UI for managing
-   route→resource+privilege mappings in `acl_route_map` table. The `webware-acl` module
-   will also register a PSR-14 listener for `CollectDashboardWidgetsEvent` that contributes
-   an **ACL overview widget** to the admin dashboard. The widget provides navigation links
-   to the ACL management pages (route map, roles, resources, rules) and overview counts
-   (e.g. roles, resources, rules). Needs: handler, template, route (`admin.acl.routes`),
-   ACL grant for Administrator role, `AclDashboardWidget` + `CollectAclWidgetListener`
-   in `webware-acl`. Load `htmx-mezzio` SKILL before implementing templates.
+3. **Phase 5 — ACL listener wiring + AclDashboardWidget** ← **NEXT SPRINT PRIORITY**
+   Full plan in `docs/planning/feature-admin-acl-listener-wiring-1.md`. Summary:
+   - **Phase 1**: Augment `AclBuiltEvent` to carry a mutable route mappings registry
+     (`addRouteMapping()` / `getRouteMappings()`); update `AclBuilder::buildFromArrays()`
+     to read back listener-augmented mappings after dispatch.
+   - **Phase 2**: Three listener classes in `src/webware-admin/src/Listener/`:
+     `RegisterAdminResourcesListener` (on `ResourcesLoadedEvent`),
+     `RegisterAdminRulesListener` (on `RulesLoadedEvent`),
+     `RegisterAdminRouteMappingsListener` (on `AclBuiltEvent`).
+   - **Phase 3**: Factories + wire `ConfigProvider` listeners key.
+   - **Phase 4**: Remove `admin.dashboard` rows from `999_seed.sql` (prevent double-registration).
+   - **Phase 5**: Unit tests for all new listeners and the augmented event.
+   - Separately: `AclDashboardWidget` + `RegisterAclWidgetListener` in `webware-acl`
+     contributing an ACL overview widget to the admin dashboard.
+   - Load `htmx-mezzio` SKILL before implementing any templates.
 
 ### Authorization phases
-4. **Phase 5 — RouteMapManager management UI** — Admin UI for managing
+4. **Phase 6 — RouteMapManager management UI** — Admin UI for managing
    route→resource+privilege mappings in `acl_route_map` table. Needs handler, template,
-   route, and ACL grant for Admin role. Load `htmx-mezzio` SKILL before implementing.
-5. **Phase 6 — Role/Resource/Rule management UI** — Admin CRUD for `acl_role`,
+   route, and ACL grant for Admin/Developer roles. Load `htmx-mezzio` SKILL before implementing.
+5. **Phase 7 — Role/Resource/Rule management UI** — Admin CRUD for `acl_role`,
    `acl_resource`, `acl_privilege`, `acl_rule` tables. Must invalidate ACL cache
    (increment `acl_version`) on any change.
-6. **Phase 7 — CommandBus privilege integration** — wire privilege checks into CommandBus
+6. **Phase 8 — CommandBus privilege integration** — wire privilege checks into CommandBus
    so commands can be authorized via ACL.
 
 ### Other work (not yet started)
-7. **Migrate password requirements validator** — user has one in another project; needs
-   adaptation for this codebase.
-8. **Wire admin dashboard route** — once Phase 5 widget is in place, add
-   `CollectDashboardWidgetsMiddleware` to the admin dashboard route. See
-   `src/webware-admin/docs/dashboard-widget-system.md`.
-9. **Integrate ZXing-js** into `process-manifest` for real camera scanning.
-9. **Analytics endpoint** — JSON response for Chart.js data arrays.
-10. **Analytics — date range switching** — the 30d/90d/6mo buttons are wired visually but
-    not yet functional; will need an HTMX swap on chart data.
-11. **Manifest, Inventory, Fulfilment modules** — not started.
+7. **Integrate ZXing-js** into `process-manifest` for real camera scanning.
+8. **Analytics endpoint** — JSON response for Chart.js data arrays.
+9. **Analytics — date range switching** — the 30d/90d/6mo buttons are wired visually but
+   not yet functional; will need an HTMX swap on chart data.
+10. **Manifest, Inventory, Fulfilment modules** — not started.
+
+### Future: `webware/composer-plugin`
+Feasibility assessed in `docs/planning/feature-admin-acl-listener-wiring-1.md` §10.
+Verdict: feasible and worthwhile. Suggested milestones:
+1. Cache invalidation only (no DB writes) — simplest scaffold
+2. ACL + route mapping DB writes (enables Approach B caching strategy)
+3. Schema migration runner
+Not started. Requires a separate package and separate plan.
 
 ---
 
-## Application Layer Status (as of May 5, 2026)
+### Developer Role — ✅ Added (May 7, 2026)
+`Developer` role added to `data/schema/002_role.sql` (comment) and `data/schema/999_seed.sql`.
+- Inherits from `Administrator` (sits above it in the hierarchy)
+- Explicit deny rules for `user/login` and `user/register` added (matches all authenticated role pattern)
+- Intended for developer tools, setup/config UI, and future `webware/composer-plugin` integration
+- No DB migration needed yet — applies on next clean seed
+
+### ACL Listener Wiring — Planning complete (May 7, 2026)
+Full implementation plan at `docs/planning/feature-admin-acl-listener-wiring-1.md`.
+Includes: 5 implementation phases, caching strategy analysis (Approach A chosen),
+and `webware/composer-plugin` feasibility assessment. See §9 and §10 of the plan.
+
+### Caching strategy decision (May 7, 2026)
+`FileAclCache` is explicitly a **DB-state cache only**. Listener-contributed ACL data
+(resources, rules, route mappings) is re-applied on every `buildFromArrays()` call via
+PSR-14 events — it is **not** written to or read from the cache file. This is the chosen
+approach (Approach A) for the current sprint. Migration to Approach B (write-once to DB
+via `webware/composer-plugin`) is planned as a future iteration.
+
+### Planning documents (May 7, 2026)
+- `docs/planning/feature-admin-acl-listener-wiring-1.md` — ACL listener wiring plan +
+  caching strategy decision + `webware/composer-plugin` feasibility
+
+---
+
+## Application Layer Status (as of May 7, 2026)
 
 ### Packages Installed
 - `mezzio/mezzio-authentication ^1.13`
@@ -293,27 +328,27 @@ All 9 `with*()` methods were missing `$this->verificationToken, $this->tokenCrea
 arguments (constructor positions 10–11). `$this->roles` was landing in the
 `verificationToken` slot. All methods now pass the full 13-argument constructor correctly.
 
-### Admin Dashboard Widget System (`src/webware-admin/src/`) — ✅ Complete (May 6, 2026)
+### Admin Dashboard Widget System (`src/webware-admin/src/`) — ✅ Complete + renamed (May 7, 2026)
 
 PSR-14 event-driven widget system for the admin dashboard. Modules contribute widgets
 by registering a single PSR-14 listener — zero changes to `webware-admin` per module.
 
-**File layout:**
+**File layout (post-rename):**
 ```
 src/webware-admin/src/
   ConfigProvider.php
   Container/
-    CollectDashboardWidgetsMiddlewareFactory.php
     DashboardHandlerFactory.php
+    DashboardMiddlewareFactory.php          (was CollectDashboardWidgetsMiddlewareFactory)
   Event/
-    CollectDashboardWidgetsEvent.php   mutable collect event; addWidget() / getIterator()
+    RegisterWidgetEvent.php                 (was CollectDashboardWidgetsEvent)
   Middleware/
-    CollectDashboardWidgetsMiddleware.php  dispatches event, filters, sets request attr
+    DashboardMiddleware.php                 (was CollectDashboardWidgetsMiddleware)
   RequestHandler/
-    DashboardHandler.php               reads 'widgets' request attribute, renders template
+    DashboardHandler.php
   Widget/
-    WidgetInterface.php                PHP 8.4 get-hooked props; extends ResourceInterface
-    AclWidgetFilterIterator.php        FilterIterator — calls acl->isAllowed() per widget
+    WidgetInterface.php                     PHP 8.4 get-hooked props; extends ResourceInterface
+    AclWidgetFilterIterator.php             FilterIterator — calls acl->isAllowed() per widget
 ```
 
 **`WidgetInterface` contract:**
@@ -328,22 +363,22 @@ interface WidgetInterface extends ResourceInterface
 }
 ```
 
-**Flow:** `CollectDashboardWidgetsMiddleware` dispatches `CollectDashboardWidgetsEvent` →
+**Flow:** `DashboardMiddleware` dispatches `RegisterWidgetEvent` →
 listeners call `addWidget()` → `AclWidgetFilterIterator` wraps sorted `ArrayIterator` and
 filters by `acl->isAllowed($roles, $widget->resourceId, $widget->privilege)` → iterator
-set as `CollectDashboardWidgetsEvent::class` request attribute → `DashboardHandler` passes
+set as `RegisterWidgetEvent::class` request attribute → `DashboardHandler` passes
 it to `admin::dashboard` template → template calls `$this->partial($widget->template, $widget)`.
 
-**Docs:** `src/webware-admin/docs/dashboard-widget-system.md`
-
-**Wiring the route (still TODO):**
+**Route — ✅ wired (May 7, 2026):**
 ```php
 $app->get('/admin', [
     AuthorizationMiddleware::class,
-    CollectDashboardWidgetsMiddleware::class,
+    DashboardMiddleware::class,
     DashboardHandler::class,
 ], 'admin.dashboard');
 ```
+
+**Docs:** `src/webware-admin/docs/dashboard-widget-system.md` (updated May 7)
 
 ### phpdb Skill
 - `.github/skills/phpdb/SKILL.md` — created. Covers: `Sql` direct vs `TableGateway`, all DML patterns, last-insert-id, `Profiler` shape, `ProfilingDelegator` wiring, `mysql.local.php` config shape.

@@ -9,7 +9,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Webware\Acl\AclInterface;
 use Webware\Admin\Middleware\DashboardMiddleware;
 
-final class CollectDashboardWidgetsMiddlewareFactory
+final class DashboardMiddlewareFactory
 {
     public function __invoke(ContainerInterface $container): DashboardMiddleware
     {

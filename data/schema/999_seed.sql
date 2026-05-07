@@ -16,7 +16,8 @@ INSERT INTO role (role_id) VALUES
     ('Credit Manager'),
     ('DC Warehouse'),
     ('Manager'),
-    ('Administrator')
+    ('Administrator'),
+    ('Developer')
 ON DUPLICATE KEY UPDATE role_id = VALUES(role_id);
 
 -- -----------------------------------------------------------------------------
@@ -80,7 +81,8 @@ JOIN role parent ON (
     (child.role_id = 'Credit Manager'      AND parent.role_id = 'Warehouse Supervisor') OR
     (child.role_id = 'DC Warehouse'        AND parent.role_id = 'Warehouse Supervisor') OR
     (child.role_id = 'Manager'             AND parent.role_id = 'DC Warehouse')      OR
-    (child.role_id = 'Administrator'       AND parent.role_id = 'Manager')
+    (child.role_id = 'Administrator'       AND parent.role_id = 'Manager')     OR
+    (child.role_id = 'Developer'            AND parent.role_id = 'Administrator')
 )
 ON DUPLICATE KEY UPDATE parent_pk = VALUES(parent_pk);
 
@@ -123,7 +125,7 @@ SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'deny'
 FROM role ro
 JOIN acl_privilege pr ON pr.privilege_id = 'login'
 JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = 'user'
-WHERE ro.role_id IN ('Sales','Warehouse','Warehouse Supervisor','Credit Manager','DC Warehouse','Manager','Administrator')
+WHERE ro.role_id IN ('Sales','Warehouse','Warehouse Supervisor','Credit Manager','DC Warehouse','Manager','Administrator','Developer')
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
 -- All authenticated roles deny: user → register
@@ -132,7 +134,7 @@ SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'deny'
 FROM role ro
 JOIN acl_privilege pr ON pr.privilege_id = 'register'
 JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = 'user'
-WHERE ro.role_id IN ('Sales','Warehouse','Warehouse Supervisor','Credit Manager','DC Warehouse','Manager','Administrator')
+WHERE ro.role_id IN ('Sales','Warehouse','Warehouse Supervisor','Credit Manager','DC Warehouse','Manager','Administrator','Developer')
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
 -- -----------------------------------------------------------------------------

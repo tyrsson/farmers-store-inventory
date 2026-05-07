@@ -3,7 +3,7 @@ title: Admin Dashboard Widget System - Technical Documentation
 component_path: src/webware-admin/src/
 version: 1.0.0
 date_created: 2026-05-06
-last_updated: 2026-05-06
+last_updated: 2026-05-07
 owner: Webware\Admin
 tags: [admin, dashboard, widget, psr-14, acl, mezzio]
 ---
@@ -17,7 +17,7 @@ A PSR-14 event-driven system that allows any module in the application to contri
 ### Purpose / Responsibility
 
 - Provide a standard contract (`WidgetInterface`) that any module can implement to expose an admin dashboard widget.
-- Dispatch a mutable `CollectDashboardWidgetsEvent` from request middleware so that registered listeners can contribute widgets.
+- Dispatch a mutable `RegisterWidgetEvent` from request middleware so that registered listeners can contribute widgets.
 - Filter the collected widgets through the ACL before the dashboard handler ever sees them — widgets the current user cannot access are invisible.
 - Allow each module to own its widget's visual rendering by providing a namespaced template path.
 
@@ -25,8 +25,8 @@ A PSR-14 event-driven system that allows any module in the application to contri
 
 **Included:**
 - `WidgetInterface` contract (PHP 8.4 get-hooked properties)
-- `CollectDashboardWidgetsEvent` — mutable PSR-14 collect event
-- `CollectDashboardWidgetsMiddleware` — dispatches the event, filters, sets request attribute
+- `RegisterWidgetEvent` — mutable PSR-14 event listeners call `addWidget()` on
+- `DashboardMiddleware` — dispatches the event, filters, sets request attribute
 - `AclWidgetFilterIterator` — PHP `FilterIterator` wrapping the ACL check
 - `DashboardHandler` — reads the filtered iterator and renders the dashboard template
 
@@ -43,8 +43,8 @@ A PSR-14 event-driven system that allows any module in the application to contri
 
 | Pattern | Where used |
 |---|---|
-| **Collect Event** (mutable PSR-14 event) | `CollectDashboardWidgetsEvent` — listeners push data in |
-| **Chain of Responsibility** | Middleware pipeline — `CollectDashboardWidgetsMiddleware` → `DashboardHandler` |
+| **Collect Event** (mutable PSR-14 event) | `RegisterWidgetEvent` — listeners push data in |
+| **Chain of Responsibility** | Middleware pipeline — `DashboardMiddleware` → `DashboardHandler` |
 | **Iterator / FilterIterator** | `AclWidgetFilterIterator` wraps `ArrayIterator<WidgetInterface>` |
 | **Interface Segregation** | `WidgetInterface` extends `Laminas\Permissions\Acl\Resource\ResourceInterface` |
 | **Factory** | Every service has a corresponding `*Factory` in `Container/` |
@@ -71,7 +71,7 @@ classDiagram
     }
 
     namespace Webware_Admin_Event {
-        class CollectDashboardWidgetsEvent {
+        class RegisterWidgetEvent {
             -WidgetInterface[] widgets
             +addWidget(WidgetInterface) void
             +getIterator() ArrayIterator
@@ -79,7 +79,7 @@ classDiagram
     }
 
     namespace Webware_Admin_Middleware {
-        class CollectDashboardWidgetsMiddleware {
+        class DashboardMiddleware {
             -EventDispatcherInterface dispatcher
             -AclInterface acl
             +process(request, handler) ResponseInterface
@@ -96,10 +96,10 @@ classDiagram
     WidgetInterface --|> ResourceInterface : extends
     AclWidgetFilterIterator --> WidgetInterface : filters
     AclWidgetFilterIterator --> AclInterface : isAllowed()
-    CollectDashboardWidgetsEvent --> WidgetInterface : collects
-    CollectDashboardWidgetsMiddleware --> CollectDashboardWidgetsEvent : dispatches
-    CollectDashboardWidgetsMiddleware --> AclWidgetFilterIterator : creates
-    DashboardHandler --> CollectDashboardWidgetsEvent : reads attribute
+    RegisterWidgetEvent --> WidgetInterface : collects
+    DashboardMiddleware --> RegisterWidgetEvent : dispatches
+    DashboardMiddleware --> AclWidgetFilterIterator : creates
+    DashboardHandler --> RegisterWidgetEvent : reads attribute
 ```
 
 ### Request Data Flow
@@ -107,19 +107,19 @@ classDiagram
 ```mermaid
 sequenceDiagram
     participant Route Pipeline
-    participant CollectDashboardWidgetsMiddleware
+    participant DashboardMiddleware
     participant EventDispatcher
     participant ModuleListener
     participant AclWidgetFilterIterator
     participant DashboardHandler
     participant Template
 
-    Route Pipeline->>CollectDashboardWidgetsMiddleware: process(request)
-    CollectDashboardWidgetsMiddleware->>EventDispatcher: dispatch(CollectDashboardWidgetsEvent)
+    Route Pipeline->>DashboardMiddleware: process(request)
+    DashboardMiddleware->>EventDispatcher: dispatch(RegisterWidgetEvent)
     EventDispatcher->>ModuleListener: __invoke(event)
-    ModuleListener->>CollectDashboardWidgetsEvent: addWidget(widget)
-    CollectDashboardWidgetsMiddleware->>AclWidgetFilterIterator: new(event->getIterator(), acl, roles)
-    CollectDashboardWidgetsMiddleware->>Route Pipeline: request->withAttribute(iterator)
+    ModuleListener->>RegisterWidgetEvent: addWidget(widget)
+    DashboardMiddleware->>AclWidgetFilterIterator: new(event->getIterator(), acl, roles)
+    DashboardMiddleware->>Route Pipeline: request->withAttribute(iterator)
     Route Pipeline->>DashboardHandler: handle(request)
     DashboardHandler->>Template: render('admin::dashboard', ['widgets' => iterator])
     loop foreach widget
@@ -146,16 +146,16 @@ Extends `Laminas\Permissions\Acl\Resource\ResourceInterface` so widgets can be p
 
 All properties must be declared with a `get` hook — PHP 8.4 asymmetric visibility.
 
-### `CollectDashboardWidgetsEvent`
+### `RegisterWidgetEvent`
 
 | Method | Parameters | Returns | Description |
 |---|---|---|---|
 | `addWidget()` | `WidgetInterface $widget` | `void` | Appends a widget; called by module listeners |
 | `getIterator()` | — | `ArrayIterator<int, WidgetInterface>` | Returns widgets sorted ascending by `$order` |
 
-### `CollectDashboardWidgetsMiddleware`
+### `DashboardMiddleware`
 
-Sets the `CollectDashboardWidgetsEvent::class` request attribute to an `AclWidgetFilterIterator`. Must be placed in the route pipeline **after** `IdentityMiddleware` so `UserInterface` is already on the request.
+Sets the `RegisterWidgetEvent::class` request attribute to an `AclWidgetFilterIterator`. Must be placed in the route pipeline **after** `IdentityMiddleware` so `UserInterface` is already on the request.
 
 ### `AclWidgetFilterIterator`
 
@@ -198,7 +198,7 @@ namespace Product\Admin\EventListener;
 
 use Product\Admin\Widget\ProductsWidget;
 use Product\Repository\ProductRepositoryInterface;
-use Webware\Admin\Event\CollectDashboardWidgetsEvent;
+use Webware\Admin\Event\RegisterWidgetEvent;
 
 final class CollectProductWidgetListener
 {
@@ -206,7 +206,7 @@ final class CollectProductWidgetListener
         private readonly ProductRepositoryInterface $products,
     ) {}
 
-    public function __invoke(CollectDashboardWidgetsEvent $event): void
+    public function __invoke(RegisterWidgetEvent $event): void
     {
         $event->addWidget(new ProductsWidget($this->products->count()));
     }
@@ -217,7 +217,7 @@ final class CollectProductWidgetListener
 
 ```php
 'listeners' => [
-    CollectDashboardWidgetsEvent::class => [
+    RegisterWidgetEvent::class => [
         CollectProductWidgetListener::class,
     ],
 ],
@@ -243,10 +243,10 @@ final class CollectProductWidgetListener
 ### Wiring the Middleware into the Admin Dashboard Route
 
 ```php
-// In RouteProvider or pipeline config
+// In RouteProvider
 $app->get('/admin', [
     AuthorizationMiddleware::class,
-    CollectDashboardWidgetsMiddleware::class,
+    DashboardMiddleware::class,
     DashboardHandler::class,
 ], 'admin.dashboard');
 ```
@@ -278,7 +278,7 @@ $app->get('/admin', [
 - Each widget fully owns its template; the dashboard template is layout-only.
 
 ### Maintainability
-- `CollectDashboardWidgetsMiddleware` has two injected dependencies (`EventDispatcherInterface`, `AclInterface`) — both are interfaces, fully testable with mocks.
+- `DashboardMiddleware` has two injected dependencies (`EventDispatcherInterface`, `AclInterface`) — both are interfaces, fully testable with mocks.
 - `AclWidgetFilterIterator` delegates all ACL logic to `AclInterface::isAllowed()` — no ACL implementation leaks into the widget layer.
 
 ---
@@ -302,9 +302,9 @@ No dedicated configuration key. Widgets contribute to `config['listeners']` in t
 
 ### Testing
 
-- **`CollectDashboardWidgetsMiddleware`**: mock `EventDispatcherInterface` to return a pre-populated event; assert the request attribute is an `AclWidgetFilterIterator`.
+- **`DashboardMiddleware`**: mock `EventDispatcherInterface` to return a pre-populated event; assert the request attribute is an `AclWidgetFilterIterator`.
 - **`AclWidgetFilterIterator`**: stub `AclInterface::isAllowed()` to return `true`/`false`; assert only permitted widgets are yielded.
-- **`CollectDashboardWidgetsEvent`**: assert `getIterator()` returns widgets sorted by `$order`.
+- **`RegisterWidgetEvent`**: assert `getIterator()` returns widgets sorted by `$order`.
 - **Widget implementations**: construct directly and assert property values.
 
 ### Related Documentation

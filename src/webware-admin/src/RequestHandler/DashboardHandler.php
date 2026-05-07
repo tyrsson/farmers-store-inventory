@@ -10,7 +10,7 @@ use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Webware\Admin\Event\CollectDashboardWidgetsEvent;
+use Webware\Admin\Event\RegisterWidgetEvent;
 
 final class DashboardHandler implements RequestHandlerInterface
 {
@@ -22,7 +22,7 @@ final class DashboardHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         return new HtmlResponse($this->template->render('admin::dashboard', [
-            'widgets' => $request->getAttribute(CollectDashboardWidgetsEvent::class, []),
+            'widgets' => $request->getAttribute(RegisterWidgetEvent::class, []),
         ]));
     }
 }
