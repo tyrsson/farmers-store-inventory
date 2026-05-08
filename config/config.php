@@ -48,7 +48,7 @@ $aggregator = new ConfigAggregator([
             return [];
         },
     // Module config
-    User\ConfigProvider::class,
+    Webware\UserManager\ConfigProvider::class,
     WebwareAclConfigProvider::class,
     // Default App module config
     ConfigProvider::class,
