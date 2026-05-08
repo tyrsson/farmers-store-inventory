@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of the Webware Farmers Store Inventory package.
+ * This file is part of the Webware\Acl package.
  *
  * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
  * and contributors.
@@ -12,6 +12,8 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace User\Command;
+namespace Webware\Acl\Exception;
 
-final class LoginCommand {}
+interface ExceptionInterface
+{
+}

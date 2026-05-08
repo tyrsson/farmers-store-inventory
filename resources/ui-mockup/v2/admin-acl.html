@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACL Manager | Farmers IMS Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="custom.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOP NAVBAR
+════════════════════════════════════════════════════════════ -->
+<nav class="navbar fixed-top ims-topbar bg-body-tertiary border-bottom border-secondary-subtle px-3">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <button class="btn btn-sm btn-link text-body p-1 d-lg-none"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#imsSidebar"
+                aria-controls="imsSidebar"
+                aria-label="Open navigation">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div>
+            <div class="fw-bold lh-1 small">ACL Manager</div>
+            <div class="text-secondary" style="font-size:0.7rem;">Administration › Access Control</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="ims-avatar"
+             data-bs-toggle="tooltip"
+             data-bs-title="James Walker — Administrator">JW</div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════════════════ -->
+<div class="offcanvas-lg offcanvas-start ims-sidebar bg-body-tertiary border-end border-secondary-subtle d-flex flex-column"
+     tabindex="-1"
+     id="imsSidebar"
+     aria-labelledby="imsSidebarLabel">
+
+    <div class="offcanvas-header border-bottom border-secondary-subtle">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-boxes fs-4 text-primary"></i>
+            <div>
+                <div class="fw-bold lh-1" id="imsSidebarLabel">Farmers IMS</div>
+                <div class="text-secondary" style="font-size:0.7rem;">Inventory Management</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#imsSidebar" aria-label="Close"></button>
+    </div>
+
+    <div class="px-3 py-2 border-bottom border-secondary-subtle">
+        <div class="text-secondary" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;">Active Store</div>
+        <div class="fw-semibold small">Store #207 · Leeds, AL</div>
+    </div>
+
+    <div class="offcanvas-body p-2 d-flex flex-column flex-grow-1 overflow-y-auto">
+        <div class="sidebar-section-label">Main</div>
+        <nav class="nav flex-column gap-1">
+            <a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i> Inventory</a>
+            <a href="manifests.html" class="nav-link"><i class="bi bi-clipboard2-data"></i> Manifests</a>
+            <a href="tickets.html" class="nav-link"><i class="bi bi-receipt"></i> Tickets</a>
+            <a href="transfers.html" class="nav-link"><i class="bi bi-arrow-left-right"></i> Transfers</a>
+        </nav>
+
+        <div class="sidebar-section-label mt-2">Administration</div>
+        <nav class="nav flex-column gap-1">
+            <a href="admin-dashboard.html" class="nav-link">
+                <i class="bi bi-speedometer2"></i> Admin Dashboard
+            </a>
+            <button class="nav-link d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#aclSubNav"
+                    aria-expanded="true"
+                    aria-controls="aclSubNav">
+                <i class="bi bi-shield-lock text-primary"></i>
+                <span class="flex-grow-1" style="color:var(--bs-primary);">ACL Manager</span>
+                <i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
+            </button>
+            <div class="collapse show" id="aclSubNav">
+                <div class="d-flex flex-column gap-1 ps-3">
+                    <a href="admin-acl.html" class="nav-link py-1 active" aria-current="page" style="font-size:.8125rem;">
+                        <i class="bi bi-grid-3x3-gap"></i> Overview
+                    </a>
+                    <a href="admin-acl-roles.html" class="nav-link py-1" style="font-size:.8125rem;">
+                        <i class="bi bi-people"></i> Roles
+                    </a>
+                    <a href="admin-acl-resources.html" class="nav-link py-1" style="font-size:.8125rem;">
+                        <i class="bi bi-collection"></i> Resources
+                    </a>
+                    <a href="admin-acl-rules.html" class="nav-link py-1" style="font-size:.8125rem;">
+                        <i class="bi bi-toggles"></i> Rules
+                    </a>
+                    <a href="admin-acl-routes.html" class="nav-link py-1" style="font-size:.8125rem;">
+                        <i class="bi bi-signpost-split"></i> Route Map
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="sidebar-section-label mt-2">Reporting</div>
+        <nav class="nav flex-column gap-1">
+            <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart-line"></i> Analytics</a>
+        </nav>
+
+        <div class="mt-auto pt-2 border-top border-secondary-subtle">
+            <nav class="nav flex-column gap-1">
+                <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+                <a href="login.html" class="nav-link"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════════════ -->
+<div class="ims-layout">
+    <main class="ims-main p-3 p-lg-4">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item"><a href="admin-dashboard.html">Admin</a></li>
+                <li class="breadcrumb-item active" aria-current="page">ACL Manager</li>
+            </ol>
+        </nav>
+
+        <!-- Page header -->
+        <div class="d-flex align-items-start justify-content-between mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-shield-lock text-primary fs-5"></i>
+                    <h1 class="h4 fw-bold mb-0">ACL Manager</h1>
+                </div>
+                <p class="text-secondary small mb-0">Manage roles, resources, privileges, rules, and route mappings.</p>
+            </div>
+            <span class="badge bg-body-tertiary border text-secondary" style="font-size:.72rem;">
+                Cache v14 &nbsp;·&nbsp; rebuilt 2m ago
+            </span>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+            <div class="col">
+                <a href="admin-acl-roles.html" class="card h-100 text-decoration-none" style="border-color:rgba(var(--bs-primary-rgb),.25);">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-people fs-3 text-primary mb-2 d-block"></i>
+                        <div class="fs-2 fw-bold">9</div>
+                        <div class="text-secondary small">Roles</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col">
+                <a href="admin-acl-resources.html" class="card h-100 text-decoration-none">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-collection fs-3 text-primary mb-2 d-block"></i>
+                        <div class="fs-2 fw-bold">12</div>
+                        <div class="text-secondary small">Resources</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col">
+                <a href="admin-acl-rules.html" class="card h-100 text-decoration-none">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-toggles fs-3 text-primary mb-2 d-block"></i>
+                        <div class="fs-2 fw-bold">47</div>
+                        <div class="text-secondary small">Rules</div>
+                    </div>
+                </a>
+            </div>
+            <div class="col">
+                <a href="admin-acl-routes.html" class="card h-100 text-decoration-none">
+                    <div class="card-body text-center py-3">
+                        <i class="bi bi-signpost-split fs-3 text-primary mb-2 d-block"></i>
+                        <div class="fs-2 fw-bold">18</div>
+                        <div class="text-secondary small">Route Maps</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Role hierarchy summary -->
+        <div class="card mb-4">
+            <div class="card-header d-flex align-items-center gap-2 py-2">
+                <i class="bi bi-diagram-3 text-primary"></i>
+                <span class="fw-semibold small">Role Hierarchy</span>
+                <a href="admin-acl-roles.html" class="ms-auto btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.75rem;">
+                    Manage <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="card-body py-3">
+                <!-- Tree view — purely visual for mockup -->
+                <div class="d-flex flex-column gap-1" style="font-size:.875rem; font-family: monospace;">
+                    <div class="text-secondary">guest <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.65rem;">unauthenticated</span></div>
+                    <div class="ps-3">└── <span class="text-body">Sales</span></div>
+                    <div class="ps-5">└── <span class="text-body">Warehouse</span></div>
+                    <div class="ps-5" style="margin-left:3rem;">└── <span class="text-body">DC Warehouse</span></div>
+                    <div class="ps-5" style="margin-left:4.5rem;">└── <span class="text-body">Credit Manager</span></div>
+                    <div class="ps-5" style="margin-left:6rem;">└── <span class="text-body">Warehouse Supervisor</span></div>
+                    <div class="ps-5" style="margin-left:7.5rem;">└── <span class="text-body">Manager</span></div>
+                    <div class="ps-5" style="margin-left:9rem;">└── <span class="text-body">Administrator</span> <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.65rem;">you</span></div>
+                    <div class="ps-5" style="margin-left:10.5rem;">└── <span class="text-body">Developer</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick access row -->
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center gap-2 py-2">
+                        <i class="bi bi-toggles text-primary"></i>
+                        <span class="fw-semibold small">Recent Rule Changes</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                <div style="font-size:.8125rem;">
+                                    <span class="badge bg-success-subtle border border-success-subtle text-success me-1">allow</span>
+                                    Manager → admin.user / read
+                                </div>
+                                <span class="text-secondary" style="font-size:.72rem;">5m ago</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                <div style="font-size:.8125rem;">
+                                    <span class="badge bg-success-subtle border border-success-subtle text-success me-1">allow</span>
+                                    Manager → admin.user / create
+                                </div>
+                                <span class="text-secondary" style="font-size:.72rem;">5m ago</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                <div style="font-size:.8125rem;">
+                                    <span class="badge bg-danger-subtle border border-danger-subtle text-danger me-1">deny</span>
+                                    Sales → admin.dashboard / read
+                                </div>
+                                <span class="text-secondary" style="font-size:.72rem;">2h ago</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center gap-2 py-2">
+                        <i class="bi bi-signpost-split text-primary"></i>
+                        <span class="fw-semibold small">Unmapped Routes</span>
+                        <span class="ms-auto badge bg-warning-subtle border border-warning-subtle text-warning">2</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                <div style="font-size:.8125rem;">
+                                    <code class="text-warning">admin.acl.rules</code>
+                                </div>
+                                <a href="admin-acl-routes.html" class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size:.72rem;">Map</a>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                <div style="font-size:.8125rem;">
+                                    <code class="text-warning">admin.acl.routes</code>
+                                </div>
+                                <a href="admin-acl-routes.html" class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size:.72rem;">Map</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-footer py-1">
+                        <a href="admin-acl-routes.html" class="btn btn-sm btn-outline-secondary w-100 py-0" style="font-size:.75rem;">
+                            View all route mappings <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

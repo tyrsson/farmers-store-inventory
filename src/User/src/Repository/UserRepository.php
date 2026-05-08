@@ -14,11 +14,15 @@ declare(strict_types=1);
 
 namespace User\Repository;
 
+use Axleus\Log\Event\LogEvent;
+use Axleus\Log\LogChannel;
 use DateTimeImmutable;
 use Mezzio\Authentication\UserInterface;
+use Monolog\Level;
 use PhpDb\Adapter\AdapterInterface;
 use PhpDb\Sql\Sql;
 use PhpDb\TableGateway\TableGateway;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use User\Entity\User;
 
 use function password_verify;
@@ -31,6 +35,7 @@ final class UserRepository implements UserRepositoryInterface
         private readonly AdapterInterface $adapter,
         /** @var callable(string, string[], array<string,mixed>): UserInterface */
         private readonly mixed $userFactory,
+        private readonly EventDispatcherInterface $dispatcher,
     ) {
         $this->gateway = new TableGateway('user', $adapter);
     }
@@ -47,11 +52,19 @@ final class UserRepository implements UserRepositoryInterface
             return null;
         }
 
-        return ($this->userFactory)(
+        $authenticatedUser = ($this->userFactory)(
             $user->getIdentity(),
             $user->getRoles(),
             $user->getDetails(),
         );
+
+        $this->dispatcher->dispatch(
+            (new LogEvent(LogChannel::Security, Level::Info))
+                ->setMessage($user->displayName . ' authenticated successfully.')
+                ->setContext(['identity' => $user->getIdentity()])
+        );
+
+        return $authenticatedUser;
     }
 
     public function findByEmail(string $email): ?User
