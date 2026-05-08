@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resources | ACL Manager | Farmers IMS Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="custom.css" />
+</head>
+<body>
+
+<!-- TOP NAVBAR -->
+<nav class="navbar fixed-top ims-topbar bg-body-tertiary border-bottom border-secondary-subtle px-3">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <button class="btn btn-sm btn-link text-body p-1 d-lg-none" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#imsSidebar" aria-controls="imsSidebar" aria-label="Open navigation">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div>
+            <div class="fw-bold lh-1 small">Resources &amp; Privileges</div>
+            <div class="text-secondary" style="font-size:0.7rem;">Administration › ACL Manager</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="ims-avatar">JW</div>
+    </div>
+</nav>
+
+<!-- SIDEBAR -->
+<div class="offcanvas-lg offcanvas-start ims-sidebar bg-body-tertiary border-end border-secondary-subtle d-flex flex-column"
+     tabindex="-1" id="imsSidebar" aria-labelledby="imsSidebarLabel">
+    <div class="offcanvas-header border-bottom border-secondary-subtle">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-boxes fs-4 text-primary"></i>
+            <div><div class="fw-bold lh-1" id="imsSidebarLabel">Farmers IMS</div><div class="text-secondary" style="font-size:0.7rem;">Inventory Management</div></div>
+        </div>
+        <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#imsSidebar" aria-label="Close"></button>
+    </div>
+    <div class="px-3 py-2 border-bottom border-secondary-subtle">
+        <div class="text-secondary" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;">Active Store</div>
+        <div class="fw-semibold small">Store #207 · Leeds, AL</div>
+    </div>
+    <div class="offcanvas-body p-2 d-flex flex-column flex-grow-1 overflow-y-auto">
+        <div class="sidebar-section-label">Main</div>
+        <nav class="nav flex-column gap-1">
+            <a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i> Inventory</a>
+            <a href="manifests.html" class="nav-link"><i class="bi bi-clipboard2-data"></i> Manifests</a>
+            <a href="tickets.html" class="nav-link"><i class="bi bi-receipt"></i> Tickets</a>
+            <a href="transfers.html" class="nav-link"><i class="bi bi-arrow-left-right"></i> Transfers</a>
+        </nav>
+        <div class="sidebar-section-label mt-2">Administration</div>
+        <nav class="nav flex-column gap-1">
+            <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Admin Dashboard</a>
+            <button class="nav-link d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#aclSubNav" aria-expanded="true">
+                <i class="bi bi-shield-lock text-primary"></i>
+                <span class="flex-grow-1" style="color:var(--bs-primary);">ACL Manager</span>
+                <i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
+            </button>
+            <div class="collapse show" id="aclSubNav">
+                <div class="d-flex flex-column gap-1 ps-3">
+                    <a href="admin-acl.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-grid-3x3-gap"></i> Overview</a>
+                    <a href="admin-acl-roles.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-people"></i> Roles</a>
+                    <a href="admin-acl-resources.html" class="nav-link py-1 active" aria-current="page" style="font-size:.8125rem;"><i class="bi bi-collection"></i> Resources</a>
+                    <a href="admin-acl-rules.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-toggles"></i> Rules</a>
+                    <a href="admin-acl-routes.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-signpost-split"></i> Route Map</a>
+                </div>
+            </div>
+        </nav>
+        <div class="sidebar-section-label mt-2">Reporting</div>
+        <nav class="nav flex-column gap-1">
+            <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart-line"></i> Analytics</a>
+        </nav>
+        <div class="mt-auto pt-2 border-top border-secondary-subtle">
+            <nav class="nav flex-column gap-1">
+                <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+                <a href="login.html" class="nav-link"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="ims-layout">
+    <main class="ims-main p-3 p-lg-4">
+
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item"><a href="admin-dashboard.html">Admin</a></li>
+                <li class="breadcrumb-item"><a href="admin-acl.html">ACL Manager</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Resources</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-collection text-primary fs-5"></i>
+                    <h1 class="h4 fw-bold mb-0">Resources &amp; Privileges</h1>
+                </div>
+                <p class="text-secondary small mb-0">Resources define what can be protected. Privileges define how.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResourceModal">
+                <i class="bi bi-plus-lg me-1"></i> Add Resource
+            </button>
+        </div>
+
+        <!-- NOTE: Listener-registered resources (admin.dashboard, admin.acl, etc.)
+             are shown read-only — they are owned by their module and cannot be
+             edited or deleted here. Only DB-seeded resources are editable. -->
+
+        <!-- Resources accordion — each resource expands to show its privileges -->
+        <div class="accordion" id="resourcesAccordion">
+
+            <!-- public (seed) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed py-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#res-public">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
+                            <code class="text-primary">public</code>
+                            <span class="text-secondary small">Public pages</span>
+                            <span class="badge bg-body-tertiary border text-secondary ms-auto me-2" style="font-size:.65rem;">seed</span>
+                            <span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">1 privilege</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="res-public" class="accordion-collapse collapse" data-bs-parent="#resourcesAccordion">
+                    <div class="accordion-body py-2 px-3">
+                        <table class="table table-sm mb-2">
+                            <thead><tr><th>Privilege</th><th>Label</th><th></th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>read</code></td>
+                                    <td class="text-secondary small">Read</td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:.75rem;">
+                            <i class="bi bi-plus-lg me-1"></i> Add Privilege
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- user (seed) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed py-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#res-user">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
+                            <code class="text-primary">user</code>
+                            <span class="text-secondary small">User authentication</span>
+                            <span class="badge bg-body-tertiary border text-secondary ms-auto me-2" style="font-size:.65rem;">seed</span>
+                            <span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">3 privileges</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="res-user" class="accordion-collapse collapse" data-bs-parent="#resourcesAccordion">
+                    <div class="accordion-body py-2 px-3">
+                        <table class="table table-sm mb-2">
+                            <thead><tr><th>Privilege</th><th>Label</th><th></th></tr></thead>
+                            <tbody>
+                                <tr><td><code>login</code></td><td class="text-secondary small">Login</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                                <tr><td><code>register</code></td><td class="text-secondary small">Register</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                                <tr><td><code>logout</code></td><td class="text-secondary small">Logout</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:.75rem;"><i class="bi bi-plus-lg me-1"></i> Add Privilege</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- dashboard (seed) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed py-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#res-dashboard">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
+                            <code class="text-primary">dashboard</code>
+                            <span class="text-secondary small">Main app dashboard</span>
+                            <span class="badge bg-body-tertiary border text-secondary ms-auto me-2" style="font-size:.65rem;">seed</span>
+                            <span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">1 privilege</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="res-dashboard" class="accordion-collapse collapse" data-bs-parent="#resourcesAccordion">
+                    <div class="accordion-body py-2 px-3">
+                        <table class="table table-sm mb-2">
+                            <thead><tr><th>Privilege</th><th>Label</th><th></th></tr></thead>
+                            <tbody>
+                                <tr><td><code>read</code></td><td class="text-secondary small">Read</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:.75rem;"><i class="bi bi-plus-lg me-1"></i> Add Privilege</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- admin.dashboard (listener — read-only) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed py-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#res-admin-dashboard">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
+                            <code class="text-primary">admin.dashboard</code>
+                            <span class="text-secondary small">Admin widget dashboard</span>
+                            <span class="badge bg-primary-subtle border border-primary-subtle text-primary ms-auto me-2" style="font-size:.65rem;">listener</span>
+                            <span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">1 privilege</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="res-admin-dashboard" class="accordion-collapse collapse" data-bs-parent="#resourcesAccordion">
+                    <div class="accordion-body py-2 px-3">
+                        <div class="alert alert-primary py-1 px-2 small mb-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Registered by <strong>webware-admin</strong> via <code>RegisterAdminResourcesListener</code>. Read-only — edit in source code.
+                        </div>
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Privilege</th><th>Label</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>read</code></td><td class="text-secondary small">Read</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- admin.acl (listener — read-only) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed py-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#res-admin-acl">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
+                            <code class="text-primary">admin.acl</code>
+                            <span class="text-secondary small">ACL management UI</span>
+                            <span class="badge bg-primary-subtle border border-primary-subtle text-primary ms-auto me-2" style="font-size:.65rem;">listener</span>
+                            <span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">4 privileges</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="res-admin-acl" class="accordion-collapse collapse" data-bs-parent="#resourcesAccordion">
+                    <div class="accordion-body py-2 px-3">
+                        <div class="alert alert-primary py-1 px-2 small mb-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Registered by <strong>webware-acl</strong> via <code>RegisterAclResourcesListener</code>. Read-only — edit in source code.
+                        </div>
+                        <table class="table table-sm mb-0">
+                            <thead><tr><th>Privilege</th><th>Label</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>read</code></td><td class="text-secondary small">Read</td></tr>
+                                <tr><td><code>create</code></td><td class="text-secondary small">Create</td></tr>
+                                <tr><td><code>update</code></td><td class="text-secondary small">Update</td></tr>
+                                <tr><td><code>delete</code></td><td class="text-secondary small">Delete</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- admin.user (seed) -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed py-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#res-admin-user">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
+                            <code class="text-primary">admin.user</code>
+                            <span class="text-secondary small">User management</span>
+                            <span class="badge bg-body-tertiary border text-secondary ms-auto me-2" style="font-size:.65rem;">seed</span>
+                            <span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">4 privileges</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="res-admin-user" class="accordion-collapse collapse" data-bs-parent="#resourcesAccordion">
+                    <div class="accordion-body py-2 px-3">
+                        <table class="table table-sm mb-2">
+                            <thead><tr><th>Privilege</th><th>Label</th><th></th></tr></thead>
+                            <tbody>
+                                <tr><td><code>read</code></td><td class="text-secondary small">Read</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                                <tr><td><code>create</code></td><td class="text-secondary small">Create</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                                <tr><td><code>update</code></td><td class="text-secondary small">Update</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                                <tr><td><code>delete</code></td><td class="text-secondary small">Delete</td><td class="text-end"><button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;"><i class="bi bi-pencil"></i></button></td></tr>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:.75rem;"><i class="bi bi-plus-lg me-1"></i> Add Privilege</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /accordion -->
+
+        <div class="mt-3 text-secondary small">
+            <i class="bi bi-info-circle me-1"></i>
+            <span class="badge bg-primary-subtle border border-primary-subtle text-primary me-1" style="font-size:.65rem;">listener</span>
+            Resources registered by module listeners are read-only here. They are defined in source code and applied on every request.
+        </div>
+
+    </main>
+</div>
+
+<!-- ADD RESOURCE MODAL -->
+<div class="modal fade" id="addResourceModal" tabindex="-1" aria-labelledby="addResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title small fw-bold" id="addResourceModalLabel"><i class="bi bi-plus-lg me-1"></i> Add Resource</h5>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Resource ID <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" placeholder="e.g. admin.manifest" />
+                        <div class="form-text">Lowercase, dot-separated. Must be unique.</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-semibold">Label <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" placeholder="e.g. Manifest Management" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary">Save Resource</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

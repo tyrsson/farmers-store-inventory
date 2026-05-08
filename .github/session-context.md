@@ -133,9 +133,13 @@ the full Reporting nav section. This is intentional (these are detail pages).
 ## Next Steps
 
 ### Immediate (todo list)
-1. ~~**Wire `LoginCommand` into login flow`**~~ — **superseded**. Auth audit logging is
+1. ~~**Wire `LoginCommand` into login flow`**~~ — **dropped**. Auth audit logging is
    handled by dispatching `LogEvent(LogChannel::Security)` from `UserRepository::authenticate()`.
-   `src/User/src/Command/LoginCommand.php` stub is still empty; can be removed or kept.
+   The `LoginCommand` stub has been deleted (May 8, 2026) — no replacement needed.
+   **`LogoutCommand`** — needed for forced session invalidation when: a user's role is
+   changed, their account is set inactive (termination), or they self-transition roles
+   (e.g. Warehouse → Sales). Will forcibly terminate their session so the new ACL state
+   takes effect immediately.
 2. **Migrate password requirements validator** — user has one in another project; needs
    adaptation for this codebase.
 3. **Phase 5 — ACL listener wiring + AclDashboardWidget** ← **NEXT SPRINT PRIORITY**

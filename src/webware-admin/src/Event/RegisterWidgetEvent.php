@@ -10,7 +10,7 @@ use Webware\Admin\Widget\WidgetInterface;
 use function usort;
 
 /**
- * Mutable collect event dispatched by CollectDashboardWidgetsMiddleware.
+ * Mutable collect event dispatched by DashboardMiddleware.
  *
  * Modules register PSR-14 listeners for this event and call addWidget()
  * to contribute their widget to the admin dashboard.
@@ -20,7 +20,7 @@ final class RegisterWidgetEvent
     /** @var WidgetInterface[] */
     private array $widgets = [];
 
-    public function addWidget(WidgetInterface $widget): void
+    public function registerWidget(WidgetInterface $widget): void
     {
         $this->widgets[] = $widget;
     }

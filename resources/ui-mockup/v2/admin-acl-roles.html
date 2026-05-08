@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roles | ACL Manager | Farmers IMS Admin</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="custom.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOP NAVBAR
+════════════════════════════════════════════════════════════ -->
+<nav class="navbar fixed-top ims-topbar bg-body-tertiary border-bottom border-secondary-subtle px-3">
+    <div class="d-flex align-items-center gap-2 flex-grow-1">
+        <button class="btn btn-sm btn-link text-body p-1 d-lg-none"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#imsSidebar"
+                aria-controls="imsSidebar"
+                aria-label="Open navigation">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <div>
+            <div class="fw-bold lh-1 small">Roles</div>
+            <div class="text-secondary" style="font-size:0.7rem;">Administration › ACL Manager</div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <div class="ims-avatar">JW</div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════════════════ -->
+<div class="offcanvas-lg offcanvas-start ims-sidebar bg-body-tertiary border-end border-secondary-subtle d-flex flex-column"
+     tabindex="-1"
+     id="imsSidebar"
+     aria-labelledby="imsSidebarLabel">
+
+    <div class="offcanvas-header border-bottom border-secondary-subtle">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-boxes fs-4 text-primary"></i>
+            <div><div class="fw-bold lh-1" id="imsSidebarLabel">Farmers IMS</div><div class="text-secondary" style="font-size:0.7rem;">Inventory Management</div></div>
+        </div>
+        <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#imsSidebar" aria-label="Close"></button>
+    </div>
+    <div class="px-3 py-2 border-bottom border-secondary-subtle">
+        <div class="text-secondary" style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em;">Active Store</div>
+        <div class="fw-semibold small">Store #207 · Leeds, AL</div>
+    </div>
+
+    <div class="offcanvas-body p-2 d-flex flex-column flex-grow-1 overflow-y-auto">
+        <div class="sidebar-section-label">Main</div>
+        <nav class="nav flex-column gap-1">
+            <a href="index.html" class="nav-link"><i class="bi bi-grid-fill"></i> Dashboard</a>
+            <a href="inventory.html" class="nav-link"><i class="bi bi-boxes"></i> Inventory</a>
+            <a href="manifests.html" class="nav-link"><i class="bi bi-clipboard2-data"></i> Manifests</a>
+            <a href="tickets.html" class="nav-link"><i class="bi bi-receipt"></i> Tickets</a>
+            <a href="transfers.html" class="nav-link"><i class="bi bi-arrow-left-right"></i> Transfers</a>
+        </nav>
+        <div class="sidebar-section-label mt-2">Administration</div>
+        <nav class="nav flex-column gap-1">
+            <a href="admin-dashboard.html" class="nav-link"><i class="bi bi-speedometer2"></i> Admin Dashboard</a>
+            <button class="nav-link d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#aclSubNav" aria-expanded="true">
+                <i class="bi bi-shield-lock text-primary"></i>
+                <span class="flex-grow-1" style="color:var(--bs-primary);">ACL Manager</span>
+                <i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
+            </button>
+            <div class="collapse show" id="aclSubNav">
+                <div class="d-flex flex-column gap-1 ps-3">
+                    <a href="admin-acl.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-grid-3x3-gap"></i> Overview</a>
+                    <a href="admin-acl-roles.html" class="nav-link py-1 active" aria-current="page" style="font-size:.8125rem;"><i class="bi bi-people"></i> Roles</a>
+                    <a href="admin-acl-resources.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-collection"></i> Resources</a>
+                    <a href="admin-acl-rules.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-toggles"></i> Rules</a>
+                    <a href="admin-acl-routes.html" class="nav-link py-1" style="font-size:.8125rem;"><i class="bi bi-signpost-split"></i> Route Map</a>
+                </div>
+            </div>
+        </nav>
+        <div class="sidebar-section-label mt-2">Reporting</div>
+        <nav class="nav flex-column gap-1">
+            <a href="analytics.html" class="nav-link"><i class="bi bi-bar-chart-line"></i> Analytics</a>
+        </nav>
+        <div class="mt-auto pt-2 border-top border-secondary-subtle">
+            <nav class="nav flex-column gap-1">
+                <a href="settings.html" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+                <a href="login.html" class="nav-link"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════════════ -->
+<div class="ims-layout">
+    <main class="ims-main p-3 p-lg-4">
+
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item"><a href="admin-dashboard.html">Admin</a></li>
+                <li class="breadcrumb-item"><a href="admin-acl.html">ACL Manager</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Roles</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-people text-primary fs-5"></i>
+                    <h1 class="h4 fw-bold mb-0">Roles</h1>
+                </div>
+                <p class="text-secondary small mb-0">Define roles and their inheritance relationships.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addRoleModal">
+                <i class="bi bi-plus-lg me-1"></i> Add Role
+            </button>
+        </div>
+
+        <!-- NOTE: Role delete is intentionally absent — deleting a role that has
+             users assigned would orphan those users. The UI should enforce this
+             constraint: show user count, disable delete if count > 0. -->
+
+        <!-- Role table -->
+        <div class="card">
+            <div class="card-header py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-people text-secondary"></i>
+                <span class="small fw-semibold">All Roles</span>
+                <span class="badge bg-body-tertiary border text-secondary ms-1">9</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width:35%">Role Name</th>
+                            <th style="width:30%">Inherits From</th>
+                            <th class="text-center" style="width:12%">Users</th>
+                            <th class="text-center" style="width:12%">Source</th>
+                            <th style="width:11%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="fw-semibold">guest</span></td>
+                            <td><span class="text-secondary fst-italic small">— root role</span></td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary">—</span></td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" disabled title="Root role — cannot edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">Sales</span></td>
+                            <td>guest</td>
+                            <td class="text-center">4</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">Warehouse</span></td>
+                            <td>Sales</td>
+                            <td class="text-center">7</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">DC Warehouse</span></td>
+                            <td>Warehouse</td>
+                            <td class="text-center">3</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">Credit Manager</span></td>
+                            <td>DC Warehouse</td>
+                            <td class="text-center">2</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">Warehouse Supervisor</span></td>
+                            <td>Credit Manager</td>
+                            <td class="text-center">2</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">Manager</span></td>
+                            <td>Warehouse Supervisor</td>
+                            <td class="text-center">1</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">Administrator</span></td>
+                            <td>Manager</td>
+                            <td class="text-center">1</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="fw-semibold">Developer</span></td>
+                            <td>Administrator</td>
+                            <td class="text-center">1</td>
+                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.72rem;" data-bs-toggle="modal" data-bs-target="#editRoleModal">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer py-2 text-secondary small">
+                Changes to roles increment <code>acl_version</code> and invalidate the ACL cache on next request.
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ADD ROLE MODAL
+════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title small fw-bold" id="addRoleModalLabel"><i class="bi bi-plus-lg me-1"></i> Add Role</h5>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Role Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" placeholder="e.g. Shift Lead" />
+                        <div class="form-text">Title Case, spaces allowed. Stored exactly as entered.</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-semibold">Inherits From <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm">
+                            <option value="">— select parent role —</option>
+                            <option>guest</option>
+                            <option>Sales</option>
+                            <option>Warehouse</option>
+                            <option>DC Warehouse</option>
+                            <option>Credit Manager</option>
+                            <option>Warehouse Supervisor</option>
+                            <option>Manager</option>
+                            <option>Administrator</option>
+                            <option>Developer</option>
+                        </select>
+                        <div class="form-text">New role inherits all grants from selected parent.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary">Save Role</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     EDIT ROLE MODAL
+════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title small fw-bold" id="editRoleModalLabel"><i class="bi bi-pencil me-1"></i> Edit Role</h5>
+                <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Role Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" value="Sales" />
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-semibold">Inherits From <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm">
+                            <option>guest</option>
+                            <option selected>Sales</option>
+                            <option>Warehouse</option>
+                            <option>DC Warehouse</option>
+                            <option>Credit Manager</option>
+                            <option>Warehouse Supervisor</option>
+                            <option>Manager</option>
+                            <option>Administrator</option>
+                            <option>Developer</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2 justify-content-between">
+                <button type="button" class="btn btn-sm btn-outline-danger" disabled title="4 users assigned — cannot delete">
+                    <i class="bi bi-trash3"></i> Delete
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

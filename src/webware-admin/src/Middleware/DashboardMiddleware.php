@@ -16,7 +16,7 @@ use Webware\Admin\Event\RegisterWidgetEvent;
 use Webware\Admin\Widget\AclWidgetFilterIterator;
 
 /**
- * Dispatches CollectDashboardWidgetsEvent so that modules may contribute
+ * Dispatches RegisterWidgetEvent so that modules may contribute
  * their widgets, then filters the collected widgets through the ACL using
  * the current user's roles, and attaches the filtered iterator to the request.
  *
