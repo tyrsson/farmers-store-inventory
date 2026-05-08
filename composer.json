@@ -52,7 +52,7 @@
             "Htmx\\": "src/Htmx/src/",
             "Mezzio\\Async\\": "src/mezzio-async/src/",
             "PhpDb\\Async\\": "src/phpdb-async/src/",
-            "User\\": "src/User/src/",
+            "Webware\\UserManager\\": "src/webware-usermanager/src/",
             "Webware\\Acl\\": "src/webware-acl/src/",
             "Webware\\Admin\\": "src/webware-admin/src/"
         }
