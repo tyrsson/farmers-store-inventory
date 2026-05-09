@@ -8,6 +8,7 @@ use Laminas\ConfigAggregator\ArrayProvider;
 use Laminas\ConfigAggregator\ConfigAggregator;
 use Laminas\ConfigAggregator\PhpFileProvider;
 use Webware\Acl\ConfigProvider as WebwareAclConfigProvider;
+use Webware\Navigation\ConfigProvider as WebwareNavigationConfigProvider;
 
 // To enable or disable caching, set the `ConfigAggregator::ENABLE_CACHE` boolean in
 // `config/autoload/local.php`.
@@ -50,6 +51,8 @@ $aggregator = new ConfigAggregator([
     // Module config
     Webware\UserManager\ConfigProvider::class,
     WebwareAclConfigProvider::class,
+    Webware\Admin\ConfigProvider::class,
+    WebwareNavigationConfigProvider::class,
     // Default App module config
     ConfigProvider::class,
     HtmxConfigProvider::class,

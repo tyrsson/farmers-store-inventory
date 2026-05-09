@@ -28,6 +28,12 @@ final readonly class RouteProvider implements RouteProviderInterface
                     ]
                 ),
                 'admin.dashboard'
-            );
+            )->setOptions([
+                'navigation' => 'admin',
+                'label'      => 'Dashboard',
+                'icon'       => 'bi-grid-fill',
+                'parent'     => null,
+                'order'      => 10,
+            ]);
     }
 }

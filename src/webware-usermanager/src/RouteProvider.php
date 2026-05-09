@@ -123,7 +123,13 @@ final class RouteProvider implements RouteProviderInterface
                 ]
             ),
             'user.logout'
-        );
+        )->setOptions([
+            'navigation' => 'user',
+            'label'      => 'Logout',
+            'icon'       => 'bi-box-arrow-right',
+            'parent'     => null,
+            'order'      => 10,
+        ]);
 
         // Admin
         $routeCollector->get(
@@ -135,7 +141,13 @@ final class RouteProvider implements RouteProviderInterface
                 ]
             ),
             'admin.user.list'
-        );
+        )->setOptions([
+            'navigation' => 'admin',
+            'label'      => 'Users',
+            'icon'       => 'bi-people-fill',
+            'parent'     => null,
+            'order'      => 20,
+        ]);
 
         $routeCollector->route(
             '/admin/create/user',
@@ -147,7 +159,13 @@ final class RouteProvider implements RouteProviderInterface
             ),
             ['GET', 'POST'],
             'admin.create.user'
-        );
+        )->setOptions([
+            'navigation' => 'admin',
+            'label'      => 'Create User',
+            'icon'       => 'bi-person-plus-fill',
+            'parent'     => 'admin.user.list',
+            'order'      => 10,
+        ]);
 
         $routeCollector->route(
             '/admin/update/user/{id:\d+}',

@@ -36,7 +36,13 @@ final class RouteProvider implements RouteProviderInterface
                 ]
             ),
             'dashboard'
-        );
+        )->setOptions([
+            'navigation' => 'main',
+            'label'      => 'Dashboard',
+            'icon'       => 'bi-speedometer2',
+            'parent'     => null,
+            'order'      => 10,
+        ]);
 
         $routeCollector->get(
             '/ping',

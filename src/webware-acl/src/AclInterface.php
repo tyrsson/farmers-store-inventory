@@ -29,4 +29,15 @@ interface AclInterface
         ServerRequestInterface $request,
         array|RoleInterface|string|null $roles = null,
     ): bool;
+
+    /**
+     * ACL check by route name without a request object.
+     * Returns true when the route name has no mapping (not ACL-protected).
+     *
+     * @param string[]|RoleInterface[]|string|null $roles
+     */
+    public function isAllowedByRouteName(
+        string $routeName,
+        array|RoleInterface|string|null $roles = null,
+    ): bool;
 }

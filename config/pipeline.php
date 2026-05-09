@@ -70,6 +70,8 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
 
     // Seed the UrlHelper with the routing results:
     $app->pipe(UrlHelperMiddleware::class);
+    // Inject roles + active route name into the Navigation view helper:
+    $app->pipe(\Webware\Navigation\Middleware\NavigationMiddleware::class);
 
     // Add more middleware here that needs to introspect the routing results; this
     // might include:

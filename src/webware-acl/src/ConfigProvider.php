@@ -17,10 +17,15 @@ use Webware\Acl\Container\AclRepositoryFactory;
 use Webware\Acl\Container\AuthorizationMiddlewareFactory;
 use Webware\Acl\Container\FileAclCacheFactory;
 use Webware\Acl\Container\IdentityMiddlewareFactory;
+use Webware\Acl\Container\RegisterAclWidgetListenerFactory;
+use Webware\Acl\Event\AclBuiltEvent;
+use Webware\Acl\Listener\RegisterAclWidgetListener;
+use Webware\Acl\Listener\RegisterOwnershipAssertionListener;
 use Webware\Acl\Middleware\AuthorizationMiddleware;
 use Webware\Acl\Middleware\IdentityMiddleware;
 use Webware\Acl\Repository\AclRepository;
 use Webware\Acl\Repository\AclRepositoryInterface;
+use Webware\Admin\Event\RegisterWidgetEvent;
 
 final class ConfigProvider
 {
@@ -34,6 +39,8 @@ final class ConfigProvider
     {
         return [
             'dependencies' => $this->getDependencies(),
+            'listeners'    => $this->getListeners(),
+            'templates'    => $this->getTemplates(),
         ];
     }
 
@@ -45,16 +52,41 @@ final class ConfigProvider
                 AclCacheInterface::class      => FileAclCache::class,
                 AclInterface::class           => Acl::class,
             ],
+            'invokables' => [
+                RegisterOwnershipAssertionListener::class => RegisterOwnershipAssertionListener::class,
+            ],
             'factories' => [
-                Acl::class                     => AclFactory::class,
-                AclBuilder::class              => AclBuilderFactory::class,
-                AclRepository::class           => AclRepositoryFactory::class,
-                FileAclCache::class            => FileAclCacheFactory::class,
-                AuthorizationMiddleware::class => AuthorizationMiddlewareFactory::class,
-                IdentityMiddleware::class      => IdentityMiddlewareFactory::class,
+                Acl::class                        => AclFactory::class,
+                AclBuilder::class                 => AclBuilderFactory::class,
+                AclRepository::class              => AclRepositoryFactory::class,
+                FileAclCache::class               => FileAclCacheFactory::class,
+                AuthorizationMiddleware::class    => AuthorizationMiddlewareFactory::class,
+                IdentityMiddleware::class         => IdentityMiddlewareFactory::class,
+                RegisterAclWidgetListener::class  => RegisterAclWidgetListenerFactory::class,
                 // Replaces Mezzio\Authentication\DefaultUserFactory so that
                 // users with no roles are assigned the configured base role.
                 UserInterface::class => DefaultUserFactory::class,
+            ],
+        ];
+    }
+
+    public function getTemplates(): array
+    {
+        return [
+            'paths' => [
+                'acl' => [__DIR__ . '/../templates/acl'],
+            ],
+        ];
+    }
+
+    public function getListeners(): array
+    {
+        return [
+            RegisterWidgetEvent::class => [
+                ['listener' => RegisterAclWidgetListener::class, 'priority' => 1],
+            ],
+            AclBuiltEvent::class       => [
+                ['listener' => RegisterOwnershipAssertionListener::class, 'priority' => 1],
             ],
         ];
     }

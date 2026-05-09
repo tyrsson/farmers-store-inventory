@@ -14,10 +14,14 @@ declare(strict_types=1);
 
 namespace Webware\Acl\Middleware;
 
+use Axleus\Log\Event\LogEvent;
+use Axleus\Log\LogChannel;
 use Axleus\Message\SystemMessengerInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Mezzio\Authentication\UserInterface;
+use Monolog\Level;
 use Override;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -30,15 +34,18 @@ use Webware\Acl\AclInterface;
  * Decision table:
  *  - No RouteResult attribute, or routing failure  → pass through (not our concern)
  *  - Any role grants isAllowed()                   → delegate to next handler
- *  - No role grants access, role === baseRole      → redirect to login
- *  - No role grants access, authenticated user     → toast warning + redirect to home
+ *  - Unauthenticated (only base role)              → redirect to login (no toast)
+ *  - Authenticated but denied                      → toast warning + redirect to home
  *  - Route name has no acl_route_privilege row     → same denial logic as above
  */
 final class AuthorizationMiddleware implements MiddlewareInterface
 {
     public function __construct(
         private readonly AclInterface $acl,
+        private readonly EventDispatcherInterface $dispatcher,
         private readonly string $loginPath,
+        private readonly string $homePath,
+        private readonly string $baseRole,
     ) {}
 
     #[Override]
@@ -50,9 +57,26 @@ final class AuthorizationMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        $messenger = $request->getAttribute(SystemMessengerInterface::class);
-        $messenger?->warning('You do not have permission to perform that action.', hops: 1, now: false);
+        // Guest (unauthenticated) — send to login silently
+        if ($roles === [$this->baseRole]) {
+            return new RedirectResponse($this->loginPath);
+        }
 
-        return new RedirectResponse($this->loginPath);
+        // Authenticated but insufficient privileges — toast + redirect home
+        $user      = $request->getAttribute(UserInterface::class);
+        $messenger = $request->getAttribute(SystemMessengerInterface::class);
+        $messenger?->warning('Insufficient privileges to perform the requested action.', hops: 1, now: false);
+
+        $event = (new LogEvent(LogChannel::Security, Level::Warning))
+            ->setMessage('Access denied: {identity} attempted {method} {path}')
+            ->setContext([
+                'identity' => $user->getIdentity(),
+                'method'   => $request->getMethod(),
+                'path'     => (string) $request->getUri()->getPath(),
+                'roles'    => $roles,
+            ]);
+        $this->dispatcher->dispatch($event);
+
+        return new RedirectResponse($this->homePath);
     }
 }

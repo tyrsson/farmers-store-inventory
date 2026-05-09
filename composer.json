@@ -54,7 +54,8 @@
             "PhpDb\\Async\\": "src/phpdb-async/src/",
             "Webware\\UserManager\\": "src/webware-usermanager/src/",
             "Webware\\Acl\\": "src/webware-acl/src/",
-            "Webware\\Admin\\": "src/webware-admin/src/"
+            "Webware\\Admin\\": "src/webware-admin/src/",
+            "Webware\\Navigation\\": "src/webware-navigation/src/"
         }
     },
     "autoload-dev": {

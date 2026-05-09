@@ -159,10 +159,11 @@ final class AclBuilder
 
         $this->dispatch(new RulesLoadedEvent($acl));
 
-        // Store route mappings for AclMiddleware access
-        $this->routeMappings = $data['routeMappings'];
-
-        $this->dispatch(new AclBuiltEvent($acl));
+        // Store route mappings for AclMiddleware access — pass DB-loaded mappings
+        // into the event so listeners can extend the set, then read back the result.
+        $event = new AclBuiltEvent($acl, $data['routeMappings']);
+        $this->dispatch($event);
+        $this->routeMappings = $event->getRouteMappings();
 
         return $acl;
     }
