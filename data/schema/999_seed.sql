@@ -10,6 +10,7 @@ SET NAMES utf8mb4;
 -- -----------------------------------------------------------------------------
 INSERT INTO role (role_id) VALUES
     ('guest'),
+    ('member'),
     ('Sales'),
     ('Warehouse'),
     ('Warehouse Supervisor'),
@@ -75,8 +76,9 @@ INSERT INTO acl_role_parent (role_pk, parent_pk)
 SELECT child.id, parent.id
 FROM role child
 JOIN role parent ON (
-    (child.role_id = 'Sales'               AND parent.role_id = 'guest')             OR
-    (child.role_id = 'Warehouse'           AND parent.role_id = 'guest')             OR
+    (child.role_id = 'member'              AND parent.role_id = 'guest')             OR
+    (child.role_id = 'Sales'               AND parent.role_id = 'member')            OR
+    (child.role_id = 'Warehouse'           AND parent.role_id = 'member')            OR
     (child.role_id = 'Warehouse Supervisor' AND parent.role_id = 'Warehouse')        OR
     (child.role_id = 'Credit Manager'      AND parent.role_id = 'Warehouse Supervisor') OR
     (child.role_id = 'DC Warehouse'        AND parent.role_id = 'Warehouse Supervisor') OR
@@ -120,21 +122,23 @@ WHERE ro.role_id = 'guest'
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
 -- All authenticated roles deny: user → login
+-- Denying on member propagates down the entire authenticated hierarchy.
 INSERT INTO acl_rule (role_pk, resource_pk, privilege_pk, type)
 SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'deny'
 FROM role ro
 JOIN acl_privilege pr ON pr.privilege_id = 'login'
 JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = 'user'
-WHERE ro.role_id IN ('Sales','Warehouse','Warehouse Supervisor','Credit Manager','DC Warehouse','Manager','Administrator','Developer')
+WHERE ro.role_id = 'member'
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
 -- All authenticated roles deny: user → register
+-- Denying on member propagates down the entire authenticated hierarchy.
 INSERT INTO acl_rule (role_pk, resource_pk, privilege_pk, type)
 SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'deny'
 FROM role ro
 JOIN acl_privilege pr ON pr.privilege_id = 'register'
 JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = 'user'
-WHERE ro.role_id IN ('Sales','Warehouse','Warehouse Supervisor','Credit Manager','DC Warehouse','Manager','Administrator','Developer')
+WHERE ro.role_id = 'member'
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
 -- -----------------------------------------------------------------------------
@@ -177,27 +181,27 @@ ON DUPLICATE KEY UPDATE label = VALUES(label);
 
 -- -----------------------------------------------------------------------------
 -- ACL: Rules — dashboard (authenticated roles only)
--- Sales is the lowest authenticated role; it inherits down to Administrator
--- via the role hierarchy, so granting Sales is sufficient.
+-- member is the base authenticated role; grant here propagates to all roles
+-- via the hierarchy.
 -- -----------------------------------------------------------------------------
 INSERT INTO acl_rule (role_pk, resource_pk, privilege_pk, type)
 SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'allow'
 FROM role ro
 JOIN acl_privilege pr ON pr.privilege_id = 'read'
 JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = 'dashboard'
-WHERE ro.role_id IN ('Sales','Warehouse')
+WHERE ro.role_id = 'member'
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
 -- -----------------------------------------------------------------------------
 -- ACL: Rules — user/logout
--- guest denied; all authenticated roles allowed.
+-- guest denied; all authenticated roles allowed via member.
 -- -----------------------------------------------------------------------------
 INSERT INTO acl_rule (role_pk, resource_pk, privilege_pk, type)
 SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'allow'
 FROM role ro
 JOIN acl_privilege pr ON pr.privilege_id = 'logout'
 JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = 'user'
-WHERE ro.role_id IN ('Sales','Warehouse')
+WHERE ro.role_id = 'member'
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
 -- -----------------------------------------------------------------------------
@@ -240,3 +244,21 @@ FROM (
 JOIN acl_resource  re ON re.resource_id  = routes.resource_id
 JOIN acl_privilege pr ON pr.privilege_id = routes.privilege_id AND pr.resource_pk = re.resource_pk
 ON DUPLICATE KEY UPDATE resource_pk = VALUES(resource_pk), privilege_pk = VALUES(privilege_pk);
+
+-- -----------------------------------------------------------------------------
+-- Seed user — Joey Smith (Developer, Store 207)
+-- -----------------------------------------------------------------------------
+INSERT INTO `user` (store_id, role_id, first_name, last_name, email, password_hash, active)
+SELECT
+    207,
+    r.id,
+    'Joey',
+    'Smith',
+    'jsmith@webinertia.net',
+    '$2y$12$5oaeB9aVIDGlccWGxAlHhuQg9mBL6RHxgGBHTHe9/03nXCCofAfBG',
+    1
+FROM role r WHERE r.role_id = 'Developer'
+ON DUPLICATE KEY UPDATE
+    role_id       = VALUES(role_id),
+    password_hash = VALUES(password_hash),
+    active        = VALUES(active);

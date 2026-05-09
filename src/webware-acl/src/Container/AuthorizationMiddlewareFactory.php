@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Webware\Acl\Container;
 
 use Psr\Container\ContainerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Webware\Acl\AclInterface;
 use Webware\Acl\Middleware\AuthorizationMiddleware;
 
@@ -24,10 +25,15 @@ final class AuthorizationMiddlewareFactory
     {
         $config    = $container->get('config');
         $loginPath = $config['webware-acl']['login_path'] ?? '/login';
+        $homePath  = $config['webware-acl']['home_path']  ?? '/';
+        $baseRole  = $config['webware-acl']['base_role']  ?? 'guest';
 
         return new AuthorizationMiddleware(
-            acl:       $container->get(AclInterface::class),
-            loginPath: $loginPath,
+            acl:        $container->get(AclInterface::class),
+            dispatcher: $container->get(EventDispatcherInterface::class),
+            loginPath:  $loginPath,
+            homePath:   $homePath,
+            baseRole:   $baseRole,
         );
     }
 }

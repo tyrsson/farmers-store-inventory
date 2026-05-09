@@ -31,9 +31,6 @@ final class Acl implements AclInterface
             $roles = [$roles];
         }
         foreach ($roles as $role) {
-            if ($role instanceof RoleInterface) {
-                $role = $role->getRoleId();
-            }
             if ($this->acl->isAllowed($role, $resource, $privilege)) {
                 return true;
             }
@@ -56,6 +53,20 @@ final class Acl implements AclInterface
 
         if (! isset($this->routeMappings[$routeName])) {
             return false;
+        }
+
+        $mapping = $this->routeMappings[$routeName];
+
+        return $this->isAllowed($roles, $mapping['resource_id'], $mapping['privilege_id']);
+    }
+
+    #[Override]
+    public function isAllowedByRouteName(
+        string $routeName,
+        array|RoleInterface|string|null $roles = null,
+    ): bool {
+        if (! isset($this->routeMappings[$routeName])) {
+            return true;
         }
 
         $mapping = $this->routeMappings[$routeName];

@@ -20,6 +20,43 @@ On HTMX requests, `DetectAjaxRequestMiddleware` sets `layout = false`, skipping 
 - The toast container (`#systemMessage`) lives in the layout outside `<main>` and is never swapped out. This element is provided by the `axleus/axleus-message` component, which the Htmx module has a soft dependency on.
 - Do not add JS to the body template — it will re-execute on every navigation and cause duplicate listeners.
 
+## Bootstrap Component Reinitialisation After HTMX Swap — Critical
+
+Every HTMX navigation replaces the body template (sidebar, nav, all chrome) inside `<main>`. Bootstrap attaches component instances (Collapse, Offcanvas, Modal, Tooltip, Popover) to specific DOM nodes. When those nodes are replaced by a swap, the old instances are orphaned and the new nodes have none — resulting in components that open but will not close, or do not respond at all.
+
+**Fix: call `getOrCreateInstance` in an `htmx:afterSettle` listener in `public/assets/js/app.js`.**
+
+```js
+// Re-wire Bootstrap Collapse after every HTMX swap
+function initBootstrapComponents() {
+  document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (el) {
+    var targetSelector = el.getAttribute('data-bs-target') || el.getAttribute('href');
+    if (targetSelector) {
+      var targetEl = document.querySelector(targetSelector);
+      if (targetEl) {
+        bootstrap.Collapse.getOrCreateInstance(targetEl, { toggle: false });
+      }
+    }
+  });
+}
+document.addEventListener('htmx:afterSettle', initBootstrapComponents);
+```
+
+Apply the same pattern for **every Bootstrap interactive component** used in the body template:
+
+| Component | Re-init call |
+|---|---|
+| Collapse | `bootstrap.Collapse.getOrCreateInstance(targetEl, { toggle: false })` |
+| Offcanvas | `bootstrap.Offcanvas.getOrCreateInstance(el)` |
+| Modal | `bootstrap.Modal.getOrCreateInstance(el)` |
+| Tooltip | `bootstrap.Tooltip.getOrCreateInstance(el)` |
+| Popover | `bootstrap.Popover.getOrCreateInstance(el)` |
+
+**Rules:**
+- All `initBootstrap*` functions live in `public/assets/js/app.js`, inside the `htmx:afterSettle` listener — never in templates.
+- Any click listeners bound to body-template DOM nodes (e.g. `.ims-store-item`) must also be re-bound in `htmx:afterSettle` — and called once immediately on page load.
+- Use `htmx:afterSettle`, not `htmx:afterSwap` — settle fires after CSS transitions complete, guaranteeing the DOM is stable.
+
 ## Variable Propagation Into Body Template
 
 Variables set in the page `ViewModel` (or passed via `render()` params) are merged up into the body model via `LaminasRenderer::renderRecursively()` / `mergeViewModel()`. This means any variable passed from the handler is available in `body/default.phtml`.

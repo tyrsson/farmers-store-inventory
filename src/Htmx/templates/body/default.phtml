@@ -59,27 +59,12 @@ use Axleus\Message\MessageLevel;
 
     <div class="offcanvas-body p-2 d-flex flex-column flex-grow-1 overflow-y-auto">
         <div class="sidebar-section-label">Main</div>
-        <nav class="nav flex-column gap-1">
-            <a href="<?= $this->url('dashboard') ?>" class="nav-link">
-                <i class="bi bi-grid-fill"></i> Dashboard
-            </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-boxes"></i> Inventory
-            </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-clipboard2-data"></i> Manifests
-            </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-receipt"></i> Tickets
-            </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-arrow-left-right"></i> Transfers
-            </a>
-            <a href="#" class="nav-link">
-                <i class="bi bi-exclamation-octagon"></i> Damage Reports
-                <span class="badge bg-danger">37</span>
-            </a>
-        </nav>
+        <?= $this->navigation('main')->menu() ?>
+        <?php $adminNav = $this->navigation('admin'); ?>
+        <?php if ($adminNav->getItems() !== []): ?>
+        <div class="sidebar-section-label mt-2">Admin</div>
+        <?= $adminNav->menu() ?>
+        <?php endif; ?>
 
         <div class="sidebar-section-label mt-2">Stores</div>
         <button class="nav-link d-flex align-items-center gap-2 w-100 text-start border-0 bg-transparent"
@@ -114,8 +99,8 @@ use Axleus\Message\MessageLevel;
         <div class="mt-auto pt-2 border-top border-secondary-subtle">
             <nav class="nav flex-column gap-1">
                 <a href="#" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
-                <a href="<?= $this->url('user.logout') ?>" class="nav-link"><i class="bi bi-box-arrow-left"></i> Sign Out</a>
             </nav>
+            <?= $this->navigation('user')->menu() ?>
         </div>
     </div>
 </div>
@@ -128,6 +113,7 @@ use Axleus\Message\MessageLevel;
         <?= $this->content ?>
     </main>
 </div>
+<?= $this->imsMessenger() ?>
 
 <!-- ═══════════════════════════════════════════════════════════
      BOTTOM NAV (mobile only)

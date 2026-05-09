@@ -7,15 +7,38 @@
 (function () {
   'use strict';
 
+  // ── Bootstrap component init ─────────────────────────────────────────────
+  // After every HTMX swap the body template is replaced, destroying Bootstrap's
+  // Collapse (and other) instances. Re-running getOrCreateInstance after
+  // htmx:afterSettle restores open/close behaviour without touching state.
+  function initBootstrapComponents() {
+    document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (el) {
+      var targetSelector = el.getAttribute('data-bs-target') || el.getAttribute('href');
+      if (targetSelector) {
+        var targetEl = document.querySelector(targetSelector);
+        if (targetEl) {
+          bootstrap.Collapse.getOrCreateInstance(targetEl, { toggle: false });
+        }
+      }
+    });
+  }
+
+  document.addEventListener('htmx:afterSettle', initBootstrapComponents);
+
   // ── Store switcher — update active store display text ────────────────────
   // When a store button in the sidebar collapse is clicked, mark it active
   // and update the store label in the topbar / sidebar header.
-  document.querySelectorAll('.ims-store-item').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.ims-store-item').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+  function initStoreSwitcher() {
+    document.querySelectorAll('.ims-store-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.ims-store-item').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
-  });
+  }
+
+  document.addEventListener('htmx:afterSettle', initStoreSwitcher);
+  initStoreSwitcher();
 
   // ── Status toggle buttons (damage-detail page) ───────────────────────────
   // Selecting a status makes that button active and deselects the others.

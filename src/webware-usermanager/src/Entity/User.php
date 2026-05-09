@@ -15,13 +15,15 @@ declare(strict_types=1);
 namespace Webware\UserManager\Entity;
 
 use DateTimeImmutable;
+use Laminas\Permissions\Acl\ProprietaryInterface;
+use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Mezzio\Authentication\UserInterface;
 use Override;
 
 use function array_merge;
 use function array_values;
 
-final class User implements UserInterface
+final class User implements UserInterface, ResourceInterface, ProprietaryInterface
 {
     public string $displayName {
         get => $this->firstName . ' ' . $this->lastName;
@@ -49,6 +51,27 @@ final class User implements UserInterface
     public function getIdentity(): string
     {
         return $this->email;
+    }
+
+    /**
+     * Implements ResourceInterface — identifies this object as the 'user' ACL resource.
+     * Allows $acl->isAllowed($role, $userEntity, $privilege) calls.
+     */
+    #[Override]
+    public function getResourceId(): string
+    {
+        return 'user';
+    }
+
+    /**
+     * Implements ProprietaryInterface — used by the Laminas Ownership assertion.
+     * Returns the user's primary key so the assertion can compare
+     * $role->getOwnerId() === $resource->getOwnerId().
+     */
+    #[Override]
+    public function getOwnerId(): int
+    {
+        return $this->id;
     }
 
     /** @return string[] */
