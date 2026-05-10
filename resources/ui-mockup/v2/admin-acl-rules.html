@@ -106,6 +106,9 @@
         </div>
 
         <!-- Filter bar -->
+        <!-- NOTE: When BOTH Resource AND Privilege are selected the flat table
+             is replaced with the Role Hierarchy view below. This mockup shows
+             that triggered state: resource=admin.user, privilege=read. -->
         <div class="card mb-3">
             <div class="card-body py-2 px-3">
                 <div class="row g-2 align-items-end">
@@ -129,26 +132,23 @@
                             <option>user</option>
                             <option>dashboard</option>
                             <option>admin.dashboard</option>
-                            <option>admin.acl</option>
-                            <option>admin.user</option>
+                            <option selected>admin.user</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-2">
-                        <label class="form-label mb-1 small fw-semibold">Type</label>
+                        <label class="form-label mb-1 small fw-semibold">Privilege</label>
                         <select class="form-select form-select-sm">
-                            <option value="">All</option>
-                            <option>allow</option>
-                            <option>deny</option>
+                            <option value="">All privileges</option>
+                            <option selected>read</option>
+                            <option>create</option>
+                            <option>update</option>
+                            <option>delete</option>
                         </select>
                     </div>
                     <div class="col-12 col-md-2">
-                        <label class="form-label mb-1 small fw-semibold">Source</label>
-                        <select class="form-select form-select-sm">
-                            <option value="">All</option>
-                            <option>seed</option>
-                            <option>listener</option>
-                            <option>db</option>
-                        </select>
+                        <button class="btn btn-sm btn-outline-primary w-100" type="button">
+                            <i class="bi bi-funnel me-1"></i> Filter
+                        </button>
                     </div>
                     <div class="col-12 col-md-2">
                         <button class="btn btn-sm btn-outline-secondary w-100" type="button">
@@ -159,150 +159,231 @@
             </div>
         </div>
 
-        <!-- Rules table -->
-        <!-- NOTE: Listener-registered rules are shown with a "listener" badge and
-             no toggle/delete — they are enforced from source code every build.
-             Only "db" sourced rules support the allow/deny toggle in real impl. -->
+        <!-- Hierarchy view — active when both Resource + Privilege are selected -->
+        <div class="alert alert-info d-flex align-items-start gap-2 py-2 px-3 mb-3 small" role="alert">
+            <i class="bi bi-diagram-3 flex-shrink-0 mt-1"></i>
+            <div>
+                <strong>Hierarchy view</strong> — showing all roles for
+                <code>admin.user</code> → <code>read</code>.
+                Every role in the inheritance chain is listed so gaps in coverage are visible.
+                Clear the Privilege filter to return to the flat rules table.
+            </div>
+        </div>
+
+        <!-- Role Hierarchy table -->
         <div class="card">
             <div class="card-header py-2 d-flex align-items-center gap-2">
-                <i class="bi bi-toggles text-secondary"></i>
-                <span class="small fw-semibold">Rules</span>
-                <span class="badge bg-body-tertiary border text-secondary ms-1">47</span>
-                <span class="text-secondary ms-auto" style="font-size:.72rem;">Showing 1–20 of 47</span>
+                <i class="bi bi-diagram-3 text-secondary"></i>
+                <span class="small fw-semibold">Role Hierarchy</span>
+                <span class="ms-1 small text-secondary">·</span>
+                <code class="small text-primary">admin.user</code>
+                <i class="bi bi-arrow-right text-secondary" style="font-size:.75rem;"></i>
+                <code class="small text-primary">read</code>
+                <span class="badge bg-info-subtle border border-info-subtle text-info ms-1" style="font-size:.65rem;">hierarchy view</span>
+                <span class="text-secondary ms-auto" style="font-size:.72rem;">6 roles</span>
             </div>
             <div class="table-responsive">
-                <table class="table table-hover table-sm mb-0 align-middle">
+                <table class="table table-sm mb-0 align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th style="width:18%">Role</th>
-                            <th style="width:20%">Resource</th>
-                            <th style="width:16%">Privilege</th>
-                            <th class="text-center" style="width:12%">Type</th>
-                            <th class="text-center" style="width:12%">Source</th>
-                            <th style="width:22%"></th>
+                            <th style="width:26%">Role</th>
+                            <th style="width:24%">Effective Rule</th>
+                            <th class="text-center" style="width:13%">Allow</th>
+                            <th class="text-center" style="width:13%">Deny</th>
+                            <th style="width:24%"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Seed rules (allow/deny toggle disabled — use DB rule to override) -->
-                        <tr>
-                            <td class="small">guest</td>
-                            <td><code class="small">public</code></td>
-                            <td><code class="small">read</code></td>
-                            <td class="text-center">
-                                <span class="badge bg-success-subtle border border-success-subtle text-success">allow</span>
+
+                        <!-- ── guest — root, no rule ───────────────────────────────── -->
+                        <!-- data-redundant-descendants lists any descendant roles that already
+                             have an explicit rule for this resource+privilege. JS reads this
+                             on click and opens the redundancy warning modal before submitting. -->
+                        <tr
+                            data-role="guest"
+                            data-redundant-descendants="Manager"
+                        >
+                            <td class="small fw-semibold">
+                                guest
                             </td>
-                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
-                            <td class="text-end text-secondary small fst-italic" style="font-size:.72rem;">seed — read-only</td>
+                            <td>
+                                <span class="text-warning-emphasis small">
+                                    <i class="bi bi-dash-circle me-1"></i>no rule
+                                </span>
+                            </td>
+                            <!-- No rule: both outline, both clickable → creates explicit rule.
+                                 JS intercepts click, detects data-redundant-descendants, opens
+                                 #redundancyWarningModal first; modal Confirm button submits. -->
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-success py-0 px-2"
+                                        title="Add explicit allow for guest → admin.user / read"
+                                        data-ims-rule-action="allow"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#redundancyWarningModal">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2" title="Add explicit deny for guest → admin.user / read">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-secondary fst-italic" style="font-size:.72rem;">no rule · defaults to deny</td>
                         </tr>
+
+                        <!-- ── Sales — parent: guest, no rule ─────────────────────── -->
                         <tr>
-                            <td class="small">guest</td>
-                            <td><code class="small">user</code></td>
-                            <td><code class="small">login</code></td>
-                            <td class="text-center">
-                                <span class="badge bg-success-subtle border border-success-subtle text-success">allow</span>
+                            <td class="small">
+                                <span class="text-secondary me-1" style="font-size:.8rem;">↳</span>
+                                Sales
+                                <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.6rem;" title="Parent role">guest</span>
                             </td>
-                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">seed</span></td>
-                            <td class="text-end text-secondary small fst-italic" style="font-size:.72rem;">seed — read-only</td>
+                            <td>
+                                <span class="text-warning-emphasis small">
+                                    <i class="bi bi-dash-circle me-1"></i>no rule
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" title="Add explicit allow for Sales → admin.user / read">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2" title="Add explicit deny for Sales → admin.user / read">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-secondary fst-italic" style="font-size:.72rem;">no rule · defaults to deny</td>
                         </tr>
-                        <!-- Listener rules (read-only) -->
+
+                        <!-- ── Warehouse — parent: guest, no rule ─────────────────── -->
                         <tr>
-                            <td class="small">Administrator</td>
-                            <td><code class="small">admin.dashboard</code></td>
-                            <td><code class="small">read</code></td>
-                            <td class="text-center">
-                                <span class="badge bg-success-subtle border border-success-subtle text-success">allow</span>
+                            <td class="small">
+                                <span class="text-secondary me-1" style="font-size:.8rem;">↳</span>
+                                Warehouse
+                                <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.6rem;" title="Parent role">guest</span>
                             </td>
-                            <td class="text-center"><span class="badge bg-primary-subtle border border-primary-subtle text-primary" style="font-size:.65rem;">listener</span></td>
-                            <td class="text-end text-secondary small fst-italic" style="font-size:.72rem;">listener — read-only</td>
+                            <td>
+                                <span class="text-warning-emphasis small">
+                                    <i class="bi bi-dash-circle me-1"></i>no rule
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" title="Add explicit allow for Warehouse → admin.user / read">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2" title="Add explicit deny for Warehouse → admin.user / read">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-secondary fst-italic" style="font-size:.72rem;">no rule · defaults to deny</td>
                         </tr>
-                        <tr>
-                            <td class="small">Developer</td>
-                            <td><code class="small">admin.acl</code></td>
-                            <td><code class="small">read</code></td>
-                            <td class="text-center">
-                                <span class="badge bg-success-subtle border border-success-subtle text-success">allow</span>
+
+                        <!-- ── Manager — parent: Sales, EXPLICIT ALLOW (db) ────────── -->
+                        <tr class="table-success">
+                            <td class="small">
+                                <span class="text-secondary me-1" style="font-size:.8rem; padding-left:.75rem;">↳</span>
+                                <strong>Manager</strong>
+                                <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.6rem;" title="Parent role">Sales</span>
                             </td>
-                            <td class="text-center"><span class="badge bg-primary-subtle border border-primary-subtle text-primary" style="font-size:.65rem;">listener</span></td>
-                            <td class="text-end text-secondary small fst-italic" style="font-size:.72rem;">listener — read-only</td>
-                        </tr>
-                        <tr>
-                            <td class="small">Developer</td>
-                            <td><code class="small">admin.acl</code></td>
-                            <td><code class="small">create</code></td>
-                            <td class="text-center">
-                                <span class="badge bg-success-subtle border border-success-subtle text-success">allow</span>
+                            <td>
+                                <span class="badge bg-body-tertiary border text-secondary me-1" style="font-size:.62rem;">db</span>
+                                <span class="text-success-emphasis small fw-semibold">explicit allow</span>
                             </td>
-                            <td class="text-center"><span class="badge bg-primary-subtle border border-primary-subtle text-primary" style="font-size:.65rem;">listener</span></td>
-                            <td class="text-end text-secondary small fst-italic" style="font-size:.72rem;">listener — read-only</td>
-                        </tr>
-                        <!-- DB rules — editable / toggleable -->
-                        <tr>
-                            <td class="small">Manager</td>
-                            <td><code class="small">admin.user</code></td>
-                            <td><code class="small">read</code></td>
+                            <!-- Explicit allow: Allow filled (clickable to remove), Deny outline (clickable to switch) -->
                             <td class="text-center">
-                                <!-- In real impl this is an HTMX-powered toggle -->
-                                <div class="form-check form-switch d-inline-block mb-0">
-                                    <input class="form-check-input" type="checkbox" role="switch" checked
-                                           title="Toggle allow/deny" style="width:2.2rem;" />
-                                </div>
-                            </td>
-                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">db</span></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:.72rem;"
+                                <button class="btn btn-sm btn-success py-0 px-2"
+                                        title="Allow is set — click to remove this rule"
                                         data-bs-toggle="modal" data-bs-target="#deleteRuleModal">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2"
+                                        title="Switch Manager → admin.user / read from allow to deny">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2"
+                                        data-bs-toggle="modal" data-bs-target="#deleteRuleModal"
+                                        title="Delete this rule">
                                     <i class="bi bi-trash3"></i>
                                 </button>
                             </td>
                         </tr>
+
+                        <!-- ── Administrator — parent: Manager, inherited allow ───── -->
+                        <!-- Inherited: Allow button shows state (disabled), Deny is clickable to add explicit override -->
                         <tr>
-                            <td class="small">Manager</td>
-                            <td><code class="small">admin.user</code></td>
-                            <td><code class="small">create</code></td>
-                            <td class="text-center">
-                                <div class="form-check form-switch d-inline-block mb-0">
-                                    <input class="form-check-input" type="checkbox" role="switch" checked style="width:2.2rem;" />
-                                </div>
+                            <td class="small">
+                                <span class="text-secondary me-1" style="font-size:.8rem; padding-left:1.5rem;">↳</span>
+                                Administrator
+                                <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.6rem;" title="Parent role">Manager</span>
                             </td>
-                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">db</span></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:.72rem;"
-                                        data-bs-toggle="modal" data-bs-target="#deleteRuleModal">
-                                    <i class="bi bi-trash3"></i>
+                            <td>
+                                <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary" style="font-size:.62rem;">
+                                    inherited · Manager
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <!-- Inherited allow — disabled, shows current effective state -->
+                                <button class="btn btn-sm btn-success py-0 px-2 opacity-50" disabled
+                                        title="Allow inherited from Manager — add an explicit deny below to override">
+                                    <i class="bi bi-check-lg"></i>
                                 </button>
                             </td>
-                        </tr>
-                        <tr>
-                            <td class="small">Sales</td>
-                            <td><code class="small">admin.dashboard</code></td>
-                            <td><code class="small">read</code></td>
                             <td class="text-center">
-                                <div class="form-check form-switch d-inline-block mb-0">
-                                    <input class="form-check-input" type="checkbox" role="switch" style="width:2.2rem;" />
-                                </div>
-                            </td>
-                            <td class="text-center"><span class="badge bg-body-tertiary border text-secondary" style="font-size:.65rem;">db</span></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:.72rem;"
-                                        data-bs-toggle="modal" data-bs-target="#deleteRuleModal">
-                                    <i class="bi bi-trash3"></i>
+                                <!-- Deny is active — clicking adds an explicit deny override on Administrator -->
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2"
+                                        title="Add explicit deny for Administrator — overrides the allow inherited from Manager">
+                                    <i class="bi bi-x-lg"></i>
                                 </button>
                             </td>
+                            <td class="text-secondary fst-italic" style="font-size:.72rem;">allow via Manager</td>
                         </tr>
+
+                        <!-- ── Developer — parent: Administrator, inherited allow ─── -->
+                        <tr>
+                            <td class="small">
+                                <span class="text-secondary me-1" style="font-size:.8rem; padding-left:2.25rem;">↳</span>
+                                Developer
+                                <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.6rem;" title="Parent role">Administrator</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary-subtle border border-secondary-subtle text-secondary" style="font-size:.62rem;">
+                                    inherited · Manager
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-success py-0 px-2 opacity-50" disabled
+                                        title="Allow inherited from Manager (via Administrator)">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger py-0 px-2"
+                                        title="Add explicit deny for Developer — overrides the allow inherited from Manager">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </td>
+                            <td class="text-secondary fst-italic" style="font-size:.72rem;">allow via Manager</td>
+                        </tr>
+
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer py-2 d-flex align-items-center justify-content-between">
-                <span class="text-secondary small">Page 1 of 3</span>
-                <nav aria-label="rules pagination">
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
-                    </ul>
-                </nav>
+            <!-- Legend -->
+            <div class="card-footer py-2">
+                <div class="d-flex flex-wrap align-items-center gap-3 small text-secondary">
+                    <span><button class="btn btn-sm btn-success py-0 px-2 me-1" style="pointer-events:none;"><i class="bi bi-check-lg"></i></button> Explicit allow — click to remove</span>
+                    <span><button class="btn btn-sm btn-danger py-0 px-2 me-1" style="pointer-events:none;"><i class="bi bi-x-lg"></i></button> Explicit deny — click to remove</span>
+                    <span><button class="btn btn-sm btn-outline-success py-0 px-2 me-1" style="pointer-events:none;"><i class="bi bi-check-lg"></i></button> No rule — click to add allow</span>
+                    <span><button class="btn btn-sm btn-outline-danger py-0 px-2 me-1" style="pointer-events:none;"><i class="bi bi-x-lg"></i></button> No rule — click to add deny / override inherited</span>
+                    <span><button class="btn btn-sm btn-success py-0 px-2 opacity-50 me-1" disabled style="pointer-events:none;"><i class="bi bi-check-lg"></i></button> Inherited (effective state, read-only)</span>
+                </div>
             </div>
         </div>
 
@@ -381,6 +462,79 @@
             <div class="modal-footer py-2">
                 <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-sm btn-primary">Save Rule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REDUNDANCY WARNING MODAL -->
+<!-- Shown client-side (no round-trip) when JS detects the role being granted
+     a rule is an ancestor of one or more roles that already have an explicit
+     rule for the same resource + privilege. The new rule will be created but
+     the descendant's existing rule will shadow it for users in that role. -->
+<div class="modal fade" id="redundancyWarningModal" tabindex="-1" aria-labelledby="redundancyWarningModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2 border-warning">
+                <h5 class="modal-title small fw-bold text-warning-emphasis" id="redundancyWarningModalLabel">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Redundancy Notice
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body small">
+                <!-- JS fills role, type, resource, privilege, and both lists -->
+                <p class="mb-2">
+                    You are adding an explicit <strong id="redundancyRuleType" class="text-success">allow</strong>
+                    on <code id="redundancyTargetRole">guest</code> for
+                    <code>admin.user</code> → <code>read</code>.
+                    Because the ACL walks <em>up</em> the chain from child to parent,
+                    this affects every descendant role that has no explicit rule of its own.
+                </p>
+
+                <!-- Section 1 — Privilege elevation (the security-critical warning) -->
+                <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
+                    <div class="fw-semibold mb-1">
+                        <i class="bi bi-shield-exclamation me-1"></i>
+                        Privilege elevation — these roles will gain access
+                    </div>
+                    <p class="mb-2 text-warning-emphasis">
+                        The following descendant roles currently have <strong>no rule</strong>
+                        for this privilege. Once this rule is added they will resolve
+                        <strong>allow</strong> via the chain walk-up. Confirm you intend
+                        to grant them access.
+                    </p>
+                    <!-- JS renders one badge per role that has no rule and no explicit deny in chain -->
+                    <div id="redundancyElevatedList" class="d-flex flex-wrap gap-1">
+                        <span class="badge bg-warning-subtle border border-warning-subtle text-warning-emphasis">Sales</span>
+                        <span class="badge bg-warning-subtle border border-warning-subtle text-warning-emphasis">Warehouse</span>
+                    </div>
+                </div>
+
+                <!-- Section 2 — Redundancy notice (informational only) -->
+                <div id="redundancySection" class="mb-2">
+                    <div class="fw-semibold mb-1 text-secondary">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Redundant — these roles are unaffected
+                    </div>
+                    <p class="text-secondary mb-2">
+                        The following descendant roles already have their own explicit rule.
+                        It is found first during the walk-up, so this new rule has no effect
+                        for them. Their rule is not changed.
+                    </p>
+                    <!-- JS renders one badge per descendant with existing explicit rule -->
+                    <div id="redundancyDescendantList" class="d-flex flex-wrap gap-1">
+                        <span class="badge bg-body-tertiary border text-secondary">
+                            Manager <span class="opacity-75">(explicit allow)</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <!-- Confirmed: JS submits the original create-rule request -->
+                <button type="button" class="btn btn-sm btn-warning" id="redundancyConfirmBtn">
+                    <i class="bi bi-exclamation-triangle me-1"></i> Add Rule Anyway
+                </button>
             </div>
         </div>
     </div>

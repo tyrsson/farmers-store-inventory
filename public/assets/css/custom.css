@@ -101,6 +101,16 @@
     padding: 16px 12px 4px;
 }
 
+/* Stores collapse — faster than Bootstrap's default 350ms */
+#storesList {
+    transition-duration: 0.2s;
+}
+
+/* Resource accordion — clip the bg-body delete-button wrapper to the item's border-radius */
+.accordion-item {
+    overflow: hidden;
+}
+
 /* Store switcher items */
 .ims-store-item {
     display: flex;
@@ -611,3 +621,9 @@
     pointer-events: auto;
     cursor: pointer;
 }
+
+/* ── ACL management table utilities ─────────────────────── */
+.ims-badge-xs   { font-size: .65rem; }
+.ims-text-ro    { font-size: .72rem; font-style: italic; }
+.ims-switch-wide { width: 2.2rem; }
+

@@ -1,0 +1,195 @@
+<?php
+/**
+ * @var array<int, \Webware\Acl\Entity\Role> $roles       — all roles keyed by PK
+ * @var array<int, int[]>                    $roleParents  — child PK → array of parent PKs
+ */
+$this->headTitle('Roles');
+?>
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb small mb-0">
+        <li class="breadcrumb-item"><a href="<?= $this->url('admin.dashboard.read') ?>">Admin</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Roles</li>
+    </ol>
+</nav>
+
+<!-- Page header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-people text-primary fs-5"></i>
+            <h1 class="h4 fw-bold mb-0">Roles</h1>
+        </div>
+        <p class="text-secondary small mb-0">Define roles and their inheritance relationships.</p>
+    </div>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addRoleModal">
+        <i class="bi bi-plus-lg me-1"></i> Add Role
+    </button>
+</div>
+
+<!-- Role table -->
+<div class="card">
+    <div class="card-header py-2 d-flex align-items-center gap-2">
+        <i class="bi bi-people text-secondary"></i>
+        <span class="small fw-semibold">All Roles</span>
+        <span class="badge bg-body-tertiary border text-secondary ms-1"><?= count($this->roles) ?></span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sm mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:38%">Role Name</th>
+                    <th style="width:40%">Inherits From</th>
+                    <th style="width:22%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($this->roles as $pk => $role):
+                    $parentPks   = $this->roleParents[$pk] ?? [];
+                    $parentNames = array_filter(
+                        array_map(fn(int $ppk) => $this->roles[$ppk]->roleId ?? null, $parentPks)
+                    );
+                    $isRoot = $parentPks === [];
+                ?>
+                    <tr>
+                        <td class="fw-semibold"><?= $this->escapeHtml($role->roleId) ?></td>
+                        <td class="small text-secondary">
+                            <?php if ($isRoot): ?>
+                                <span class="fst-italic">— root role</span>
+                            <?php else: ?>
+                                <?= $this->escapeHtml(implode(', ', $parentNames)) ?>
+                            <?php endif; ?>
+                        </td>
+                        <td class="text-end">
+                            <?php if ($isRoot): ?>
+                                <button class="btn btn-sm btn-outline-secondary py-0 px-2" disabled title="Root role — cannot edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            <?php else: ?>
+                                <button
+                                    class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editRoleModal"
+                                    data-role-pk="<?= $pk ?>"
+                                    data-role-id="<?= $this->escapeHtmlAttr($role->roleId) ?>"
+                                    data-parent-id="<?= $this->escapeHtmlAttr((string) ($parentPks[0] ?? '')) ?>"
+                                    data-user-count="0"
+                                >
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer py-2 text-secondary small">
+        Changes to roles increment <code>acl_version</code> and invalidate the ACL cache on next request.
+    </div>
+</div>
+
+<!-- ADD ROLE MODAL -->
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title small fw-bold" id="addRoleModalLabel">
+                    <i class="bi bi-plus-lg me-1"></i> Add Role
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    id="addRoleForm"
+                    method="POST"
+                    action="<?= $this->url('admin.acl.roles.create') ?>"
+                    hx-post="<?= $this->url('admin.acl.roles.create') ?>"
+                    hx-target="main"
+                    hx-swap="innerHTML"
+                >
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold" for="new_role_name">Role Name <span class="text-danger">*</span></label>
+                        <input type="text" id="new_role_name" name="role_id" class="form-control form-control-sm" placeholder="e.g. Shift Lead" required>
+                        <div class="form-text">Title Case, spaces allowed. Stored exactly as entered.</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-semibold" for="new_parent_id">Inherits From <span class="text-danger">*</span></label>
+                        <select id="new_parent_id" name="parent_pk" class="form-select form-select-sm" required>
+                            <option value="">— select parent role —</option>
+                            <?php foreach ($this->roles as $pk => $role): ?>
+                                <option value="<?= $pk ?>">
+                                    <?= $this->escapeHtml($role->roleId) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">New role inherits all grants from selected parent.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addRoleForm" class="btn btn-sm btn-primary">Save Role</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT ROLE MODAL -->
+<div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title small fw-bold" id="editRoleModalLabel">
+                    <i class="bi bi-pencil me-1"></i> Edit Role
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    id="editRoleForm"
+                    method="POST"
+                    action="<?= $this->url('admin.acl.roles.create') ?>"
+                    hx-post="<?= $this->url('admin.acl.roles.create') ?>"
+                    hx-target="main"
+                    hx-swap="innerHTML"
+                >
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold" for="edit_role_name">Role Name <span class="text-danger">*</span></label>
+                        <input type="text" id="edit_role_name" name="role_id" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-semibold" for="edit_parent_id">Inherits From <span class="text-danger">*</span></label>
+                        <select id="edit_parent_id" name="parent_pk" class="form-select form-select-sm" required>
+                            <option value="">— select parent role —</option>
+                            <?php foreach ($this->roles as $pk => $role): ?>
+                                <option value="<?= $pk ?>">
+                                    <?= $this->escapeHtml($role->roleId) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2 justify-content-between">
+                <button
+                    id="editRoleDeleteBtn"
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    hx-delete=""
+                    hx-target="main"
+                    hx-swap="innerHTML"
+                    disabled
+                    title=""
+                >
+                    <i class="bi bi-trash3"></i> Delete
+                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="editRoleForm" class="btn btn-sm btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

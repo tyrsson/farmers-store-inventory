@@ -52,16 +52,28 @@
             "Htmx\\": "src/Htmx/src/",
             "Mezzio\\Async\\": "src/mezzio-async/src/",
             "PhpDb\\Async\\": "src/phpdb-async/src/",
+            "Webware\\Core\\": "src/webware-core/src/",
             "Webware\\UserManager\\": "src/webware-usermanager/src/",
             "Webware\\Acl\\": "src/webware-acl/src/",
             "Webware\\Admin\\": "src/webware-admin/src/",
+            "Ims\\Manifest\\": "src/ims-manifest/src/",
             "Webware\\Navigation\\": "src/webware-navigation/src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "AppTest\\": "test/AppTest/",
-            "AsyncTest\\": "test/AsyncTest/"
+            "AsyncTest\\": "test/AsyncTest/",
+            "Webware\\CoreTest\\": "src/webware-core/test/unit/",
+            "Webware\\CoreIntegrationTest\\": "src/webware-core/test/integration/",
+            "Webware\\AclTest\\": "src/webware-acl/test/unit/",
+            "Webware\\AclIntegrationTest\\": "src/webware-acl/test/integration/",
+            "Webware\\AdminTest\\": "src/webware-admin/test/unit/",
+            "Webware\\AdminIntegrationTest\\": "src/webware-admin/test/integration/",
+            "Webware\\NavigationTest\\": "src/webware-navigation/test/unit/",
+            "Webware\\NavigationIntegrationTest\\": "src/webware-navigation/test/integration/",
+            "Webware\\UserManagerTest\\": "src/webware-usermanager/test/unit/",
+            "Webware\\UserManagerIntegrationTest\\": "src/webware-usermanager/test/integration/"
         }
     },
     "minimum-stability": "dev",

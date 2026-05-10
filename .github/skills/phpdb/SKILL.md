@@ -81,8 +81,11 @@ $insert = $sql->insert()->values($data);
 
 $sql->prepareStatementForSqlObject($insert)->execute();
 
-$id = (int) $this->gateway->getAdapter()
-    ->getDriver()->getConnection()->getLastGeneratedValue();
+// getLastGeneratedValue() is on DriverInterface directly — no ->getConnection() needed.
+// When injecting AdapterInterface directly (preferred over TableGateway for simple repos):
+$id = (int) $this->adapter->getDriver()->getLastGeneratedValue();
+// When a TableGateway is available, use its own convenience method instead:
+$id = (int) $this->gateway->getLastInsertValue();
 ```
 
 - Pass the full `$data` array to `values()` — column names are the array keys.

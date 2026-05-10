@@ -236,14 +236,36 @@ FROM (
     SELECT 'dashboard',                             'dashboard',                 'read'                     UNION ALL
     SELECT 'api.ping',                              'public',                    'read'                     UNION ALL
     -- Admin user management
-    SELECT 'admin.user.list',                       'admin.user',                'read'                     UNION ALL
-    SELECT 'admin.create.user',                     'admin.user',                'create'                   UNION ALL
-    SELECT 'admin.update.user',                     'admin.user',                'update'                   UNION ALL
-    SELECT 'admin.toggle.user',                     'admin.user',                'update'
+    SELECT 'admin.user.list.read',                    'admin.user',                'read'                     UNION ALL
+    SELECT 'admin.user.create',                     'admin.user',                'create'                   UNION ALL
+    SELECT 'admin.user.update',                     'admin.user',                'update'                   UNION ALL
+    SELECT 'admin.user.toggle.update',              'admin.user',                'update'
 ) AS routes
 JOIN acl_resource  re ON re.resource_id  = routes.resource_id
 JOIN acl_privilege pr ON pr.privilege_id = routes.privilege_id AND pr.resource_pk = re.resource_pk
 ON DUPLICATE KEY UPDATE resource_pk = VALUES(resource_pk), privilege_pk = VALUES(privilege_pk);
+
+-- -----------------------------------------------------------------------------
+-- ACL: Rule — member → user → update (with OwnershipAssertion)
+-- Grants any authenticated user the ability to update their own user record.
+-- The assertion is stored in acl_rule_assertion; AclBuilder attaches it at
+-- runtime so the check only passes when editing one's own record.
+-- -----------------------------------------------------------------------------
+INSERT INTO acl_rule (role_pk, resource_pk, privilege_pk, type)
+SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'allow'
+FROM role ro
+JOIN acl_privilege pr ON pr.privilege_id = 'update'
+JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = 'user'
+WHERE ro.role_id = 'member'
+ON DUPLICATE KEY UPDATE type = VALUES(type);
+
+INSERT INTO acl_rule_assertion (rule_pk, assertion, mode, sort_order)
+SELECT r.id, 'Laminas\\Permissions\\Acl\\Assertion\\OwnershipAssertion', 'all', 0
+FROM acl_rule r
+JOIN role         ro ON ro.id          = r.role_pk      AND ro.role_id     = 'member'
+JOIN acl_resource re ON re.resource_pk = r.resource_pk  AND re.resource_id = 'user'
+JOIN acl_privilege pr ON pr.privilege_pk = r.privilege_pk AND pr.privilege_id = 'update'
+ON DUPLICATE KEY UPDATE assertion = VALUES(assertion);
 
 -- -----------------------------------------------------------------------------
 -- Seed user — Joey Smith (Developer, Store 207)

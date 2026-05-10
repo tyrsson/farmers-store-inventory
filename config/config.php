@@ -53,6 +53,7 @@ $aggregator = new ConfigAggregator([
     WebwareAclConfigProvider::class,
     Webware\Admin\ConfigProvider::class,
     WebwareNavigationConfigProvider::class,
+    Ims\Manifest\ConfigProvider::class,
     // Default App module config
     ConfigProvider::class,
     HtmxConfigProvider::class,

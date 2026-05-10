@@ -1,0 +1,101 @@
+<?php
+/**
+ * Manifest list page.
+ *
+ * Variables:
+ *   $this->manifests  Ims\Manifest\Entity\Manifest[]
+ *   $this->total      int
+ *   $this->page       int
+ *   $this->pageSize   int
+ */
+$this->headTitle('Manifests');
+?>
+
+<!-- Page header -->
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h1 class="h4 fw-bold mb-0">Manifests</h1>
+        <p class="text-secondary small mb-0"><?= (int) $this->total ?> manifests</p>
+    </div>
+    <a href="#" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>New Manifest
+    </a>
+</div>
+
+<!-- Manifest list -->
+<div class="d-flex flex-column gap-3 mb-4">
+<?php foreach ($this->manifests as $manifest): ?>
+    <?php
+        $pieces  = $manifest->totalPieces();
+        $damaged = $manifest->damagedLines();
+    ?>
+    <a href="<?= $this->url('manifest.detail', ['id' => $manifest->id]) ?>"
+       class="card text-decoration-none text-body"
+       hx-boost="true">
+        <div class="card-body">
+            <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                <div>
+                    <div class="fw-bold"><?= $this->escapeHtml($manifest->displayId()) ?></div>
+                    <div class="text-secondary small">
+                        <?= $this->escapeHtml($manifest->receivedDate->format('M j, Y')) ?>
+                        <?php if ($manifest->reference !== null): ?>
+                            &middot; DC #<?= $this->escapeHtml($manifest->reference) ?>
+                        <?php endif; ?>
+                        &middot; <?= (int) $pieces ?> pieces
+                    </div>
+                </div>
+                <span class="badge bg-success flex-shrink-0">Received</span>
+            </div>
+            <div class="ims-progress-label">
+                <span><?= (int) $pieces ?> pieces</span>
+                <?php if ($damaged > 0): ?>
+                    <span class="text-danger">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <?= (int) $damaged ?> damaged
+                    </span>
+                <?php endif; ?>
+            </div>
+            <div class="progress ims-progress-bar-sm" role="progressbar"
+                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar <?= $damaged > 0 ? 'bg-warning' : 'bg-success' ?>"
+                     style="width:100%"></div>
+            </div>
+        </div>
+    </a>
+<?php endforeach; ?>
+<?php if ($this->manifests === []): ?>
+    <div class="text-center text-secondary py-5">
+        <i class="bi bi-clipboard2-data fs-1 d-block mb-2"></i>
+        No manifests yet.
+    </div>
+<?php endif; ?>
+</div>
+
+<!-- Pagination -->
+<?php if ($this->total > $this->pageSize): ?>
+<?php
+    $pages      = (int) ceil($this->total / $this->pageSize);
+    $currentPage = (int) $this->page;
+?>
+<nav aria-label="Manifest pagination">
+    <ul class="pagination pagination-sm justify-content-center">
+        <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+            <a class="page-link"
+               href="<?= $this->url('manifest.list', [], ['query' => ['page' => $currentPage - 1]]) ?>"
+               hx-boost="true">Previous</a>
+        </li>
+        <?php for ($p = 1; $p <= $pages; $p++): ?>
+        <li class="page-item <?= $p === $currentPage ? 'active' : '' ?>">
+            <a class="page-link"
+               href="<?= $this->url('manifest.list', [], ['query' => ['page' => $p]]) ?>"
+               hx-boost="true"><?= $p ?></a>
+        </li>
+        <?php endfor; ?>
+        <li class="page-item <?= $currentPage >= $pages ? 'disabled' : '' ?>">
+            <a class="page-link"
+               href="<?= $this->url('manifest.list', [], ['query' => ['page' => $currentPage + 1]]) ?>"
+               hx-boost="true">Next</a>
+        </li>
+    </ul>
+</nav>
+<?php endif; ?>

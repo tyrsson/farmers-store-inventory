@@ -1,0 +1,175 @@
+<?php
+/**
+ * Manifest detail page.
+ *
+ * Variables:
+ *   $this->manifest  Ims\Manifest\Entity\Manifest
+ */
+$this->headTitle($this->manifest->displayId() . ' · Manifest');
+
+$manifest      = $this->manifest;
+$damagedItems  = $manifest->damagedItems();
+$cleanItems    = $manifest->cleanItems();
+$totalPieces   = $manifest->totalPieces();
+$damagedLines  = $manifest->damagedLines();
+$cleanLines    = $manifest->cleanLines();
+$pct           = $totalPieces > 0 ? 100 : 0;
+?>
+
+<!-- Back link -->
+<a href="<?= $this->url('manifest.list') ?>" class="ims-back-link" hx-boost="true">
+    <i class="bi bi-arrow-left"></i> Manifests
+</a>
+
+<!-- Summary card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+            <h1 class="h4 fw-bold mb-0"><?= $this->escapeHtml($manifest->displayId()) ?></h1>
+            <span class="badge bg-success">Received</span>
+        </div>
+        <p class="text-secondary small mb-3">
+            <?= $this->escapeHtml($manifest->receivedDate->format('M j, Y')) ?>
+            <?php if ($manifest->reference !== null): ?>
+                &middot; DC #<?= $this->escapeHtml($manifest->reference) ?>
+            <?php endif; ?>
+        </p>
+
+        <!-- 4-stat grid -->
+        <div class="row row-cols-2 row-cols-md-4 g-3 mb-3">
+            <div class="col">
+                <div class="text-secondary small">Total Pieces</div>
+                <div class="fw-bold fs-5"><?= (int) $totalPieces ?></div>
+            </div>
+            <div class="col">
+                <div class="text-secondary small">Line Items</div>
+                <div class="fw-bold fs-5"><?= count($manifest->items) ?></div>
+            </div>
+            <div class="col">
+                <div class="text-secondary small text-danger">Damaged</div>
+                <div class="fw-bold fs-5 text-danger"><?= (int) $damagedLines ?></div>
+            </div>
+            <div class="col">
+                <div class="text-secondary small text-success">Clean</div>
+                <div class="fw-bold fs-5 text-success"><?= (int) $cleanLines ?></div>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress ims-progress-bar-lg" role="progressbar"
+             aria-valuenow="<?= (int) $pct ?>" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar bg-success" style="width:<?= (int) $pct ?>%"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Damaged items section -->
+<?php if ($damagedItems !== []): ?>
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <h2 class="h6 fw-bold mb-0">Damaged Items</h2>
+        <span class="badge bg-danger"><?= count($damagedItems) ?></span>
+    </div>
+    <div class="card">
+        <?php foreach ($damagedItems as $item): ?>
+        <div class="ims-product-item">
+            <div class="ims-product-thumb bg-danger bg-opacity-10">
+                <i class="bi bi-exclamation-triangle text-danger"></i>
+            </div>
+            <div class="flex-grow-1 min-width-0">
+                <div class="ims-product-name"><?= $this->escapeHtml($item->displayName()) ?></div>
+                <div class="ims-product-ids">
+                    SKU <?= (int) $item->sku ?>
+                    &middot; AO# <?= $this->escapeHtml($item->aoNumber) ?>
+                    <?php if ($manifest->reference !== null): ?>
+                        &middot; <?= $this->escapeHtml($manifest->reference) ?>
+                    <?php endif; ?>
+                </div>
+                <div class="mt-1">
+                    <span class="badge badge-ims-damaged">Damaged</span>
+                    <?php if ($item->notes !== null && $item->notes !== ''): ?>
+                        <span class="text-secondary small ms-1"><?= $this->escapeHtml($item->notes) ?></span>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Clean items section -->
+<?php if ($cleanItems !== []): ?>
+<?php $showAll = count($cleanItems) <= 5; ?>
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <h2 class="h6 fw-bold mb-0">Clean Items</h2>
+        <span class="badge bg-success"><?= count($cleanItems) ?></span>
+    </div>
+    <div class="card">
+        <?php
+            $display = $showAll ? $cleanItems : array_slice($cleanItems, 0, 3);
+        ?>
+        <?php foreach ($display as $item): ?>
+        <div class="ims-product-item">
+            <div class="ims-product-thumb bg-success bg-opacity-10">
+                <i class="bi bi-check-lg text-success"></i>
+            </div>
+            <div class="flex-grow-1 min-width-0">
+                <div class="ims-product-name"><?= $this->escapeHtml($item->displayName()) ?></div>
+                <div class="ims-product-ids">
+                    SKU <?= (int) $item->sku ?>
+                    &middot; AO# <?= $this->escapeHtml($item->aoNumber) ?>
+                    <?php if ($manifest->reference !== null): ?>
+                        &middot; <?= $this->escapeHtml($manifest->reference) ?>
+                    <?php endif; ?>
+                </div>
+                <div class="mt-1">
+                    <span class="badge bg-success">Floor</span>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+        <?php if (! $showAll): ?>
+        <div class="card-footer text-center">
+            <button class="btn btn-sm btn-outline-secondary"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#allCleanItems"
+                    aria-expanded="false"
+                    aria-controls="allCleanItems">
+                View all <?= count($cleanItems) ?> clean items
+            </button>
+        </div>
+        <div class="collapse" id="allCleanItems">
+            <?php foreach (array_slice($cleanItems, 3) as $item): ?>
+            <div class="ims-product-item">
+                <div class="ims-product-thumb bg-success bg-opacity-10">
+                    <i class="bi bi-check-lg text-success"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ims-product-name"><?= $this->escapeHtml($item->displayName()) ?></div>
+                    <div class="ims-product-ids">
+                        SKU <?= (int) $item->sku ?>
+                        &middot; AO# <?= $this->escapeHtml($item->aoNumber) ?>
+                        <?php if ($manifest->reference !== null): ?>
+                            &middot; <?= $this->escapeHtml($manifest->reference) ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="mt-1">
+                        <span class="badge bg-success">Floor</span>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($manifest->items === []): ?>
+<div class="text-center text-secondary py-5">
+    <i class="bi bi-clipboard2-x fs-1 d-block mb-2"></i>
+    No items recorded for this manifest yet.
+</div>
+<?php endif; ?>

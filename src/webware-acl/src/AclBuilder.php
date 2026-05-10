@@ -15,6 +15,8 @@ declare(strict_types=1);
 namespace Webware\Acl;
 
 use Laminas\Permissions\Acl\Acl as LaminasAcl;
+use Laminas\Permissions\Acl\Assertion\AssertionAggregate;
+use Laminas\Permissions\Acl\Assertion\AssertionInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Webware\Acl\Cache\AclCacheInterface;
 use Webware\Acl\Event\AclBuildStartedEvent;
@@ -29,8 +31,10 @@ use function array_diff;
 use function array_keys;
 use function array_map;
 use function array_values;
+use function class_exists;
 use function count;
 use function implode;
+use function is_a;
 use function sprintf;
 
 /**
@@ -72,11 +76,12 @@ final class AclBuilder
         }
 
         // Cache miss or stale — load everything from the DB
-        $roles         = $this->repository->fetchRoles();
-        $parents       = $this->repository->fetchRoleParents();
-        $resources     = $this->repository->fetchResources();
-        $rules         = $this->repository->fetchRules();
-        $routeMappings = $this->repository->fetchRouteMappings();
+        $roles          = $this->repository->fetchRoles();
+        $parents        = $this->repository->fetchRoleParents();
+        $resources      = $this->repository->fetchResources();
+        $rules          = $this->repository->fetchRules();
+        $assertions     = $this->repository->fetchRuleAssertions();
+        $routeMappings  = $this->repository->fetchRouteMappings();
 
         // Convert entity objects to cache-friendly arrays
         $rolesData = array_values(
@@ -99,6 +104,7 @@ final class AclBuilder
             'parents'       => $parents,
             'resources'     => $resourcesData,
             'rules'         => $rules,         // already resolved string IDs from repository joins
+            'assertions'    => $assertions,    // rule_pk → [{assertion, mode, sort_order}]
             'routeMappings' => $routeMappings,  // already resolved string IDs from repository joins
         ];
 
@@ -148,12 +154,14 @@ final class AclBuilder
 
         $this->dispatch(new ResourcesLoadedEvent($acl));
 
-        // Apply allow / deny rules
+        // Apply allow / deny rules, attaching assertions where present
+        $assertionMap = $data['assertions'] ?? [];
         foreach ($data['rules'] as $row) {
+            $assertion = $this->buildAssertion($assertionMap[(int) $row['id']] ?? []);
             if ($row['type'] === 'allow') {
-                $acl->allow((string) $row['role_id'], (string) $row['resource_id'], (string) $row['privilege_id']);
+                $acl->allow((string) $row['role_id'], (string) $row['resource_id'], (string) $row['privilege_id'], $assertion);
             } else {
-                $acl->deny((string) $row['role_id'], (string) $row['resource_id'], (string) $row['privilege_id']);
+                $acl->deny((string) $row['role_id'], (string) $row['resource_id'], (string) $row['privilege_id'], $assertion);
             }
         }
 
@@ -215,5 +223,48 @@ final class AclBuilder
     private function dispatch(object $event): void
     {
         $this->events?->dispatch($event);
+    }
+
+    /**
+     * Builds an AssertionInterface (or null) from a list of assertion rows for
+     * a single rule. Returns null when no assertions exist, the single
+     * AssertionInterface instance when exactly one exists, or an
+     * AssertionAggregate when multiple exist.
+     *
+     * @param array<int, array{assertion: string, mode: string, sort_order: int}> $rows
+     */
+    private function buildAssertion(array $rows): ?AssertionInterface
+    {
+        if ($rows === []) {
+            return null;
+        }
+
+        $instances = [];
+        foreach ($rows as $row) {
+            $fqcn = $row['assertion'];
+            if (! class_exists($fqcn) || ! is_a($fqcn, AssertionInterface::class, true)) {
+                continue;
+            }
+            $instances[] = new $fqcn();
+        }
+
+        if ($instances === []) {
+            return null;
+        }
+
+        if (count($instances) === 1) {
+            return $instances[0];
+        }
+
+        $mode      = $rows[0]['mode'] === 'at_least_one'
+            ? AssertionAggregate::MODE_AT_LEAST_ONE
+            : AssertionAggregate::MODE_ALL;
+        $aggregate = new AssertionAggregate();
+        $aggregate->setMode($mode);
+        foreach ($instances as $instance) {
+            $aggregate->addAssertion($instance);
+        }
+
+        return $aggregate;
     }
 }

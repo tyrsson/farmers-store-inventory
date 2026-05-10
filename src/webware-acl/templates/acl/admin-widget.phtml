@@ -1,4 +1,12 @@
 <?php
+/**
+ * @var int $roleCount
+ * @var int $resourceCount
+ * @var int $ruleCount
+ * @var int $assertionCount
+ * @var int $mappingCount
+ * @var int $aclVersion
+ */
 $this->headTitle('Admin Dashboard');
 ?>
 <div class="col">
@@ -6,12 +14,52 @@ $this->headTitle('Admin Dashboard');
         <div class="card-header d-flex align-items-center gap-2 py-2">
             <i class="bi bi-shield-lock text-primary"></i>
             <span class="fw-semibold small">ACL Management</span>
-            <a href="#" class="ms-auto btn btn-sm btn-outline-secondary py-0 px-2">
+            <a href="<?= $this->url('admin.acl.read') ?>" class="ms-auto btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.75rem;">
                 Manage <i class="bi bi-arrow-right"></i>
             </a>
         </div>
         <div class="card-body">
-            <p class="text-secondary small mb-0">Manage roles, resources, rules and route mappings.</p>
+            <!-- Stat row -->
+            <div class="row row-cols-2 g-2 mb-3">
+                <div class="col text-center">
+                    <div class="fs-3 fw-bold text-primary"><?= $this->roleCount ?></div>
+                    <div class="text-secondary" style="font-size:.75rem;">Roles</div>
+                </div>
+                <div class="col text-center">
+                    <div class="fs-3 fw-bold text-primary"><?= $this->resourceCount ?></div>
+                    <div class="text-secondary" style="font-size:.75rem;">Resources</div>
+                </div>
+                <div class="col text-center">
+                    <div class="fs-3 fw-bold text-primary"><?= $this->ruleCount ?></div>
+                    <div class="text-secondary" style="font-size:.75rem;">Rules</div>
+                </div>
+                <div class="col text-center">
+                    <div class="fs-3 fw-bold text-primary"><?= $this->assertionCount ?></div>
+                    <div class="text-secondary" style="font-size:.75rem;">Assertions</div>
+                </div>
+                <div class="col text-center">
+                    <div class="fs-3 fw-bold text-primary"><?= $this->mappingCount ?></div>
+                    <div class="text-secondary" style="font-size:.75rem;">Route Maps</div>
+                </div>
+            </div>
+            <!-- Quick links -->
+            <div class="d-flex flex-column gap-1">
+                <a href="<?= $this->url('admin.acl.roles.read') ?>" class="btn btn-sm btn-outline-secondary text-start">
+                    <i class="bi bi-people me-1"></i> Manage Roles
+                </a>
+                <a href="<?= $this->url('admin.acl.resources.read') ?>" class="btn btn-sm btn-outline-secondary text-start">
+                    <i class="bi bi-file-earmark-lock me-1"></i> Manage Resources
+                </a>
+                <a href="<?= $this->url('admin.acl.rules.read') ?>" class="btn btn-sm btn-outline-secondary text-start">
+                    <i class="bi bi-toggles me-1"></i> Manage Rules
+                </a>
+                <a href="<?= $this->url('admin.acl.routes.read') ?>" class="btn btn-sm btn-outline-secondary text-start">
+                    <i class="bi bi-signpost-split me-1"></i> Manage Route Map
+                </a>
+            </div>
+        </div>
+        <div class="card-footer py-1 text-secondary" style="font-size:.72rem;">
+            Cache version: <strong class="text-body"><?= $this->aclVersion ?></strong>
         </div>
     </div>
 </div>

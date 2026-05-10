@@ -1,0 +1,44 @@
+{
+    "name": "webware/core",
+    "description": "Shared traits and contracts for the webware-* package family.",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "webware",
+        "core",
+        "mezzio"
+    ],
+    "authors": [
+        {
+            "name": "Joey Smith",
+            "email": "jsmith@webinertia.net",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
+        "fig/http-message-util": "^1.1",
+        "psr/http-message": "^2.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.0",
+        "webware/coding-standard": "^0.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Webware\\Core\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webware\\CoreTest\\": "test/unit/",
+            "Webware\\CoreIntegrationTest\\": "test/integration/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    }
+}
