@@ -83,29 +83,15 @@ C4Component
 
 ## 4. Architectural Layers
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  Admin UI Layer                                                  │
-│  Admin\RequestHandler\*  (render only — no write logic)         │
-│  templates/acl/*.phtml                                          │
-├─────────────────────────────────────────────────────────────────┤
-│  Write-Path Middleware Layer                                     │
-│  Admin\Middleware\Process*  (HttpMethodProcessorTrait)          │
-│  → sets WriteResult::Success on request attribute               │
-├─────────────────────────────────────────────────────────────────┤
-│  Access Control Layer                                            │
-│  Middleware\AuthorizationMiddleware                             │
-│  Middleware\IdentityMiddleware                                   │
-│  Acl  (isAllowed / isAllowedRoute / isAllowedByRouteName)       │
-├─────────────────────────────────────────────────────────────────┤
-│  Build & Cache Layer                                             │
-│  AclBuilder  ←→  FileAclCache                                   │
-│  PSR-14 event pipeline (5 events)                               │
-├─────────────────────────────────────────────────────────────────┤
-│  Repository Layer                                                │
-│  AclRepository (implements AclRepositoryInterface)              │
-│  Entity\Role, Entity\Resource, Entity\Privilege                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    A["**Admin UI Layer**\nAdmin\\RequestHandler\\* — render only\ntemplates/acl/*.phtml"]
+    B["**Write-Path Middleware Layer**\nAdmin\\Middleware\\Process* — HttpMethodProcessorTrait\nSets WriteResult::Success on request attribute"]
+    C["**Access Control Layer**\nMiddleware\\AuthorizationMiddleware\nMiddleware\\IdentityMiddleware\nAcl — isAllowed / isAllowedRoute / isAllowedByRouteName"]
+    D["**Build & Cache Layer**\nAclBuilder + FileAclCache\nPSR-14 event pipeline — 5 events"]
+    E["**Repository Layer**\nAclRepository — implements AclRepositoryInterface\nEntity\\Role, Entity\\Resource, Entity\\Privilege"]
+
+    A --> B --> C --> D --> E
 ```
 
 **Dependency flow is strictly downward.** Handlers depend on repositories and
@@ -289,10 +275,10 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     A([Browser POST]) --> B[AuthorizationMiddleware]
-    B -- allowed --> C[Process* Middleware\nHttpMethodProcessorTrait]
+    B -- allowed --> C[Process* Middleware / HttpMethodProcessorTrait]
     C -- processPost --> D[AclRepository.saveXxx]
     D --> E[AclRepository.incrementVersion]
-    E --> F[request.withAttribute\nWriteResult::Success = true]
+    E --> F[withAttribute WriteResult::Success = true]
     F --> G[RequestHandler.handle]
     G -- WriteResult::Success === true --> H[withHeader Htmx-Trigger closeModal]
     G --> I([HtmlResponse re-render])

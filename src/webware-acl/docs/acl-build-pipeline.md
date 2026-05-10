@@ -12,26 +12,26 @@ subsequent requests pay only the cost of one `fetchVersion()` query.
 
 ```mermaid
 flowchart TD
-    A([AclFactory constructs AclBuilder\nthen calls build()]) --> B
+    A([AclFactory: AclBuilder.build]) --> B
 
     B{Cache hit?}
-    B -- "FileAclCache::get() returns array\nand version matches DB" --> C
-    B -- "Cache absent or version mismatch" --> D
+    B -- "version matches + cache file exists" --> C
+    B -- "cache absent or version mismatch" --> D
 
     C[buildFromArrays cached data] --> E
     D[AclRepository: fetch all DB rows] --> D2
-    D2[FileAclCache::set serialised arrays] --> C
+    D2[FileAclCache: set serialised arrays] --> C
 
-    E[dispatch AclBuildStartedEvent\nLaminas Acl created] --> F
+    E[dispatch AclBuildStartedEvent / new LaminasAcl] --> F
     F[Add roles in topological order] --> G
     G[dispatch RolesLoadedEvent] --> H
-    H[Add resources] --> I
-    I[dispatch ResourcesLoadedEvent\nListeners call acl.addResource] --> J
-    J[Apply allow/deny rules + assertions] --> K
-    K[dispatch RulesLoadedEvent\nListeners call acl.allow / acl.deny] --> L
-    L[dispatch AclBuiltEvent with DB routeMappings\nListeners call event.addRouteMapping] --> M
+    H[Add resources from DB] --> I
+    I[dispatch ResourcesLoadedEvent / listeners add resources] --> J
+    J[Apply allow and deny rules from DB] --> K
+    K[dispatch RulesLoadedEvent / listeners add built-in rules] --> L
+    L[dispatch AclBuiltEvent / listeners add route mappings] --> M
     M[routeMappings = event.getRouteMappings] --> N
-    N([Return LaminasAcl + routeMappings\nto AclFactory → new Acl wrapper])
+    N([Return LaminasAcl + routeMappings to AclFactory])
 ```
 
 ---

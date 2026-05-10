@@ -21,10 +21,10 @@ Registered in: `config/pipeline.php` (global; always runs)
 ```mermaid
 flowchart LR
     A([Request]) --> B[IdentityMiddleware]
-    B --> C{Session has\nauthenticated user?}
-    C -- yes --> D[request.withAttribute\nUserInterface::class → User object]
-    C -- no  --> E[request.withAttribute\nUserInterface::class → DefaultUser]
-    D --> F[request.withAttribute\nSystemMessengerInterface::class → messenger]
+    B --> C{Authenticated user in session?}
+    C -- yes --> D[withAttribute UserInterface to User]
+    C -- no  --> E[withAttribute UserInterface to DefaultUser]
+    D --> F[withAttribute SystemMessengerInterface to messenger]
     E --> F
     F --> G([delegate to next])
 ```
