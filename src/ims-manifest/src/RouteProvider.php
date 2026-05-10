@@ -14,8 +14,10 @@ declare(strict_types=1);
 
 namespace Ims\Manifest;
 
+use Ims\Manifest\Middleware\ProcessManifestUploadMiddleware;
 use Ims\Manifest\RequestHandler\ManifestDetailHandler;
 use Ims\Manifest\RequestHandler\ManifestListHandler;
+use Ims\Manifest\RequestHandler\ManifestUploadHandler;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
@@ -41,6 +43,25 @@ final class RouteProvider implements RouteProviderInterface
             'parent'     => null,
             'order'      => 20,
         ]);
+
+        $routeCollector->get(
+            '/manifests/upload',
+            $middlewareFactory->prepare([
+                AuthorizationMiddleware::class,
+                ManifestUploadHandler::class,
+            ]),
+            'manifest.upload'
+        );
+
+        $routeCollector->post(
+            '/manifests/upload',
+            $middlewareFactory->prepare([
+                AuthorizationMiddleware::class,
+                ProcessManifestUploadMiddleware::class,
+                ManifestUploadHandler::class,
+            ]),
+            'manifest.upload.store'
+        );
 
         $routeCollector->get(
             '/manifests/{id:\d+}',

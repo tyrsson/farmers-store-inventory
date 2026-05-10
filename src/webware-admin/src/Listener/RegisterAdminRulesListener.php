@@ -11,13 +11,15 @@ use Webware\Acl\Privilege;
 /**
  * Registers admin module ACL rules.
  *
- * Grants Administrator and Developer read on admin.dashboard.
+ * Grants Warehouse Supervisor and above read on admin.dashboard.
+ * Warehouse Supervisor is the minimum role that may access any admin section
+ * (manifest admin widget). Inheritance propagates upward through DC Warehouse,
+ * Manager, Administrator, and Developer automatically.
  */
 final class RegisterAdminRulesListener
 {
     public function __invoke(RulesLoadedEvent $event): void
     {
-        $event->acl->allow('Administrator', 'admin.dashboard', Privilege::READ);
-        $event->acl->allow('Developer', 'admin.dashboard', Privilege::READ);
+        $event->acl->allow('Warehouse Supervisor', 'admin.dashboard', Privilege::READ);
     }
 }

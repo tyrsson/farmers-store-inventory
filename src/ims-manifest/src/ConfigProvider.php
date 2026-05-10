@@ -14,12 +14,18 @@ declare(strict_types=1);
 
 namespace Ims\Manifest;
 
-final class ConfigProvider
+use Webware\Acl\Event\AclBuiltEvent;
+use Webware\Acl\Event\ResourcesLoadedEvent;
+use Webware\Acl\Event\RulesLoadedEvent;
+use Webware\Admin\Event\RegisterWidgetEvent;
+
+final readonly class ConfigProvider
 {
     public function __invoke(): array
     {
         return [
             'dependencies' => $this->getDependencies(),
+            'listeners'    => $this->getListeners(),
             'router'       => $this->getRouteProviders(),
             'templates'    => $this->getTemplates(),
         ];
@@ -32,10 +38,35 @@ final class ConfigProvider
                 Repository\ManifestRepositoryInterface::class => Repository\ManifestRepository::class,
             ],
             'factories' => [
-                Repository\ManifestRepository::class               => Repository\ManifestRepositoryFactory::class,
-                RequestHandler\ManifestListHandler::class          => RequestHandler\Container\ManifestListHandlerFactory::class,
-                RequestHandler\ManifestDetailHandler::class        => RequestHandler\Container\ManifestDetailHandlerFactory::class,
-                RouteProvider::class                               => Container\RouteProviderFactory::class,
+                Repository\ManifestRepository::class                                              => Repository\ManifestRepositoryFactory::class,
+                RequestHandler\ManifestListHandler::class                                         => RequestHandler\Container\ManifestListHandlerFactory::class,
+                RequestHandler\ManifestDetailHandler::class                                       => RequestHandler\Container\ManifestDetailHandlerFactory::class,
+                RequestHandler\ManifestUploadHandler::class                                       => RequestHandler\Container\ManifestUploadHandlerFactory::class,
+                Middleware\ProcessManifestUploadMiddleware::class                                  => Middleware\Container\ProcessManifestUploadMiddlewareFactory::class,
+                Csv\ManifestCsvParser::class                                                      => Csv\ManifestCsvParserFactory::class,
+                RouteProvider::class                                                               => Container\RouteProviderFactory::class,
+                Listener\RegisterManifestResourcesListener::class                                 => Container\RegisterManifestResourcesListenerFactory::class,
+                Listener\RegisterManifestRulesListener::class                                     => Container\RegisterManifestRulesListenerFactory::class,
+                Listener\RegisterManifestRouteMappingsListener::class                             => Container\RegisterManifestRouteMappingsListenerFactory::class,
+                Listener\RegisterManifestWidgetListener::class                                    => Container\RegisterManifestWidgetListenerFactory::class,
+            ],
+        ];
+    }
+
+    public function getListeners(): array
+    {
+        return [
+            RegisterWidgetEvent::class  => [
+                ['listener' => Listener\RegisterManifestWidgetListener::class, 'priority' => 1],
+            ],
+            ResourcesLoadedEvent::class => [
+                ['listener' => Listener\RegisterManifestResourcesListener::class, 'priority' => 1],
+            ],
+            RulesLoadedEvent::class     => [
+                ['listener' => Listener\RegisterManifestRulesListener::class, 'priority' => 1],
+            ],
+            AclBuiltEvent::class        => [
+                ['listener' => Listener\RegisterManifestRouteMappingsListener::class, 'priority' => 1],
             ],
         ];
     }

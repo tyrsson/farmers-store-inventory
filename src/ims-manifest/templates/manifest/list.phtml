@@ -17,8 +17,8 @@ $this->headTitle('Manifests');
         <h1 class="h4 fw-bold mb-0">Manifests</h1>
         <p class="text-secondary small mb-0"><?= (int) $this->total ?> manifests</p>
     </div>
-    <a href="#" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg me-1"></i>New Manifest
+    <a href="<?= $this->url('manifest.upload') ?>" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Upload Manifest
     </a>
 </div>
 
