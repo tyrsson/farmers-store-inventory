@@ -18,16 +18,19 @@ use Webware\Acl\Event\AclBuiltEvent;
 use Webware\Acl\Event\ResourcesLoadedEvent;
 use Webware\Acl\Event\RulesLoadedEvent;
 use Webware\Admin\Event\RegisterWidgetEvent;
+use Webware\CommandBus\CommandBusInterface;
+use Webware\CommandBus\ConfigProvider as BusProvider;
 
 final readonly class ConfigProvider
 {
     public function __invoke(): array
     {
         return [
-            'dependencies' => $this->getDependencies(),
-            'listeners'    => $this->getListeners(),
-            'router'       => $this->getRouteProviders(),
-            'templates'    => $this->getTemplates(),
+            'dependencies'           => $this->getDependencies(),
+            'listeners'              => $this->getListeners(),
+            'router'                 => $this->getRouteProviders(),
+            'templates'              => $this->getTemplates(),
+            CommandBusInterface::class => $this->getBusConfig(),
         ];
     }
 
@@ -49,6 +52,7 @@ final readonly class ConfigProvider
                 Listener\RegisterManifestRulesListener::class                                     => Container\RegisterManifestRulesListenerFactory::class,
                 Listener\RegisterManifestRouteMappingsListener::class                             => Container\RegisterManifestRouteMappingsListenerFactory::class,
                 Listener\RegisterManifestWidgetListener::class                                    => Container\RegisterManifestWidgetListenerFactory::class,
+                CommandHandler\UploadManifestHandler::class                                       => CommandHandler\Container\UploadManifestHandlerFactory::class,
             ],
         ];
     }
@@ -85,6 +89,15 @@ final readonly class ConfigProvider
         return [
             'paths' => [
                 'manifest' => [__DIR__ . '/../templates/manifest'],
+            ],
+        ];
+    }
+
+    public function getBusConfig(): array
+    {
+        return [
+            BusProvider::COMMAND_MAP_KEY => [
+                Command\UploadManifestCommand::class => CommandHandler\UploadManifestHandler::class,
             ],
         ];
     }

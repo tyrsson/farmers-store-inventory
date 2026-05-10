@@ -19,14 +19,14 @@ lockout or privilege escalation via the UI.
 
 ## Entity Inventory
 
-| Entity | Handler (read) | Middleware (write) |
-|---|---|---|
-| ACL Overview | `AclOverviewHandler` | — |
-| Roles | `RoleListHandler` | `ProcessRoleMiddleware` |
-| Resources | `ResourceListHandler` | `ProcessResourceMiddleware` |
-| Rules | `RuleManagerHandler` | `ProcessRuleMiddleware` |
-| Route Mappings | `RouteMapManagerHandler` | `ProcessRouteMappingMiddleware` |
-| Assertions | (inline on Rule Manager page) | `ProcessAssertionMiddleware` |
+| Entity | Handler (read) | Middleware (write) | Command Handler |
+|---|---|---|---|
+| ACL Overview | `AclOverviewHandler` | — | — |
+| Roles | `RoleListHandler` | `ProcessRoleMiddleware` | `SaveRoleHandler` / `DeleteRoleHandler` |
+| Resources | `ResourceListHandler` | `ProcessResourceMiddleware` | `SaveResourceHandler` / `DeleteResourceHandler` |
+| Rules | `RuleManagerHandler` | `ProcessRuleMiddleware` | `SaveRuleHandler` / `UpdateRuleTypeHandler` / `DeleteRuleHandler` |
+| Route Mappings | `RouteMapManagerHandler` | `ProcessRouteMappingMiddleware` | `SaveRouteMappingHandler` / `DeleteRouteMappingHandler` |
+| Assertions | (inline on Rule Manager page) | `ProcessAssertionMiddleware` | `SaveAssertionHandler` / `DeleteAssertionHandler` |
 
 ---
 
@@ -40,6 +40,8 @@ sequenceDiagram
     participant HTMX
     participant AuthMW as AuthorizationMiddleware
     participant ProcMW as Process* Middleware
+    participant Bus as CommandBus
+    participant CmdHandler as CommandHandler
     participant Handler as RequestHandler
 
     Browser->>HTMX: Click "Add / Edit / Delete" button
@@ -50,10 +52,14 @@ sequenceDiagram
     HTMX->>AuthMW: POST /acl/roles
     AuthMW->>ProcMW: allowed → delegate
     ProcMW->>ProcMW: processPost() / processPatch() / processDelete()
-    ProcMW->>ProcMW: AclRepository.saveXxx / deleteXxx
-    ProcMW->>ProcMW: AclRepository.incrementVersion()
-    ProcMW->>Handler: request.withAttribute(WriteResult::Success, true)
-    Handler->>Handler: if WriteResult::Success === true → HX-Trigger: closeModal
+    ProcMW->>Bus: handle(SaveXxxCommand)
+    Bus->>CmdHandler: resolve and call handler
+    CmdHandler->>CmdHandler: AclRepository.saveXxx / deleteXxx
+    CmdHandler->>CmdHandler: AclRepository.incrementVersion()
+    CmdHandler-->>Bus: CommandResult(Success)
+    Bus-->>ProcMW: CommandResult
+    ProcMW->>Handler: request.withAttribute(CommandResult::class, result)
+    Handler->>Handler: if result->getStatus() === Success → HX-Trigger: closeModal
     Handler-->>Browser: HtmlResponse + closeModal header
 
     Browser->>Browser: Bootstrap modal closes
@@ -61,8 +67,8 @@ sequenceDiagram
 ```
 
 **Key**: The modal close and list refresh are triggered by the `HX-Trigger:
-closeModal` response header set by the handler when `WriteResult::Success`
-is `true`. The HTMX swap target refreshes the surrounding list.
+closeModal` response header set by the handler when `CommandStatus::Success`
+is returned by the bus. The HTMX swap target refreshes the surrounding list.
 
 ---
 
@@ -78,13 +84,15 @@ is `true`. The HTMX swap target refreshes the surrounding list.
 
 ### Create / Edit
 
-```php
-// ProcessRoleMiddleware::processPost()
-$roleId = $data['role_id'];    // validated string
-$parentPk = (int) $data['parent_pk'];  // 0 = no parent
+The middleware validates input and dispatches a typed command to the bus.
+The `SaveRoleHandler` performs the write:
 
-$this->aclRepository->saveRole($roleId, $parentPk);
+```php
+// SaveRoleHandler::handle()
+assert($command instanceof SaveRoleCommand);
+$pk = $this->aclRepository->saveRole($command->roleId, $command->parentPk);
 $this->aclRepository->incrementVersion();
+return new CommandResult($command, CommandStatus::Success, $pk);
 ```
 
 Roles have at most **one** parent in the DB schema (the `role_parent` table
@@ -94,8 +102,8 @@ are detected at build time by `AclBuilder::addRolesInOrder()`.
 ### Delete
 
 A role cannot be deleted if any rules reference it. The repository throws an
-exception that `ProcessRoleMiddleware` catches and converts to
-`WriteResult::Failure` with an error message via `SystemMessengerInterface`.
+exception that `ProcessRoleMiddleware` catches and sets a `CommandResult::Failure`
+with an error message via `SystemMessengerInterface`.
 
 ---
 
@@ -156,30 +164,38 @@ what it would inherit — the explicit rule is unnecessary.
 
 ### Adding a rule
 
+The middleware dispatches a `SaveRuleCommand` to the bus. `SaveRuleHandler` performs the write:
+
 ```php
-// ProcessRuleMiddleware::processPost()
+// SaveRuleHandler::handle()
+assert($command instanceof SaveRuleCommand);
 $this->aclRepository->saveRule(
-    rolePk:      (int) $data['role_pk'],
-    resourcePk:  (int) $data['resource_pk'],
-    privilegePk: (int) $data['privilege_pk'],
-    type:        $data['type'],   // 'allow' | 'deny'
+    $command->rolePk,
+    $command->resourcePk,
+    $command->privilegePk,
+    $command->type,   // 'allow' | 'deny'
 );
 $this->aclRepository->incrementVersion();
+return new CommandResult($command, CommandStatus::Success, null);
 ```
 
 ### Assertions
 
 Assertions are managed via the **Add Assertion** modal triggered from a rule
-row. `ProcessAssertionMiddleware` handles the write:
+row. `ProcessAssertionMiddleware` dispatches a `SaveAssertionCommand` to the
+bus. `SaveAssertionHandler` performs the write:
 
 ```php
-$this->aclRepository->saveAssertion(
-    rulePk:    (int) $data['rule_pk'],
-    assertion: $data['assertion'],   // FQCN of AssertionInterface implementation
-    mode:      $data['mode'],        // 'all' | 'at_least_one'
-    sortOrder: (int) $data['sort_order'],
+// SaveAssertionHandler::handle()
+assert($command instanceof SaveAssertionCommand);
+$id = $this->aclRepository->saveRuleAssertion(
+    $command->rulePk,
+    $command->assertion,   // FQCN of AssertionInterface implementation
+    $command->mode,        // 'all' | 'at_least_one'
+    $command->sortOrder,
 );
 $this->aclRepository->incrementVersion();
+return new CommandResult($command, CommandStatus::Success, $id);
 ```
 
 Multiple assertions on a rule are evaluated as an `AssertionAggregate`. The
@@ -205,14 +221,19 @@ flowchart TD
 
 ### Adding a route mapping
 
+The middleware dispatches a `SaveRouteMappingCommand` to the bus.
+`SaveRouteMappingHandler` performs the write:
+
 ```php
-// ProcessRouteMappingMiddleware::processPost()
+// SaveRouteMappingHandler::handle()
+assert($command instanceof SaveRouteMappingCommand);
 $this->aclRepository->saveRouteMapping(
-    routeName:   $data['route_name'],    // e.g. 'manifest.upload.store'
-    resourcePk:  (int) $data['resource_pk'],
-    privilegePk: (int) $data['privilege_pk'],
+    $command->routeName,    // e.g. 'manifest.upload.store'
+    $command->resourcePk,
+    $command->privilegePk,
 );
 $this->aclRepository->incrementVersion();
+return new CommandResult($command, CommandStatus::Success, null);
 ```
 
 > **Note**: Route mappings added via the Admin UI persist to the DB and survive
@@ -223,34 +244,35 @@ $this->aclRepository->incrementVersion();
 
 ## Version Increment Rule
 
-**Every write in every `Process*Middleware` must call `incrementVersion()` after
-the primary write.** This is not optional — without it, the cache will not
-invalidate and other requests will continue using stale ACL data.
+**Every `CommandHandler` must call `incrementVersion()` after the primary write.**
+This is not optional — without it, the cache will not invalidate and other
+requests will continue using stale ACL data.
 
 ```php
-// Required pattern — every Process* Middleware write method
-try {
-    $this->aclRepository->saveXxx(...);
-    $this->aclRepository->incrementVersion();   // ← mandatory
-    $request = $request->withAttribute(WriteResult::Success->value, true);
-} catch (Throwable $e) {
-    $messenger?->danger('Failed to save: ' . $e->getMessage());
-    $request = $request->withAttribute(WriteResult::Success->value, false);
-}
-return $handler->handle($request);
+// Required pattern — every CommandHandler::handle()
+assert($command instanceof SaveXxxCommand);
+$this->aclRepository->saveXxx(...);
+$this->aclRepository->incrementVersion();
+return new CommandResult($command, CommandStatus::Success, $result);
 ```
+
+If the repository throws, the exception propagates through the bus to
+`Process*Middleware`, which catches it and sets a `CommandResult::Failure`
+attribute with a message via `SystemMessengerInterface`.
 
 ---
 
 ## Handler Pattern
 
-All admin handlers are render-only. They inspect the `WriteResult` attribute
+All admin handlers are render-only. They inspect the `CommandResult` attribute
 and either close the modal or render the page with fresh data:
 
 ```php
 public function handle(ServerRequestInterface $request): ResponseInterface
 {
-    if ($request->getAttribute(WriteResult::Success->value) === true) {
+    $result = $request->getAttribute(CommandResult::class);
+
+    if ($result instanceof CommandResult && $result->getStatus() === CommandStatus::Success) {
         return new HtmlResponse(
             $this->template->render('acl::role-list', $this->buildViewModel($request)),
             200,

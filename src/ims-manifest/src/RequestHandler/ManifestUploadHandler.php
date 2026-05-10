@@ -21,7 +21,8 @@ use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Webware\Acl\Admin\WriteResult;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
 
 final class ManifestUploadHandler implements RequestHandlerInterface
 {
@@ -32,9 +33,10 @@ final class ManifestUploadHandler implements RequestHandlerInterface
     #[Override]
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        // After a successful POST the middleware sets WriteResult::Success and manifest_id
-        if ($request->getAttribute(WriteResult::Success->value) === true) {
-            $manifestId = (int) $request->getAttribute('manifest_id');
+        $commandResult = $request->getAttribute(CommandResult::class);
+
+        if ($commandResult instanceof CommandResult && $commandResult->getStatus() === CommandStatus::Success) {
+            $manifestId = (int) $commandResult->getResult();
             return new RedirectResponse('/manifests/' . $manifestId);
         }
 

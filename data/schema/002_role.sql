@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS role;
 CREATE TABLE IF NOT EXISTS role (
     id      TINYINT UNSIGNED AUTO_INCREMENT,
     role_id VARCHAR(50) NOT NULL,
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (id),
     UNIQUE KEY uq_role_id (role_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

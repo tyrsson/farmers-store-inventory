@@ -1,7 +1,7 @@
 ---
 title: Sprint — May 8–11, 2026
 date_created: 2026-05-07
-status: Planned
+status: In Progress
 total_hours_estimated: 62–65h
 ---
 
@@ -13,8 +13,8 @@ total_hours_estimated: 62–65h
 |---|---|---|---|
 | **Block 1** | Thursday May 8 | 19:00 – 00:00 | 5h |
 | **Block 2** | Friday May 9 | Full day | 18–20h |
-| **Block 3** | Saturday May 10 | Full day | 18–20h |
-| **Block 4** | Sunday May 11 | Full day | 18–20h |
+| **Block 3** | Sunday May 10 | Full day | 18–20h |
+| **Block 4** | Monday May 11 | Full day | 18–20h |
 | **Total** | | | **59–65h** |
 
 > Items are sequenced by dependency order, not importance. Items within a block

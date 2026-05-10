@@ -16,8 +16,8 @@ namespace Ims\Manifest\Middleware;
 
 use Axleus\Message\SystemMessengerInterface;
 use DateTimeImmutable;
+use Ims\Manifest\Command\UploadManifestCommand;
 use Ims\Manifest\Csv\ManifestCsvParser;
-use Ims\Manifest\Repository\ManifestRepositoryInterface;
 use Mezzio\Authentication\UserInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,10 +25,13 @@ use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RuntimeException;
-use Webware\Acl\Admin\WriteResult;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
+use Webware\CommandBus\CommandBusInterface;
 use Webware\Core\HttpMethodProcessorTrait;
 use Webware\UserManager\Entity\User;
 
+use function count;
 use function file_exists;
 use function is_string;
 use function sprintf;
@@ -43,7 +46,7 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
     use HttpMethodProcessorTrait;
 
     public function __construct(
-        private readonly ManifestRepositoryInterface $manifests,
+        private readonly CommandBusInterface $commandBus,
         private readonly ManifestCsvParser $parser,
     ) {}
 
@@ -62,9 +65,7 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
 
         if (! $file instanceof UploadedFileInterface || $file->getError() !== UPLOAD_ERR_OK) {
             $messenger?->danger('No file was uploaded or the upload failed. Please try again.');
-            return $handler->handle(
-                $request->withAttribute(WriteResult::Failure->value, true)
-            );
+            return $handler->handle($request);
         }
 
         // Optional received date override supplied by the user
@@ -75,8 +76,7 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
             : null;
 
         $tmpPath = sprintf('%s/%s.csv', sys_get_temp_dir(), uniqid('manifest_', true));
-        $success = false;
-        $manifestId = null;
+        $result  = null;
 
         try {
             $file->moveTo($tmpPath);
@@ -87,16 +87,16 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
                     'The CSV contained no importable items. '
                     . 'Check that the file is a DC truck manifest and is not empty.'
                 );
-                return $handler->handle(
-                    $request->withAttribute(WriteResult::Failure->value, true)
-                );
+                return $handler->handle($request);
             }
 
-            $manifestId = $this->manifests->insertFromCsv($parsed, $user->id);
-            $messenger?->success(
-                sprintf('Manifest imported — %d items added.', count($parsed->items))
-            );
-            $success = true;
+            $result = $this->commandBus->handle(new UploadManifestCommand($parsed, $user->id));
+
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success(
+                    sprintf('Manifest imported — %d items added.', count($parsed->items))
+                );
+            }
         } catch (RuntimeException $e) {
             $messenger?->danger($e->getMessage());
         } finally {
@@ -106,9 +106,9 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
         }
 
         return $handler->handle(
-            $request
-                ->withAttribute(WriteResult::Success->value, $success)
-                ->withAttribute('manifest_id', $manifestId)
+            $result !== null
+                ? $request->withAttribute(CommandResult::class, $result)
+                : $request
         );
     }
 }

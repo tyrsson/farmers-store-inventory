@@ -13,10 +13,12 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Webware\Acl\Admin\Command\DeleteResourceCommand;
+use Webware\Acl\Admin\Command\SaveResourceCommand;
 use Webware\Acl\Admin\Middleware\ProcessResourceMiddleware;
-use Webware\Acl\Admin\WriteResult;
-use Webware\Acl\Privilege;
-use Webware\Acl\Repository\AclRepositoryInterface;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
+use Webware\CommandBus\CommandBusInterface;
 
 #[CoversClass(ProcessResourceMiddleware::class)]
 final class ProcessResourceMiddlewareTest extends TestCase
@@ -35,17 +37,13 @@ final class ProcessResourceMiddlewareTest extends TestCase
     }
 
     #[Test]
-    public function postWithValidBodySavesResourceAndSeedsFourPrivileges(): void
+    public function postWithValidBodyDispatchesSaveResourceCommandAndSetsSuccess(): void
     {
-        $repository = $this->createMock(AclRepositoryInterface::class);
-        $repository->expects($this->once())->method('saveResource')
-            ->with('admin.products', 'Products')
-            ->willReturn(7);
-        $repository->expects($this->exactly(4))->method('insertPrivilege')
-            ->willReturnCallback(static function (int $pk, string $privilege): int {
-                return 1;
-            });
-        $repository->expects($this->once())->method('incrementVersion');
+        $bus = $this->createMock(CommandBusInterface::class);
+        $bus->expects($this->once())
+            ->method('handle')
+            ->with($this->isInstanceOf(SaveResourceCommand::class))
+            ->willReturnCallback(fn($cmd) => new CommandResult($cmd, CommandStatus::Success, null));
 
         $messenger = $this->createStub(SystemMessengerInterface::class);
 
@@ -54,65 +52,45 @@ final class ProcessResourceMiddlewareTest extends TestCase
             ->withAttribute(SystemMessengerInterface::class, $messenger);
 
         $handler    = $this->capturingHandler();
-        $middleware = new ProcessResourceMiddleware($repository);
+        $middleware = new ProcessResourceMiddleware($bus);
         $middleware->process($request, $handler);
 
-        self::assertTrue($handler->received?->getAttribute(WriteResult::Success->value));
+        $result = $handler->received?->getAttribute(CommandResult::class);
+        self::assertInstanceOf(CommandResult::class, $result);
+        self::assertSame(CommandStatus::Success, $result->getStatus());
     }
 
     #[Test]
-    public function insertPrivilegeSeedsAllFourCanonicalPrivileges(): void
+    public function postWithMissingResourceIdSetsFailure(): void
     {
-        $seededPrivileges = [];
-
-        $repository = $this->createStub(AclRepositoryInterface::class);
-        $repository->method('saveResource')->willReturn(7);
-        $repository->method('insertPrivilege')
-            ->willReturnCallback(static function (int $pk, string $privilege) use (&$seededPrivileges): int {
-                $seededPrivileges[] = $privilege;
-                return 1;
-            });
-        $repository->method('incrementVersion');
-
-        $request = (new ServerRequest([], [], '/', 'POST'))
-            ->withParsedBody(['resource_id' => 'admin.products', 'label' => 'Products']);
-
-        $middleware = new ProcessResourceMiddleware($repository);
-        $middleware->process($request, $this->capturingHandler());
-
-        self::assertSame(
-            [Privilege::READ, Privilege::CREATE, Privilege::UPDATE, Privilege::DELETE],
-            $seededPrivileges,
-        );
-    }
-
-    #[Test]
-    public function postWithMissingResourceIdSetsSuccessFalse(): void
-    {
-        $repository = $this->createStub(AclRepositoryInterface::class);
+        $bus = $this->createStub(CommandBusInterface::class);
 
         $request = (new ServerRequest([], [], '/', 'POST'))
             ->withParsedBody(['label' => 'Products']);
 
         $handler    = $this->capturingHandler();
-        $middleware = new ProcessResourceMiddleware($repository);
+        $middleware = new ProcessResourceMiddleware($bus);
         $middleware->process($request, $handler);
 
-        self::assertFalse($handler->received?->getAttribute(WriteResult::Success->value));
+        $result = $handler->received?->getAttribute(CommandResult::class);
+        self::assertInstanceOf(CommandResult::class, $result);
+        self::assertSame(CommandStatus::Failure, $result->getStatus());
     }
 
     #[Test]
-    public function postWithMissingLabelSetsSuccessFalse(): void
+    public function postWithMissingLabelSetsFailure(): void
     {
-        $repository = $this->createStub(AclRepositoryInterface::class);
+        $bus = $this->createStub(CommandBusInterface::class);
 
         $request = (new ServerRequest([], [], '/', 'POST'))
             ->withParsedBody(['resource_id' => 'admin.products']);
 
         $handler    = $this->capturingHandler();
-        $middleware = new ProcessResourceMiddleware($repository);
+        $middleware = new ProcessResourceMiddleware($bus);
         $middleware->process($request, $handler);
 
-        self::assertFalse($handler->received?->getAttribute(WriteResult::Success->value));
+        $result = $handler->received?->getAttribute(CommandResult::class);
+        self::assertInstanceOf(CommandResult::class, $result);
+        self::assertSame(CommandStatus::Failure, $result->getStatus());
     }
 }

@@ -4,6 +4,8 @@ component_path: src/webware-acl/src
 version: 1.0.0
 date_created: 2026-05-10
 last_updated: 2026-05-10
+changelog:
+  - 2026-05-10: CommandBus integration — WriteResult retired; 11 single-command handlers introduced
 owner: Joey Smith <jsmith@webinertia.net>
 tags: [acl, rbac, mezzio, authorisation, psr-14, laminas]
 ---
@@ -66,6 +68,8 @@ C4Component
     Component(authmw, "AuthorizationMiddleware", "PSR-15 middleware", "Per-request access check; redirects denied requests")
     Component(identmw, "IdentityMiddleware", "PSR-15 middleware", "Attaches UserInterface + SystemMessengerInterface to every request")
     Component(adminmw, "Admin Write Middleware", "PSR-15 middleware ×5", "ProcessRole/Resource/Rule/RouteMapping/Assertion — HttpMethodProcessorTrait")
+    Component(bus, "CommandBus", "CommandBusInterface", "webware/command-bus pipeline; resolves handler by command class")
+    Component(cmdhandlers, "CommandHandlers", "CommandHandlerInterface ×11", "SaveRole/DeleteRole/SaveResource/DeleteResource/SaveRule/UpdateRuleType/DeleteRule/SaveRouteMapping/DeleteRouteMapping/SaveAssertion/DeleteAssertion — 1:1 with commands")
     Component(handlers, "Admin Handlers", "PSR-15 handler ×5", "AclOverview/RoleList/ResourceList/RuleManager/RouteMapManager — render only")
 
     Rel(builder, cache2, "read/write serialised arrays")
@@ -74,8 +78,10 @@ C4Component
     Rel(acli, builder, "constructed with Laminas Acl + routeMappings from builder")
     Rel(authmw, acli, "isAllowedRoute(request, roles)")
     Rel(identmw, authmw, "populates UserInterface attribute consumed by AuthorizationMiddleware")
-    Rel(adminmw, repo, "save* / delete* / incrementVersion")
-    Rel(adminmw, handlers, "passes WriteResult attribute on request")
+    Rel(adminmw, bus, "handle(CommandInterface) — dispatches typed command")
+    Rel(bus, cmdhandlers, "resolves and calls handler")
+    Rel(cmdhandlers, repo, "save* / delete* / incrementVersion")
+    Rel(adminmw, handlers, "passes CommandResult attribute on request")
     Rel(handlers, repo, "fetch* for rendering")
 ```
 
@@ -86,18 +92,19 @@ C4Component
 ```mermaid
 flowchart TB
     A["**Admin UI Layer**\nAdmin\\RequestHandler\\* — render only\ntemplates/acl/*.phtml"]
-    B["**Write-Path Middleware Layer**\nAdmin\\Middleware\\Process* — HttpMethodProcessorTrait\nSets WriteResult::Success on request attribute"]
+    B["**Write-Path Middleware Layer**\nAdmin\\Middleware\\Process* — HttpMethodProcessorTrait\nDispatches typed Command; sets CommandResult attribute on request"]
+    BUS["**Command Bus Layer**\nwebware/command-bus — CommandBusInterface\nAdmin\\Command\\* (11 typed commands)\nAdmin\\CommandHandler\\* (11 handlers — 1:1 with commands)"]
     C["**Access Control Layer**\nMiddleware\\AuthorizationMiddleware\nMiddleware\\IdentityMiddleware\nAcl — isAllowed / isAllowedRoute / isAllowedByRouteName"]
     D["**Build & Cache Layer**\nAclBuilder + FileAclCache\nPSR-14 event pipeline — 5 events"]
     E["**Repository Layer**\nAclRepository — implements AclRepositoryInterface\nEntity\\Role, Entity\\Resource, Entity\\Privilege"]
 
-    A --> B --> C --> D --> E
+    A --> B --> BUS --> C --> D --> E
 ```
 
 **Dependency flow is strictly downward.** Handlers depend on repositories and
-the template renderer only. Middleware depends on repositories and the Acl.
-The Acl depends on AclBuilder. AclBuilder depends on the repository and cache.
-Nothing in the lower layers knows about HTTP requests.
+the template renderer only. Middleware dispatches typed commands to the bus;
+command handlers call the repository. Nothing in the lower layers knows about
+HTTP requests.
 
 ---
 
@@ -167,10 +174,24 @@ classDiagram
         +incrementVersion() void
     }
 
-    class WriteResult {
+    class CommandBusInterface {
+        <<interface>>
+        +handle(CommandInterface) CommandResultInterface
+    }
+
+    class CommandResult {
+        <<final readonly class>>
+        +CommandInterface command
+        +CommandStatus status
+        +mixed result
+        +getStatus() CommandStatus
+        +getResult() mixed
+    }
+
+    class CommandStatus {
         <<enum>>
-        Success = "webware_acl.write_result.success"
-        Failure = "webware_acl.write_result.failure"
+        Success
+        Failure
     }
 
     class Privilege {
@@ -186,6 +207,8 @@ classDiagram
     Acl --> AclBuilder : built by
     AclBuilder --> AclCacheInterface : cache
     AclBuilder --> AclRepositoryInterface : repository
+    CommandResult --> CommandStatus : has
+    CommandBusInterface ..> CommandResult : returns
 ```
 
 ---
@@ -199,6 +222,8 @@ sequenceDiagram
     participant IdentMW as IdentityMiddleware
     participant AuthMW as AuthorizationMiddleware
     participant ProcMW as Process* Middleware
+    participant Bus as CommandBus
+    participant CmdHandler as CommandHandler
     participant Handler as RequestHandler
     participant Acl
     participant Repo as AclRepository
@@ -216,8 +241,14 @@ sequenceDiagram
 
     alt Allowed
         AuthMW->>ProcMW: delegate (write routes only)
-        ProcMW->>Repo: save*/delete* + incrementVersion()
-        ProcMW->>Handler: request.withAttribute(WriteResult::Success, true)
+        ProcMW->>ProcMW: build typed Command from request data
+        ProcMW->>Bus: handle(Command)
+        Bus->>CmdHandler: resolve and call CommandHandler
+        CmdHandler->>Repo: save*/delete* + incrementVersion()
+        CmdHandler-->>Bus: CommandResult(Success)
+        Bus-->>ProcMW: CommandResult
+        ProcMW->>Handler: request.withAttribute(CommandResult::class, result)
+        Handler->>Handler: if result->getStatus() === Success → HX-Trigger: closeModal
         Handler->>Browser: HtmlResponse (render)
     else Unauthenticated (base role only)
         AuthMW->>Browser: RedirectResponse → /login
@@ -276,13 +307,17 @@ sequenceDiagram
 flowchart LR
     A([Browser POST]) --> B[AuthorizationMiddleware]
     B -- allowed --> C[Process* Middleware / HttpMethodProcessorTrait]
-    C -- processPost --> D[AclRepository.saveXxx]
-    D --> E[AclRepository.incrementVersion]
-    E --> F[withAttribute WriteResult::Success = true]
-    F --> G[RequestHandler.handle]
-    G -- WriteResult::Success === true --> H[withHeader Htmx-Trigger closeModal]
-    G --> I([HtmlResponse re-render])
-    B -- denied --> J([RedirectResponse])
+    C -- buildCommand --> D["Admin\\Command\\SaveXxxCommand"]
+    D --> E[CommandBusInterface.handle]
+    E -- resolves --> F["Admin\\CommandHandler\\SaveXxxHandler"]
+    F --> G[AclRepository.saveXxx]
+    G --> H[AclRepository.incrementVersion]
+    H --> I["CommandResult(Success)"]  
+    I --> J[withAttribute CommandResult::class]
+    J --> K[RequestHandler.handle]
+    K -- Success --> L[withHeader HX-Trigger closeModal]
+    K --> M([HtmlResponse re-render])
+    B -- denied --> N([RedirectResponse])
 ```
 
 ---
@@ -396,9 +431,28 @@ lookup with no Laminas coupling.
 **Status**: Accepted  
 **Rationale**: Write operations (`POST`, `PATCH`, `DELETE`) are handled by
 `Process*Middleware` classes using `HttpMethodProcessorTrait`. The downstream
-`RequestHandler` reads `WriteResult::Success` from the request attribute and
+`RequestHandler` reads `CommandResult::class` from the request attribute and
 renders. This eliminates method-branching in handlers and makes each class
 single-responsibility.
+
+### ADR-007 — CommandBus for all admin write operations
+**Status**: Accepted  
+**Rationale**: Middleware previously called `AclRepository` directly, coupling
+HTTP concerns to persistence logic. `webware/command-bus` decouples the
+request-parsing layer (`Process*Middleware`) from the write logic
+(`CommandHandler`). Each middleware builds a typed, immutable `CommandInterface`
+object and dispatches it to the bus. The bus resolves the handler by command
+class and calls `handle()`. The `CommandResult` returned by the handler is set
+as the `CommandResult::class` request attribute for the downstream
+`RequestHandler`. The old `WriteResult` enum was retired.
+
+### ADR-008 — One CommandHandler per Command (1:1)
+**Status**: Accepted  
+**Rationale**: Handlers that switch on `instanceof` to serve multiple commands
+violate the Single Responsibility Principle and complicate testing. Each of the
+11 admin commands maps to exactly one dedicated `CommandHandler` class. This
+makes handlers trivially testable in isolation (one mock, one assertion path)
+and makes the `ConfigProvider` command map self-documenting.
 
 ### ADR-006 — Administrators cannot manage their own ACL
 **Status**: Accepted  

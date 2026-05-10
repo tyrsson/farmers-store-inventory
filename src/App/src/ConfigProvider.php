@@ -14,6 +14,11 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\CommandBus\Middleware\CommandLoggingMiddleware;
+use App\CommandBus\Middleware\Container\CommandLoggingMiddlewareFactory;
+use Webware\CommandBus\CommandBusInterface;
+use Webware\CommandBus\ConfigProvider as BusProvider;
+
 /**
  * @phpstan-type dependencyArray array{
  *                      delegators?: array<class-string, list<class-string>>,
@@ -42,10 +47,11 @@ class ConfigProvider
     public function __invoke(): array
     {
         return [
-            'dependencies' => $this->getDependencies(),
-            'router'       => $this->getRouteProviders(),
-            'templates'    => $this->getTemplates(),
-            'view_helpers' => $this->getViewHelpers(),
+            'dependencies'             => $this->getDependencies(),
+            'router'                   => $this->getRouteProviders(),
+            'templates'                => $this->getTemplates(),
+            'view_helpers'             => $this->getViewHelpers(),
+            CommandBusInterface::class => $this->getBusConfig(),
         ];
     }
 
@@ -58,6 +64,7 @@ class ConfigProvider
     {
         return [
             'factories'  => [
+                CommandLoggingMiddleware::class         => CommandLoggingMiddlewareFactory::class,
                 Middleware\ImsMessengerMiddleware::class => Middleware\ImsMessengerMiddlewareFactory::class,
                 RequestHandler\DashboardHandler::class  => RequestHandler\Container\DashboardHandlerFactory::class,
                 RouteProvider::class                    => Container\RouteProviderFactory::class,
@@ -90,6 +97,18 @@ class ConfigProvider
             ],
             'factories' => [
                 View\Helper\ImsMessenger::class => View\Helper\ImsMessengerFactory::class,
+            ],
+        ];
+    }
+
+    public function getBusConfig(): array
+    {
+        return [
+            BusProvider::MIDDLEWARE_PIPELINE_KEY => [
+                [
+                    'middleware' => CommandLoggingMiddleware::class,
+                    'priority'   => 0,
+                ],
             ],
         ];
     }

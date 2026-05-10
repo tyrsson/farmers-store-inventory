@@ -19,15 +19,21 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Webware\Acl\Admin\WriteResult;
-use Webware\Acl\Repository\AclRepositoryInterface;
+use Webware\Acl\Admin\Command\DeleteRuleCommand;
+use Webware\Acl\Admin\Command\SaveRuleCommand;
+use Webware\Acl\Admin\Command\UpdateRuleTypeCommand;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
+use Webware\CommandBus\CommandBusInterface;
 use Webware\Core\HttpMethodProcessorTrait;
+
+use function in_array;
 
 final class ProcessRuleMiddleware implements MiddlewareInterface
 {
     use HttpMethodProcessorTrait;
 
-    public function __construct(private readonly AclRepositoryInterface $aclRepository)
+    public function __construct(private readonly CommandBusInterface $commandBus)
     {
     }
 
@@ -49,16 +55,16 @@ final class ProcessRuleMiddleware implements MiddlewareInterface
         /** @var SystemMessengerInterface|null $messenger */
         $messenger = $request->getAttribute(SystemMessengerInterface::class);
 
-        $success = false;
+        $result = new CommandResult(new UpdateRuleTypeCommand(0, 'allow'), CommandStatus::Failure, null);
 
         if ($id > 0 && in_array($type, ['allow', 'deny'], true)) {
-            $this->aclRepository->updateRuleType($id, $type);
-            $this->aclRepository->incrementVersion();
-            $messenger?->success('Rule updated.');
-            $success = true;
+            $result = $this->commandBus->handle(new UpdateRuleTypeCommand($id, $type));
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success('Rule updated.');
+            }
         }
 
-        return $handler->handle($request->withAttribute(WriteResult::Success->value, $success));
+        return $handler->handle($request->withAttribute(CommandResult::class, $result));
     }
 
     public function processDelete(
@@ -70,16 +76,16 @@ final class ProcessRuleMiddleware implements MiddlewareInterface
         /** @var SystemMessengerInterface|null $messenger */
         $messenger = $request->getAttribute(SystemMessengerInterface::class);
 
-        $success = false;
+        $result = new CommandResult(new DeleteRuleCommand(0), CommandStatus::Failure, null);
 
         if ($id > 0) {
-            $this->aclRepository->deleteRule($id);
-            $this->aclRepository->incrementVersion();
-            $messenger?->success('Rule deleted.');
-            $success = true;
+            $result = $this->commandBus->handle(new DeleteRuleCommand($id));
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success('Rule deleted.');
+            }
         }
 
-        return $handler->handle($request->withAttribute(WriteResult::Success->value, $success));
+        return $handler->handle($request->withAttribute(CommandResult::class, $result));
     }
 
     private function persistRule(
@@ -95,15 +101,15 @@ final class ProcessRuleMiddleware implements MiddlewareInterface
         /** @var SystemMessengerInterface|null $messenger */
         $messenger = $request->getAttribute(SystemMessengerInterface::class);
 
-        $success = false;
+        $result = new CommandResult(new SaveRuleCommand(0, 0, 0, 'allow'), CommandStatus::Failure, null);
 
         if ($rolePk > 0 && $resourcePk > 0 && $privilegePk > 0) {
-            $this->aclRepository->saveRule($rolePk, $resourcePk, $privilegePk, $type);
-            $this->aclRepository->incrementVersion();
-            $messenger?->success('Rule saved.');
-            $success = true;
+            $result = $this->commandBus->handle(new SaveRuleCommand($rolePk, $resourcePk, $privilegePk, $type));
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success('Rule saved.');
+            }
         }
 
-        return $handler->handle($request->withAttribute(WriteResult::Success->value, $success));
+        return $handler->handle($request->withAttribute(CommandResult::class, $result));
     }
 }

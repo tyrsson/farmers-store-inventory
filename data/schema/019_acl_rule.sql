@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS acl_rule (
     resource_pk   SMALLINT UNSIGNED    NOT NULL,
     privilege_pk  SMALLINT UNSIGNED    NOT NULL,
     type          ENUM('allow','deny') NOT NULL DEFAULT 'allow',
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (id),
     UNIQUE KEY uq_rule (role_pk, resource_pk, privilege_pk),
     CONSTRAINT fk_rule_role      FOREIGN KEY (role_pk)      REFERENCES role          (id),

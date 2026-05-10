@@ -19,15 +19,18 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Webware\Acl\Admin\WriteResult;
-use Webware\Acl\Repository\AclRepositoryInterface;
+use Webware\Acl\Admin\Command\DeleteRouteMappingCommand;
+use Webware\Acl\Admin\Command\SaveRouteMappingCommand;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
+use Webware\CommandBus\CommandBusInterface;
 use Webware\Core\HttpMethodProcessorTrait;
 
 final class ProcessRouteMappingMiddleware implements MiddlewareInterface
 {
     use HttpMethodProcessorTrait;
 
-    public function __construct(private readonly AclRepositoryInterface $aclRepository)
+    public function __construct(private readonly CommandBusInterface $commandBus)
     {
     }
 
@@ -54,16 +57,16 @@ final class ProcessRouteMappingMiddleware implements MiddlewareInterface
         /** @var SystemMessengerInterface|null $messenger */
         $messenger = $request->getAttribute(SystemMessengerInterface::class);
 
-        $success = false;
+        $result = new CommandResult(new DeleteRouteMappingCommand(''), CommandStatus::Failure, null);
 
         if ($routeName !== '') {
-            $this->aclRepository->deleteRouteMapping($routeName);
-            $this->aclRepository->incrementVersion();
-            $messenger?->success('Route mapping deleted.');
-            $success = true;
+            $result = $this->commandBus->handle(new DeleteRouteMappingCommand($routeName));
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success('Route mapping deleted.');
+            }
         }
 
-        return $handler->handle($request->withAttribute(WriteResult::Success->value, $success));
+        return $handler->handle($request->withAttribute(CommandResult::class, $result));
     }
 
     private function persistRouteMapping(
@@ -78,15 +81,15 @@ final class ProcessRouteMappingMiddleware implements MiddlewareInterface
         /** @var SystemMessengerInterface|null $messenger */
         $messenger = $request->getAttribute(SystemMessengerInterface::class);
 
-        $success = false;
+        $result = new CommandResult(new SaveRouteMappingCommand('', 0, 0), CommandStatus::Failure, null);
 
         if ($routeName !== '' && $resourcePk > 0 && $privilegePk > 0) {
-            $this->aclRepository->saveRouteMapping($routeName, $resourcePk, $privilegePk);
-            $this->aclRepository->incrementVersion();
-            $messenger?->success('Route mapping saved.');
-            $success = true;
+            $result = $this->commandBus->handle(new SaveRouteMappingCommand($routeName, $resourcePk, $privilegePk));
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success('Route mapping saved.');
+            }
         }
 
-        return $handler->handle($request->withAttribute(WriteResult::Success->value, $success));
+        return $handler->handle($request->withAttribute(CommandResult::class, $result));
     }
 }

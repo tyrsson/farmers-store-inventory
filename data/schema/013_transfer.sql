@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS transfer (
     completed_at  DATETIME          NULL,
     created_by    INT UNSIGNED      NOT NULL,
     created_at    DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (id),
     UNIQUE KEY uq_transfer_reference (reference),
     KEY idx_transfer_from_status (from_store_id, status),

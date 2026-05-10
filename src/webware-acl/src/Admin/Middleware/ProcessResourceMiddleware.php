@@ -19,16 +19,18 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Webware\Acl\Admin\WriteResult;
-use Webware\Acl\Privilege;
-use Webware\Acl\Repository\AclRepositoryInterface;
+use Webware\Acl\Admin\Command\DeleteResourceCommand;
+use Webware\Acl\Admin\Command\SaveResourceCommand;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
+use Webware\CommandBus\CommandBusInterface;
 use Webware\Core\HttpMethodProcessorTrait;
 
 final class ProcessResourceMiddleware implements MiddlewareInterface
 {
     use HttpMethodProcessorTrait;
 
-    public function __construct(private readonly AclRepositoryInterface $aclRepository)
+    public function __construct(private readonly CommandBusInterface $commandBus)
     {
     }
 
@@ -55,16 +57,16 @@ final class ProcessResourceMiddleware implements MiddlewareInterface
         /** @var SystemMessengerInterface|null $messenger */
         $messenger = $request->getAttribute(SystemMessengerInterface::class);
 
-        $success = false;
+        $result = new CommandResult(new DeleteResourceCommand(0), CommandStatus::Failure, null);
 
         if ($resourcePk > 0) {
-            $this->aclRepository->deleteResource($resourcePk);
-            $this->aclRepository->incrementVersion();
-            $messenger?->success('Resource deleted.');
-            $success = true;
+            $result = $this->commandBus->handle(new DeleteResourceCommand($resourcePk));
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success('Resource deleted.');
+            }
         }
 
-        return $handler->handle($request->withAttribute(WriteResult::Success->value, $success));
+        return $handler->handle($request->withAttribute(CommandResult::class, $result));
     }
 
     private function persistResource(
@@ -78,19 +80,15 @@ final class ProcessResourceMiddleware implements MiddlewareInterface
         /** @var SystemMessengerInterface|null $messenger */
         $messenger = $request->getAttribute(SystemMessengerInterface::class);
 
-        $success = false;
+        $result = new CommandResult(new SaveResourceCommand('', ''), CommandStatus::Failure, null);
 
         if ($resourceId !== '' && $label !== '') {
-            $resourcePk = $this->aclRepository->saveResource($resourceId, $label);
-            $this->aclRepository->insertPrivilege($resourcePk, Privilege::READ,   'Read');
-            $this->aclRepository->insertPrivilege($resourcePk, Privilege::CREATE, 'Create');
-            $this->aclRepository->insertPrivilege($resourcePk, Privilege::UPDATE, 'Update');
-            $this->aclRepository->insertPrivilege($resourcePk, Privilege::DELETE, 'Delete');
-            $this->aclRepository->incrementVersion();
-            $messenger?->success('Resource saved.');
-            $success = true;
+            $result = $this->commandBus->handle(new SaveResourceCommand($resourceId, $label));
+            if ($result->getStatus() === CommandStatus::Success) {
+                $messenger?->success('Resource saved.');
+            }
         }
 
-        return $handler->handle($request->withAttribute(WriteResult::Success->value, $success));
+        return $handler->handle($request->withAttribute(CommandResult::class, $result));
     }
 }

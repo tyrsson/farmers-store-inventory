@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     verification_token VARCHAR(36)        NULL,
     token_created_at   DATETIME          NULL,
     created_at         DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (id),
     UNIQUE KEY uq_user_email (email),
     CONSTRAINT fk_user_store FOREIGN KEY (store_id) REFERENCES store (store_number),
