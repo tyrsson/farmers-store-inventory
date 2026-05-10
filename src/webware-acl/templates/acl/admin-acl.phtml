@@ -1,0 +1,203 @@
+<?php
+/**
+ * @var array<int, \Webware\Acl\Entity\Role>      $roles
+ * @var array<int, int[]>                          $roleParents
+ * @var array<int, \Webware\Acl\Entity\Resource>  $resources
+ * @var array<int, array{role_id: string, resource_id: string, privilege_id: string, type: string}> $rules
+ * @var array<string, array{resource_id: string, privilege_id: string}> $mappings
+ */
+$this->headTitle('ACL Manager');
+?>
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb small mb-0">
+        <li class="breadcrumb-item"><a href="<?= $this->url('admin.dashboard.read') ?>">Admin</a></li>
+        <li class="breadcrumb-item active" aria-current="page">ACL Manager</li>
+    </ol>
+</nav>
+
+<!-- Page header -->
+<div class="d-flex align-items-start justify-content-between mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-shield-lock text-primary fs-5"></i>
+            <h1 class="h4 fw-bold mb-0">ACL Manager</h1>
+        </div>
+        <p class="text-secondary small mb-0">Manage roles, resources, privileges, rules, assertions, and route mappings.</p>
+    </div>
+    <span class="badge bg-body-tertiary border text-secondary" style="font-size:.72rem;">
+        Cache v<?= $this->escapeHtml((string) ($this->aclVersion ?? '—')) ?>
+    </span>
+</div>
+
+<!-- Stat cards -->
+<div class="row row-cols-2 row-cols-lg-5 g-3 mb-4">
+    <div class="col">
+        <a href="<?= $this->url('admin.acl.roles.read') ?>" class="card h-100 text-decoration-none" style="border-color:rgba(var(--bs-primary-rgb),.25);">
+            <div class="card-body text-center py-3">
+                <i class="bi bi-people fs-3 text-primary mb-2 d-block"></i>
+                <div class="fs-2 fw-bold"><?= count($this->roles) ?></div>
+                <div class="text-secondary small">Roles</div>
+            </div>
+        </a>
+    </div>
+    <div class="col">
+        <a href="<?= $this->url('admin.acl.resources.read') ?>" class="card h-100 text-decoration-none">
+            <div class="card-body text-center py-3">
+                <i class="bi bi-collection fs-3 text-primary mb-2 d-block"></i>
+                <div class="fs-2 fw-bold"><?= count($this->resources) ?></div>
+                <div class="text-secondary small">Resources</div>
+            </div>
+        </a>
+    </div>
+    <div class="col">
+        <a href="<?= $this->url('admin.acl.rules.read') ?>" class="card h-100 text-decoration-none">
+            <div class="card-body text-center py-3">
+                <i class="bi bi-toggles fs-3 text-primary mb-2 d-block"></i>
+                <div class="fs-2 fw-bold"><?= count($this->rules) ?></div>
+                <div class="text-secondary small">Rules</div>
+            </div>
+        </a>
+    </div>
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body text-center py-3">
+                <i class="bi bi-shield-check fs-3 text-warning mb-2 d-block"></i>
+                <div class="fs-2 fw-bold"><?= (int) $this->assertionCount ?></div>
+                <div class="text-secondary small">Assertions</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <a href="<?= $this->url('admin.acl.routes.read') ?>" class="card h-100 text-decoration-none">
+            <div class="card-body text-center py-3">
+                <i class="bi bi-signpost-split fs-3 text-primary mb-2 d-block"></i>
+                <div class="fs-2 fw-bold"><?= count($this->mappings) ?></div>
+                <div class="text-secondary small">Route Maps</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Role hierarchy -->
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center gap-2 py-2">
+        <i class="bi bi-diagram-3 text-primary"></i>
+        <span class="fw-semibold small">Role Hierarchy</span>
+        <a href="<?= $this->url('admin.acl.roles.read') ?>" class="ms-auto btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.75rem;">
+            Manage <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    <div class="card-body py-3">
+        <?php
+        /**
+         * Build a tree from $roles + $roleParents for display.
+         * $roleParents is keyed by child PK → array of parent PKs.
+         * We find root roles (no parents) and recurse.
+         */
+        $childrenOf = [];
+        foreach ($this->roleParents as $childPk => $parentPks) {
+            foreach ($parentPks as $parentPk) {
+                $childrenOf[$parentPk][] = $childPk;
+            }
+        }
+        $rootPks = [];
+        foreach ($this->roles as $pk => $role) {
+            if (($this->roleParents[$pk] ?? []) === []) {
+                $rootPks[] = $pk;
+            }
+        }
+        $renderTree = static function (int $pk, int $depth) use (&$renderTree, $childrenOf, $roles): void {
+            $indent = str_repeat('&nbsp;&nbsp;&nbsp;&nbsp;', $depth);
+            $prefix = $depth > 0 ? '└── ' : '';
+            $role   = $roles[$pk];
+            echo '<div style="font-size:.875rem; font-family:monospace;">';
+            echo $indent . $prefix . '<span class="text-body">' . htmlspecialchars($role->roleId, ENT_QUOTES) . '</span>';
+            if ($depth === 0) {
+                echo ' <span class="badge bg-body-tertiary border text-secondary ms-1" style="font-size:.65rem;">root</span>';
+            }
+            echo '</div>';
+            foreach ($childrenOf[$pk] ?? [] as $childPk) {
+                $renderTree($childPk, $depth + 1);
+            }
+        };
+        $roles = $this->roles;
+        foreach ($rootPks as $rootPk) {
+            $renderTree($rootPk, 0);
+        }
+        ?>
+    </div>
+</div>
+
+<!-- Quick access row -->
+<div class="row g-3">
+    <div class="col-12 col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center gap-2 py-2">
+                <i class="bi bi-signpost-split text-primary"></i>
+                <span class="fw-semibold small">Route Mappings</span>
+                <span class="badge bg-body-tertiary border text-secondary ms-1"><?= count($this->mappings) ?></span>
+                <a href="<?= $this->url('admin.acl.routes.read') ?>" class="ms-auto btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.75rem;">
+                    Manage <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <?php
+                $previewMappings = array_slice($this->mappings, 0, 5, true);
+                $remaining       = count($this->mappings) - count($previewMappings);
+                ?>
+                <ul class="list-group list-group-flush">
+                    <?php foreach ($previewMappings as $routeName => $mapping): ?>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                            <code style="font-size:.8125rem;"><?= $this->escapeHtml($routeName) ?></code>
+                            <span class="text-secondary" style="font-size:.72rem;">
+                                <?= $this->escapeHtml($mapping['resource_id']) ?> / <?= $this->escapeHtml($mapping['privilege_id']) ?>
+                            </span>
+                        </li>
+                    <?php endforeach; ?>
+                    <?php if ($remaining > 0): ?>
+                        <li class="list-group-item py-2 px-3 text-secondary small fst-italic">
+                            and <?= $remaining ?> more…
+                        </li>
+                    <?php endif; ?>
+                    <?php if ($this->mappings === []): ?>
+                        <li class="list-group-item py-2 px-3 text-secondary small">No route mappings yet.</li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center gap-2 py-2">
+                <i class="bi bi-toggles text-primary"></i>
+                <span class="fw-semibold small">Rules</span>
+                <span class="badge bg-body-tertiary border text-secondary ms-1"><?= count($this->rules) ?></span>
+                <a href="<?= $this->url('admin.acl.rules.read') ?>" class="ms-auto btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.75rem;">
+                    Manage <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <?php $previewRules = array_slice($this->rules, 0, 5); ?>
+                <ul class="list-group list-group-flush">
+                    <?php foreach ($previewRules as $rule): ?>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                            <div style="font-size:.8125rem;">
+                                <?php if ($rule['type'] === 'allow'): ?>
+                                    <span class="badge bg-success-subtle border border-success-subtle text-success me-1">allow</span>
+                                <?php else: ?>
+                                    <span class="badge bg-danger-subtle border border-danger-subtle text-danger me-1">deny</span>
+                                <?php endif; ?>
+                                <?= $this->escapeHtml($rule['role_id']) ?> → <?= $this->escapeHtml($rule['resource_id']) ?> / <?= $this->escapeHtml($rule['privilege_id']) ?>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                    <?php if ($this->rules === []): ?>
+                        <li class="list-group-item py-2 px-3 text-secondary small">No rules defined yet.</li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,187 @@
+<?php
+/**
+ * @var array<int, \Webware\Acl\Entity\Resource>  $resources   — keyed by resource_pk
+ * @var array<int, \Webware\Acl\Entity\Privilege> $privileges  — keyed by privilege_pk
+ */
+$this->headTitle('Resources & Privileges');
+
+// Group privileges by resource_pk for accordion rows
+$privsByResource = [];
+foreach ($this->privileges as $priv) {
+    $privsByResource[$priv->resourcePk][] = $priv;
+}
+?>
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb small mb-0">
+        <li class="breadcrumb-item"><a href="<?= $this->url('admin.dashboard.read') ?>">Admin</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Resources &amp; Privileges</li>
+    </ol>
+</nav>
+
+<!-- Page header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <i class="bi bi-collection text-primary fs-5"></i>
+            <h1 class="h4 fw-bold mb-0">Resources &amp; Privileges</h1>
+        </div>
+        <p class="text-secondary small mb-0">Resources define what can be protected. Privileges define how.</p>
+    </div>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addResourceModal">
+        <i class="bi bi-plus-lg me-1"></i> Add Resource
+    </button>
+</div>
+
+<!-- Resources accordion -->
+<div class="accordion" id="resourcesAccordion">
+    <?php foreach ($this->resources as $resource):
+        $resourcePrivs = $privsByResource[$resource->resourcePk] ?? [];
+        $privCount     = count($resourcePrivs);
+        $accordionId   = 'res-' . preg_replace('/[^a-z0-9]+/', '-', strtolower($resource->resourceId));
+    ?>
+        <div class="accordion-item">
+            <h2 class="accordion-header d-flex align-items-center">
+                <button
+                    class="accordion-button collapsed py-2 flex-grow-1"
+                    type="button"
+                    data-ims-resource-toggle="<?= $this->escapeHtmlAttr($accordionId) ?>"
+                    aria-expanded="false"
+                    aria-controls="<?= $this->escapeHtmlAttr($accordionId) ?>"
+                >
+                    <div class="d-flex align-items-center gap-2 flex-grow-1 me-3">
+                        <code class="text-primary"><?= $this->escapeHtml($resource->resourceId) ?></code>
+                        <span class="text-secondary small"><?= $this->escapeHtml($resource->label) ?></span>
+                        <span class="badge bg-body-tertiary border text-secondary ms-auto ims-badge-xs">
+                            <?= $privCount ?> <?= $privCount === 1 ? 'privilege' : 'privileges' ?>
+                        </span>
+                    </div>
+                </button>
+                <div class="d-flex align-items-center align-self-stretch border-start bg-body px-2 flex-shrink-0">
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger py-0 px-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteResourceModal"
+                        data-resource-pk="<?= $resource->resourcePk ?>"
+                        data-resource-id="<?= $this->escapeHtmlAttr($resource->resourceId) ?>"
+                        title="Delete resource"
+                    >
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+            </h2>
+            <div
+                id="<?= $this->escapeHtmlAttr($accordionId) ?>"
+                class="accordion-collapse collapse"
+            >
+                <div class="accordion-body py-2 px-3">
+                    <?php if ($resourcePrivs !== []): ?>
+                        <table class="table table-sm mb-2">
+                            <thead>
+                                <tr>
+                                    <th>Privilege</th>
+                                    <th>Label</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($resourcePrivs as $priv): ?>
+                                    <tr>
+                                        <td><code><?= $this->escapeHtml($priv->privilegeId) ?></code></td>
+                                        <td class="text-secondary small"><?= $this->escapeHtml($priv->label) ?></td>
+                                        <td class="text-end">
+                                            <button
+                                                class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editPrivilegeModal"
+                                                data-privilege-pk="<?= $priv->privilegePk ?>"
+                                                data-privilege-id="<?= $this->escapeHtmlAttr($priv->privilegeId) ?>"
+                                                data-privilege-label="<?= $this->escapeHtmlAttr($priv->label) ?>"
+                                            >
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
+
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+</div>
+
+<?php if ($this->resources === []): ?>
+    <div class="text-secondary small mt-3">No resources defined yet.</div>
+<?php endif; ?>
+
+<!-- ADD RESOURCE MODAL -->
+<div class="modal fade" id="addResourceModal" tabindex="-1" aria-labelledby="addResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title small fw-bold" id="addResourceModalLabel">
+                    <i class="bi bi-plus-lg me-1"></i> Add Resource
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form
+                    id="addResourceForm"
+                    method="POST"
+                    action="<?= $this->url('admin.acl.resources.create') ?>"
+                    hx-post="<?= $this->url('admin.acl.resources.create') ?>"
+                    hx-target="main"
+                    hx-swap="innerHTML"
+                >
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold" for="new_resource_id">Resource ID <span class="text-danger">*</span></label>
+                        <input type="text" id="new_resource_id" name="resource_id" class="form-control form-control-sm" placeholder="e.g. admin.manifest" required>
+                        <div class="form-text">Lowercase, dot-separated. Must be unique.</div>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-semibold" for="new_resource_label">Label <span class="text-danger">*</span></label>
+                        <input type="text" id="new_resource_label" name="label" class="form-control form-control-sm" placeholder="e.g. Manifest Management" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addResourceForm" class="btn btn-sm btn-primary">Save Resource</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE RESOURCE CONFIRM MODAL -->
+<div class="modal fade" id="deleteResourceModal" tabindex="-1" aria-labelledby="deleteResourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2 border-danger">
+                <h5 class="modal-title small fw-bold text-danger" id="deleteResourceModalLabel">
+                    <i class="bi bi-trash3 me-1"></i> Delete Resource
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body small">
+                Delete resource <code id="deleteResourceId"></code> and all its privileges, rules, and route mappings?
+                <div class="text-danger mt-1 fw-semibold">This cannot be undone.</div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button
+                    id="deleteResourceConfirmBtn"
+                    type="button"
+                    class="btn btn-sm btn-danger"
+                    hx-delete=""
+                    hx-target="main"
+                    hx-swap="innerHTML"
+                >Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

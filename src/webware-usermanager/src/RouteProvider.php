@@ -140,7 +140,7 @@ final class RouteProvider implements RouteProviderInterface
                     UserListHandler::class,
                 ]
             ),
-            'admin.user.list'
+            'admin.user.list.read'
         )->setOptions([
             'navigation' => 'admin',
             'label'      => 'Users',
@@ -150,7 +150,7 @@ final class RouteProvider implements RouteProviderInterface
         ]);
 
         $routeCollector->route(
-            '/admin/create/user',
+            '/admin/user/create',
             $middlewareFactory->prepare(
                 [
                     AuthorizationMiddleware::class,
@@ -158,17 +158,17 @@ final class RouteProvider implements RouteProviderInterface
                 ]
             ),
             ['GET', 'POST'],
-            'admin.create.user'
+            'admin.user.create'
         )->setOptions([
             'navigation' => 'admin',
             'label'      => 'Create User',
             'icon'       => 'bi-person-plus-fill',
-            'parent'     => 'admin.user.list',
+            'parent'     => 'admin.user.list.read',
             'order'      => 10,
         ]);
 
         $routeCollector->route(
-            '/admin/update/user/{id:\d+}',
+            '/admin/user/{id:\d+}',
             $middlewareFactory->prepare(
                 [
                     AuthorizationMiddleware::class,
@@ -176,18 +176,18 @@ final class RouteProvider implements RouteProviderInterface
                 ]
             ),
             ['GET', 'POST'],
-            'admin.update.user'
+            'admin.user.update'
         );
 
         $routeCollector->post(
-            '/admin/toggle/user/{id:\d+}',
+            '/admin/user/{id:\d+}/toggle',
             $middlewareFactory->prepare(
                 [
                     AuthorizationMiddleware::class,
                     ToggleUserActiveHandler::class,
                 ]
             ),
-            'admin.toggle.user'
+            'admin.user.toggle.update'
         );
     }
 }

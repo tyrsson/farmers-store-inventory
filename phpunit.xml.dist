@@ -16,6 +16,36 @@
         <testsuite name="async">
             <directory>test/AsyncTest</directory>
         </testsuite>
+        <testsuite name="webware-core">
+            <directory>src/webware-core/test/unit</directory>
+        </testsuite>
+        <testsuite name="webware-core-integration">
+            <directory>src/webware-core/test/integration</directory>
+        </testsuite>
+        <testsuite name="webware-acl">
+            <directory>src/webware-acl/test/unit</directory>
+        </testsuite>
+        <testsuite name="webware-acl-integration">
+            <directory>src/webware-acl/test/integration</directory>
+        </testsuite>
+        <testsuite name="webware-admin">
+            <directory>src/webware-admin/test/unit</directory>
+        </testsuite>
+        <testsuite name="webware-admin-integration">
+            <directory>src/webware-admin/test/integration</directory>
+        </testsuite>
+        <testsuite name="webware-navigation">
+            <directory>src/webware-navigation/test/unit</directory>
+        </testsuite>
+        <testsuite name="webware-navigation-integration">
+            <directory>src/webware-navigation/test/integration</directory>
+        </testsuite>
+        <testsuite name="webware-usermanager">
+            <directory>src/webware-usermanager/test/unit</directory>
+        </testsuite>
+        <testsuite name="webware-usermanager-integration">
+            <directory>src/webware-usermanager/test/integration</directory>
+        </testsuite>
     </testsuites>
     <source restrictNotices="true">
         <include>

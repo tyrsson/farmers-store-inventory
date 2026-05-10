@@ -16,29 +16,16 @@ namespace Webware\Acl\Repository;
 
 use Override;
 use PhpDb\Adapter\AdapterInterface;
+use PhpDb\Sql\Expression;
 use PhpDb\Sql\Sql;
-use PhpDb\TableGateway\TableGateway;
 use Webware\Acl\Entity\Privilege;
 use Webware\Acl\Entity\Resource;
 use Webware\Acl\Entity\Role;
 
 final class AclRepository implements AclRepositoryInterface
 {
-    private readonly TableGateway $roles;
-    private readonly TableGateway $resources;
-    private readonly TableGateway $privileges;
-    private readonly TableGateway $rules;
-    private readonly TableGateway $routeMappings;
-    private readonly TableGateway $version;
-
     public function __construct(private readonly AdapterInterface $adapter)
     {
-        $this->roles         = new TableGateway('role', $adapter);
-        $this->resources     = new TableGateway('acl_resource', $adapter);
-        $this->privileges    = new TableGateway('acl_privilege', $adapter);
-        $this->rules         = new TableGateway('acl_rule', $adapter);
-        $this->routeMappings = new TableGateway('acl_route_privilege', $adapter);
-        $this->version       = new TableGateway('acl_version', $adapter);
     }
 
     /**
@@ -47,7 +34,7 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function fetchRoles(): array
     {
-        $sql    = $this->roles->getSql();
+        $sql    = new Sql($this->adapter, 'role');
         $select = $sql->select()->order('id ASC');
 
         $result = [];
@@ -67,8 +54,8 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function fetchRoleParents(): array
     {
-        $sql    = new Sql($this->adapter);
-        $select = $sql->select('acl_role_parent')->order('role_pk ASC');
+        $sql    = new Sql($this->adapter, 'acl_role_parent');
+        $select = $sql->select()->order('role_pk ASC');
 
         $result = [];
         foreach ($sql->prepareStatementForSqlObject($select)->execute() as $row) {
@@ -84,7 +71,7 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function fetchResources(): array
     {
-        $sql    = $this->resources->getSql();
+        $sql    = new Sql($this->adapter, 'acl_resource');
         $select = $sql->select()->order('resource_pk ASC');
 
         $result = [];
@@ -105,7 +92,7 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function fetchPrivileges(): array
     {
-        $sql    = $this->privileges->getSql();
+        $sql    = new Sql($this->adapter, 'acl_privilege');
         $select = $sql->select()->order('privilege_pk ASC');
 
         $result = [];
@@ -144,16 +131,42 @@ final class AclRepository implements AclRepositoryInterface
                 'acl_privilege.privilege_pk = acl_rule.privilege_pk',
                 ['privilege_id'],
             )
-            ->columns(['type'])
+            ->columns(['id', 'type'])
             ->order('acl_rule.id ASC');
 
         $result = [];
         foreach ($sql->prepareStatementForSqlObject($select)->execute() as $row) {
-            $result[] = [
+            $result[(int) $row['id']] = [
+                'id'           => (int) $row['id'],
                 'role_id'      => (string) $row['role_id'],
                 'resource_id'  => (string) $row['resource_id'],
                 'privilege_id' => (string) $row['privilege_id'],
                 'type'         => (string) $row['type'],
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function fetchRuleAssertions(): array
+    {
+        $sql    = new Sql($this->adapter);
+        $select = $sql->select('acl_rule_assertion')
+            ->columns(['id', 'rule_pk', 'assertion', 'mode', 'sort_order'])
+            ->order(['rule_pk ASC', 'sort_order ASC']);
+
+        $result = [];
+        foreach ($sql->prepareStatementForSqlObject($select)->execute() as $row) {
+            $rulePk = (int) $row['rule_pk'];
+            $result[$rulePk][] = [
+                'id'         => (int)    $row['id'],
+                'assertion'  => (string) $row['assertion'],
+                'mode'       => (string) $row['mode'],
+                'sort_order' => (int)    $row['sort_order'],
             ];
         }
 
@@ -197,7 +210,7 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function fetchVersion(): int
     {
-        $sql    = $this->version->getSql();
+        $sql    = new Sql($this->adapter, 'acl_version');
         $select = $sql->select()->columns(['version'])->where(['id' => 1]);
 
         foreach ($sql->prepareStatementForSqlObject($select)->execute() as $row) {
@@ -205,5 +218,263 @@ final class AclRepository implements AclRepositoryInterface
         }
 
         return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function insertRole(string $roleId, int $parentPk): int
+    {
+        $sql    = new Sql($this->adapter, 'role');
+        $insert = $sql->insert()->values(['role_id' => $roleId]);
+        $sql->prepareStatementForSqlObject($insert)->execute();
+
+        $newPk = (int) $this->adapter->getDriver()->getLastGeneratedValue();
+
+        $parentSql    = new Sql($this->adapter, 'acl_role_parent');
+        $parentInsert = $parentSql->insert()->values(['role_pk' => $newPk, 'parent_pk' => $parentPk]);
+        $parentSql->prepareStatementForSqlObject($parentInsert)->execute();
+
+        return $newPk;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function saveRole(string $roleId, int $parentPk): int
+    {
+        $sql    = new Sql($this->adapter, 'role');
+        $select = $sql->select()->columns(['id'])->where(['role_id' => $roleId]);
+        $existing = $sql->prepareStatementForSqlObject($select)->execute()->current();
+
+        if ($existing !== false && $existing !== null) {
+            $pk = (int) $existing['id'];
+            $parentSql = new Sql($this->adapter, 'acl_role_parent');
+            $update    = $parentSql->update()->set(['parent_pk' => $parentPk])->where(['role_pk' => $pk]);
+            $parentSql->prepareStatementForSqlObject($update)->execute();
+            return $pk;
+        }
+
+        return $this->insertRole($roleId, $parentPk);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function insertResource(string $resourceId, string $label): int
+    {
+        $sql    = new Sql($this->adapter, 'acl_resource');
+        $insert = $sql->insert()->values(['resource_id' => $resourceId, 'label' => $label]);
+        $sql->prepareStatementForSqlObject($insert)->execute();
+
+        return (int) $this->adapter->getDriver()->getLastGeneratedValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function saveResource(string $resourceId, string $label): int
+    {
+        $sql      = new Sql($this->adapter, 'acl_resource');
+        $select   = $sql->select()->columns(['resource_pk'])->where(['resource_id' => $resourceId]);
+        $existing = $sql->prepareStatementForSqlObject($select)->execute()->current();
+
+        if ($existing !== false && $existing !== null) {
+            $pk     = (int) $existing['resource_pk'];
+            $update = $sql->update()->set(['label' => $label])->where(['resource_pk' => $pk]);
+            $sql->prepareStatementForSqlObject($update)->execute();
+            return $pk;
+        }
+
+        return $this->insertResource($resourceId, $label);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function insertPrivilege(int $resourcePk, string $privilegeId, string $label): int
+    {
+        $sql    = new Sql($this->adapter, 'acl_privilege');
+        $insert = $sql->insert()->values([
+            'resource_pk'  => $resourcePk,
+            'privilege_id' => $privilegeId,
+            'label'        => $label,
+        ]);
+        $sql->prepareStatementForSqlObject($insert)->execute();
+
+        return (int) $this->adapter->getDriver()->getLastGeneratedValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function saveRule(int $rolePk, int $resourcePk, int $privilegePk, string $type): void
+    {
+        $sql    = new Sql($this->adapter, 'acl_rule');
+        $select = $sql->select()
+            ->columns(['id'])
+            ->where(['role_pk' => $rolePk, 'resource_pk' => $resourcePk, 'privilege_pk' => $privilegePk]);
+
+        $existing = $sql->prepareStatementForSqlObject($select)->execute()->current();
+
+        if ($existing !== false && $existing !== null) {
+            $update = $sql->update()->set(['type' => $type])->where(['id' => (int) $existing['id']]);
+            $sql->prepareStatementForSqlObject($update)->execute();
+        } else {
+            $insert = $sql->insert()->values([
+                'role_pk'      => $rolePk,
+                'resource_pk'  => $resourcePk,
+                'privilege_pk' => $privilegePk,
+                'type'         => $type,
+            ]);
+            $sql->prepareStatementForSqlObject($insert)->execute();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function deleteRole(int $rolePk): void
+    {
+        // Remove parent-mapping rows first (FK constraint)
+        $sql    = new Sql($this->adapter, 'acl_role_parent');
+        $delete = $sql->delete()->where(['role_pk' => $rolePk]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+
+        // Remove the role itself
+        $sql    = new Sql($this->adapter, 'role');
+        $delete = $sql->delete()->where(['id' => $rolePk]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function deleteResource(int $resourcePk): void
+    {
+        // 1. Rules referencing this resource's privileges
+        $sql    = new Sql($this->adapter, 'acl_rule');
+        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+
+        // 2. Route mappings referencing this resource
+        $sql    = new Sql($this->adapter, 'acl_route_privilege');
+        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+
+        // 3. Privileges belonging to this resource
+        $sql    = new Sql($this->adapter, 'acl_privilege');
+        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+
+        // 4. The resource itself
+        $sql    = new Sql($this->adapter, 'acl_resource');
+        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function deleteRule(int $id): void
+    {
+        $sql    = new Sql($this->adapter, 'acl_rule');
+        $delete = $sql->delete()->where(['id' => $id]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]    public function updateRuleType(int $id, string $type): void
+    {
+        $sql    = new Sql($this->adapter, 'acl_rule');
+        $update = $sql->update()->set(['type' => $type])->where(['id' => $id]);
+        $sql->prepareStatementForSqlObject($update)->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]    public function saveRouteMapping(string $routeName, int $resourcePk, int $privilegePk): void
+    {
+        $sql    = new Sql($this->adapter, 'acl_route_privilege');
+        $select = $sql->select()->columns(['id'])->where(['route_name' => $routeName]);
+
+        $existing = $sql->prepareStatementForSqlObject($select)->execute()->current();
+
+        if ($existing !== false && $existing !== null) {
+            $update = $sql->update()
+                ->set(['resource_pk' => $resourcePk, 'privilege_pk' => $privilegePk])
+                ->where(['id' => (int) $existing['id']]);
+            $sql->prepareStatementForSqlObject($update)->execute();
+        } else {
+            $insert = $sql->insert()->values([
+                'route_name'   => $routeName,
+                'resource_pk'  => $resourcePk,
+                'privilege_pk' => $privilegePk,
+            ]);
+            $sql->prepareStatementForSqlObject($insert)->execute();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function deleteRouteMapping(string $routeName): void
+    {
+        $sql    = new Sql($this->adapter, 'acl_route_privilege');
+        $delete = $sql->delete()->where(['route_name' => $routeName]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function incrementVersion(): void
+    {
+        $sql    = new Sql($this->adapter, 'acl_version');
+        $update = $sql->update()->set(['version' => new Expression('version + 1')])->where(['id' => 1]);
+        $sql->prepareStatementForSqlObject($update)->execute();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function saveRuleAssertion(int $rulePk, string $assertion, string $mode, int $sortOrder): int
+    {
+        $sql    = new Sql($this->adapter, 'acl_rule_assertion');
+        $insert = $sql->insert()->values([
+            'rule_pk'    => $rulePk,
+            'assertion'  => $assertion,
+            'mode'       => $mode,
+            'sort_order' => $sortOrder,
+        ]);
+        $sql->prepareStatementForSqlObject($insert)->execute();
+
+        return (int) $this->adapter->getDriver()->getLastGeneratedValue();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    #[Override]
+    public function deleteRuleAssertion(int $id): void
+    {
+        $sql    = new Sql($this->adapter, 'acl_rule_assertion');
+        $delete = $sql->delete()->where(['id' => $id]);
+        $sql->prepareStatementForSqlObject($delete)->execute();
     }
 }

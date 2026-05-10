@@ -6,17 +6,18 @@ declare(strict_types=1);
 namespace Webware\Admin\Listener;
 
 use Webware\Acl\Event\AclBuiltEvent;
+use Webware\Acl\Privilege;
 
 /**
- * Registers the admin.dashboard route→ACL resource mapping.
+ * Registers route→ACL resource mappings for the admin module.
  *
- * Called on AclBuiltEvent so that AclMiddleware can resolve the route to
- * its required resource and privilege without a database lookup.
+ * Called on AclBuiltEvent so that AclMiddleware can resolve routes to their
+ * required resource and privilege without a database lookup.
  */
 final class RegisterAdminRouteMappingsListener
 {
     public function __invoke(AclBuiltEvent $event): void
     {
-        $event->addRouteMapping('admin.dashboard', 'admin.dashboard', 'read');
+        $event->addRouteMapping('admin.dashboard.read', 'admin.dashboard', Privilege::READ);
     }
 }

@@ -12,19 +12,28 @@ use Webware\Admin\Widget\WidgetInterface;
  * Admin dashboard widget contributed by webware-acl.
  *
  * Links to the ACL Management pages (roles, resources, rules, routes).
- * Visible to any role with 'read' access to 'admin.dashboard'.
+ * Visible only to roles with 'read' access to 'admin.acl' (Developer only).
  */
 final class AclDashboardWidget implements WidgetInterface
 {
     public string $title      { get => 'ACL Management'; }
 
-    public string $resourceId { get => 'admin.dashboard'; }
+    public string $resourceId { get => 'admin.acl'; }
 
     public string $privilege  { get => 'read'; }
 
     public string $template   { get => 'acl::admin-widget'; }
 
     public int    $order      { get => 10; }
+
+    public function __construct(
+        public readonly int $roleCount,
+        public readonly int $resourceCount,
+        public readonly int $ruleCount,
+        public readonly int $assertionCount,
+        public readonly int $mappingCount,
+        public readonly int $aclVersion,
+    ) {}
 
     #[Override]
     public function getResourceId(): string

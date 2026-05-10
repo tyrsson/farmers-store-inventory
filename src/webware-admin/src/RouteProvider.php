@@ -27,7 +27,7 @@ final readonly class RouteProvider implements RouteProviderInterface
                         RequestHandler\DashboardHandler::class,
                     ]
                 ),
-                'admin.dashboard'
+                'admin.dashboard.read'
             )->setOptions([
                 'navigation' => 'admin',
                 'label'      => 'Dashboard',
