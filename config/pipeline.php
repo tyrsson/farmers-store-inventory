@@ -30,9 +30,9 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
         : $app->pipe(ErrorHandler::class);
 
     $app->pipe(ServerUrlMiddleware::class);
-    $app->pipe(MonologMiddleware::class);
     $app->pipe(SessionMiddleware::class);
     $app->pipe(IdentityMiddleware::class);
+    $app->pipe(MonologMiddleware::class);
     $app->pipe(DetectAjaxRequestMiddleware::class);
     $app->pipe(\App\Middleware\ImsMessengerMiddleware::class);
 

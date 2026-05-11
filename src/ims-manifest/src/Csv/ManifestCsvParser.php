@@ -79,7 +79,7 @@ final class ManifestCsvParser
         $headers      = null;
         $items        = [];
 
-        while (($row = fgetcsv($handle)) !== false) {
+        while (($row = fgetcsv($handle, 0, ',', '"', '')) !== false) {
             // fgetcsv returns [null] for blank / empty lines — skip without counting
             if ($row === [null]) {
                 continue;

@@ -37,7 +37,7 @@ final class ManifestUploadHandler implements RequestHandlerInterface
 
         if ($commandResult instanceof CommandResult && $commandResult->getStatus() === CommandStatus::Success) {
             $manifestId = (int) $commandResult->getResult();
-            return new RedirectResponse('/manifests/' . $manifestId);
+            return new RedirectResponse('/manifest/' . $manifestId);
         }
 
         // GET or failed POST — render the upload form

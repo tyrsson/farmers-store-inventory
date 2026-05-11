@@ -1,7 +1,7 @@
 ---
 title: Sprint — May 8–11, 2026
 date_created: 2026-05-07
-status: In Progress
+status: Block 3 complete — Block 4 not started
 total_hours_estimated: 62–65h
 ---
 
@@ -99,17 +99,17 @@ Full plan: `docs/planning/feature-admin-acl-listener-wiring-1.md`
 |---|---|---|---|
 | 3.5 | **Analytics JSON endpoint** — `GET /api/analytics` — returns Chart.js-ready data arrays: damage trend (30/90/180 day), status distribution, items-per-manifest, top damage categories. Accepts `?range=30d\|90d\|6mo` query param. | 2h | `src/App/src/RequestHandler/AnalyticsApiHandler.php` + factory + route |
 | 3.6 | **Analytics — date range switching** — wire 30d/90d/6mo buttons with `hx-get="/api/analytics?range=…"` + `hx-target` swapping chart data; update `Chart.js` datasets on swap without re-creating charts. | 1h | `src/App/templates/app/analytics.phtml` + `public/assets/js/app.js` |
-| 3.7 | **Manifest module scaffold** — `src/Manifest/` package skeleton: `ConfigProvider`, `RouteProvider`, DB schema review (`006_manifest.sql`, `007_manifest_item.sql`), entity classes (`Manifest`, `ManifestItem`), repository interface + stub implementation. | 2h | `src/Manifest/src/` |
-| 3.8 | **Manifest list handler** — `GET /manifests` (`manifest.list`) — paginated list, status badge, progress bar (items processed / total). HTMX infinite scroll or pagination. Load `htmx-mezzio` SKILL. | 90m | Handler + factory + template |
+| 3.7 | ~~**Manifest module scaffold**~~ ✅ | 2h | Complete |
+| 3.8 | ~~**Manifest list handler**~~ ✅ | 90m | Complete |
 
 ### Evening session (≈6h)
 
 | # | Task | Est. | Files |
 |---|---|---|---|
-| 3.9 | **Manifest detail handler** — `GET /manifests/{id}` (`manifest.detail`) — summary card, damaged items list, clean items list. | 90m | Handler + factory + template |
-| 3.10 | **Process manifest handler** — `GET /manifests/{id}/process` (`manifest.process`) — scan zone, manual entry form, processed items list. Uses HTMX for real-time updates. | 2h | Handler + factory + template |
-| 3.11 | **Scan / AO# lookup endpoint** — `POST /manifests/{id}/scan` (`manifest.scan`) — receives AO# from hardware wedge or ZXing; validates against manifest items; returns HTMX partial (success card or error toast). | 2h | Handler + factory + template partial |
-| 3.12 | **Finish manifest endpoint** — `POST /manifests/{id}/finish` — marks manifest complete; validates all items accounted for or explicitly skipped; redirects to detail. | 45m | Handler |
+| 3.9 | ~~**Manifest detail handler**~~ ✅ — `GET /manifest/{id}` (`manifest.detail`) — summary card, damaged items list, clean items list. | 90m | Complete |
+| 3.10 | **Process manifest handler** — `GET /manifest/{id}/process` (`manifest.process`) — scan zone, manual entry form, processed items list. Uses HTMX for real-time updates. | 2h | Handler + factory + template |
+| 3.11 | **Scan / AO# lookup endpoint** — `POST /manifest/{id}/scan` (`manifest.scan`) — receives AO# from hardware wedge or ZXing; validates against manifest items; returns HTMX partial (success card or error toast). | 2h | Handler + factory + template partial |
+| 3.12 | **Finish manifest endpoint** — `POST /manifest/{id}/finish` — marks manifest complete; validates all items accounted for or explicitly skipped; calls `unlink($manifest->csvPath)` + nulls `csv_path` in DB; redirects to detail. | 45m | Handler |
 
 ---
 
@@ -145,9 +145,37 @@ Full plan: `docs/planning/feature-admin-acl-listener-wiring-1.md`
 
 ---
 
-## Carry-Forward Items (not expected this sprint)
+## Session Notes — May 11, 2026
 
-These are recorded here so they are not lost. Pick up in the next sprint.
+### Resolved Issues
+- **Performance**: `/admin` double `acl_version` SELECT fixed — `AclRepository::fetchVersion()` memoized; cleared by `incrementVersion()`
+- **ACL UI**: Add Rule modal privilege select was showing all privileges for all resources — fixed with `data-resource-pk` filtering via JS
+- **Manifest upload — `userId = 0` FK violation**: Session stores `DefaultUser`; `$user->id` is always `null`. Fixed by adding `'id'` to details array in `UserRepository::hydrate()`; read via `$user->getDetail('id')`
+- **`fgetcsv()` deprecation**: Explicit 5-arg call: `fgetcsv($handle, 0, ',', '"', '')`
+- **`execute()->current()` returns `false`**: PhpDb does not normalize empty result — guarded in `resolveMajorCodeId()` and `upsertSkuCatalogue()`
+- **Raw exception in toast**: Changed `catch (RuntimeException)` to `catch (Throwable)`; logger pulled from `$request->getAttribute(LoggerInterface::class)`; generic user message shown
+- **CSV file orphaned on DB failure**: `cleanupFile()` helper called on empty-CSV early return and in catch block; `$finalPath ?? $tmpPath` covers all failure points
+- **Upload form defaulting to today's date**: `received_date` input now blank by default — parser uses CSV consignment date unless user explicitly overrides
+
+### Key Architecture Decisions Deferred
+- **Centralized error handling**: Future `App\Exception\ExceptionInterface` with `getSystemMessage()` + pipeline error middleware. Components throw typed exceptions; one middleware logs + toasts + rethrows to `ErrorHandler`/`axleus-log`. Not implemented yet — current placeholder (`Throwable` catch + request logger) is acceptable.
+- **No-JS fallback for upload form**: `GET /manifest/upload` retained pending IT dept policy on JavaScript requirement.
+
+### Route Corrections (final)
+| Method | Path | Note |
+|---|---|---|
+| `GET` | `/manifests` | List — plural |
+| `GET` | `/manifest/upload` | Upload form — singular (no-JS fallback) |
+| `POST` | `/manifest/upload` | Process upload — singular (creates one manifest) |
+| `GET` | `/manifest/{id}` | Detail — singular |
+
+### `displayId()` format
+`{storeId}-{mmdd}` e.g. `207-0427`. Year visible in date field in context; not in ID itself.
+DC date on manifest = dispatch date at DC (typically 1 day before store receipt). Override field allows correction.
+
+---
+
+## Carry-Forward Items (not expected this sprint)
 
 | Item | Notes |
 |---|---|

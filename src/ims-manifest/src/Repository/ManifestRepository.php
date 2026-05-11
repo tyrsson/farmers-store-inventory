@@ -99,7 +99,7 @@ final class ManifestRepository implements ManifestRepositoryInterface
     }
 
     #[Override]
-    public function insertFromCsv(ParsedManifest $parsed, int $userId): int
+    public function insertFromCsv(ParsedManifest $parsed, int $userId, string $csvPath): int
     {
         // 1. Resolve / create major_code rows; cache by code string to avoid repeat queries
         $majorCodeIds = [];
@@ -128,6 +128,7 @@ final class ManifestRepository implements ManifestRepositoryInterface
             'received_date' => $parsed->receivedDate->format('Y-m-d'),
             'created_by'    => $userId,
             'created_at'    => $now,
+            'csv_path'      => $csvPath,
         ]);
 
         // 4. Insert manifest_item rows; scanned_by = uploading user (import = initial record)
@@ -161,7 +162,7 @@ final class ManifestRepository implements ManifestRepositoryInterface
         $select = $sql->select()->columns(['id'])->where(['code' => $code])->limit(1);
         $row    = $sql->prepareStatementForSqlObject($select)->execute()->current();
 
-        if ($row !== null) {
+        if ($row !== null && $row !== false) {
             return (int) $row['id'];
         }
 
@@ -192,7 +193,7 @@ final class ManifestRepository implements ManifestRepositoryInterface
             'major_code_id' => $majorCodeId,
         ];
 
-        if ($row === null) {
+        if ($row === null || $row === false) {
             $insert = $sql->insert()->values(['sku' => $sku] + $data);
             $sql->prepareStatementForSqlObject($insert)->execute();
         } else {
@@ -235,6 +236,7 @@ final class ManifestRepository implements ManifestRepositoryInterface
             receivedDate: new DateTimeImmutable((string) $row['received_date']),
             createdBy:    (int) $row['created_by'],
             createdAt:    new DateTimeImmutable((string) $row['created_at']),
+            csvPath:      ($row['csv_path'] ?? null) !== null ? (string) $row['csv_path'] : null,
             items:        $items,
             itemCount:    (int) ($row['item_count'] ?? 0),
             pieceCount:   (int) ($row['piece_count'] ?? 0),

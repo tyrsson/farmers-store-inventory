@@ -53,5 +53,5 @@ interface ManifestRepositoryInterface
      *
      * @return int The generated manifest id.
      */
-    public function insertFromCsv(ParsedManifest $parsed, int $userId): int;
+    public function insertFromCsv(ParsedManifest $parsed, int $userId, string $csvPath): int;
 }

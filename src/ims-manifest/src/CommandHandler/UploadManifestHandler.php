@@ -33,7 +33,7 @@ final class UploadManifestHandler implements CommandHandlerInterface
     {
         assert($command instanceof UploadManifestCommand);
 
-        $manifestId = $this->manifests->insertFromCsv($command->parsed, $command->userId);
+        $manifestId = $this->manifests->insertFromCsv($command->parsed, $command->userId, $command->csvPath);
 
         return new CommandResult($command, CommandStatus::Success, $manifestId);
     }

@@ -45,7 +45,7 @@ final class RouteProvider implements RouteProviderInterface
         ]);
 
         $routeCollector->get(
-            '/manifests/upload',
+            '/manifest/upload',
             $middlewareFactory->prepare([
                 AuthorizationMiddleware::class,
                 ManifestUploadHandler::class,
@@ -54,7 +54,7 @@ final class RouteProvider implements RouteProviderInterface
         );
 
         $routeCollector->post(
-            '/manifests/upload',
+            '/manifest/upload',
             $middlewareFactory->prepare([
                 AuthorizationMiddleware::class,
                 ProcessManifestUploadMiddleware::class,
@@ -64,7 +64,7 @@ final class RouteProvider implements RouteProviderInterface
         );
 
         $routeCollector->get(
-            '/manifests/{id:\d+}',
+            '/manifest/{id:\d+}',
             $middlewareFactory->prepare([
                 AuthorizationMiddleware::class,
                 ManifestDetailHandler::class,

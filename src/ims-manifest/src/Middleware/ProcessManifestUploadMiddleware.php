@@ -24,7 +24,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
+use Psr\Log\LoggerInterface;
+use Throwable;
 use Webware\CommandBus\Command\CommandResult;
 use Webware\CommandBus\Command\CommandStatus;
 use Webware\CommandBus\CommandBusInterface;
@@ -34,8 +35,8 @@ use Webware\UserManager\Entity\User;
 use function count;
 use function file_exists;
 use function is_string;
+use function rename;
 use function sprintf;
-use function sys_get_temp_dir;
 use function uniqid;
 use function unlink;
 
@@ -72,17 +73,27 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
         $body            = $request->getParsedBody();
         $receivedDateRaw = is_string($body['received_date'] ?? null) ? $body['received_date'] : '';
         $receivedDate    = $receivedDateRaw !== ''
-            ? DateTimeImmutable::createFromFormat('Y-m-d', $receivedDateRaw) ?: null
+            ? (DateTimeImmutable::createFromFormat('Y-m-d', $receivedDateRaw) ?: null)
             : null;
 
-        $tmpPath = sprintf('%s/%s.csv', sys_get_temp_dir(), uniqid('manifest_', true));
-        $result  = null;
+        $tmpPath   = sprintf('data/manifest/%s.csv', uniqid('manifest_', true));
+        $finalPath = null;
+        $result    = null;
 
         try {
             $file->moveTo($tmpPath);
             $parsed = $this->parser->parse($tmpPath, $receivedDate);
 
+            // Rename to store-prefixed filename now that we know the store number
+            $finalPath = sprintf(
+                'data/manifest/store%d_%s.csv',
+                $parsed->storeId,
+                uniqid('', true)
+            );
+            rename($tmpPath, $finalPath);
+
             if ($parsed->items === []) {
+                $this->cleanupFile($finalPath);
                 $messenger?->danger(
                     'The CSV contained no importable items. '
                     . 'Check that the file is a DC truck manifest and is not empty.'
@@ -90,19 +101,18 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
                 return $handler->handle($request);
             }
 
-            $result = $this->commandBus->handle(new UploadManifestCommand($parsed, $user->id));
+            $result = $this->commandBus->handle(new UploadManifestCommand($parsed, (int) $user->getDetail('id'), $finalPath));
 
             if ($result->getStatus() === CommandStatus::Success) {
                 $messenger?->success(
                     sprintf('Manifest imported — %d items added.', count($parsed->items))
                 );
             }
-        } catch (RuntimeException $e) {
-            $messenger?->danger($e->getMessage());
-        } finally {
-            if (file_exists($tmpPath)) {
-                unlink($tmpPath);
-            }
+        } catch (Throwable $e) {
+            $this->cleanupFile($finalPath ?? $tmpPath);
+            $logger = $request->getAttribute(LoggerInterface::class);
+            $logger?->error($e->getMessage(), ['exception' => $e]);
+            $messenger?->danger('The manifest could not be imported. Please try again or contact support.');
         }
 
         return $handler->handle(
@@ -110,5 +120,12 @@ final class ProcessManifestUploadMiddleware implements MiddlewareInterface
                 ? $request->withAttribute(CommandResult::class, $result)
                 : $request
         );
+    }
+
+    private function cleanupFile(?string $path): void
+    {
+        if (is_string($path) && file_exists($path)) {
+            unlink($path);
+        }
     }
 }

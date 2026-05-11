@@ -25,5 +25,6 @@ final readonly class UploadManifestCommand implements NamedCommandInterface
     public function __construct(
         public ParsedManifest $parsed,
         public int $userId,
+        public string $csvPath,
     ) {}
 }

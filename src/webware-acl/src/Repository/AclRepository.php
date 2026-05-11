@@ -24,6 +24,8 @@ use Webware\Acl\Entity\Role;
 
 final class AclRepository implements AclRepositoryInterface
 {
+    private ?int $cachedVersion = null;
+
     public function __construct(private readonly AdapterInterface $adapter)
     {
     }
@@ -210,14 +212,18 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function fetchVersion(): int
     {
+        if ($this->cachedVersion !== null) {
+            return $this->cachedVersion;
+        }
+
         $sql    = new Sql($this->adapter, 'acl_version');
         $select = $sql->select()->columns(['version'])->where(['id' => 1]);
 
         foreach ($sql->prepareStatementForSqlObject($select)->execute() as $row) {
-            return (int) $row['version'];
+            return $this->cachedVersion = (int) $row['version'];
         }
 
-        return 0;
+        return $this->cachedVersion = 0;
     }
 
     /**
@@ -447,6 +453,7 @@ final class AclRepository implements AclRepositoryInterface
         $sql    = new Sql($this->adapter, 'acl_version');
         $update = $sql->update()->set(['version' => new Expression('version + 1')])->where(['id' => 1]);
         $sql->prepareStatementForSqlObject($update)->execute();
+        $this->cachedVersion = null;
     }
 
     /**

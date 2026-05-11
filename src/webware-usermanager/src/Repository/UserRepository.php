@@ -181,6 +181,7 @@ final class UserRepository implements UserRepositoryInterface
             tokenCreatedAt: isset($row['token_created_at']) ? new DateTimeImmutable((string) $row['token_created_at']) : null,
             roles: [(string) $row['role_name']],
             details: [
+                'id'       => (int) $row['id'],
                 'store_id' => (int) $row['store_id'],
             ],
         );

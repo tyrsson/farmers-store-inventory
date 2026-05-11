@@ -53,8 +53,7 @@ $this->headTitle('Upload Manifest');
                         <input type="date"
                                class="form-control"
                                id="received_date"
-                               name="received_date"
-                               value="<?= $this->escapeHtml((new DateTime())->format('Y-m-d')) ?>">
+                               name="received_date">
                         <div class="form-text">
                             Defaults to the date in the consignment header. Override only if
                             the truck arrived on a different calendar day.
