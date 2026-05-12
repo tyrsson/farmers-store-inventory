@@ -24,12 +24,13 @@ final class SendVerificationEmailListener
         private readonly string $fromEmail,
         private readonly string $fromName,
         private readonly string $baseUrl,
+        private readonly string $verificationSubject,
     ) {}
 
     public function __invoke(SendVerificationEmailEvent $event): void
     {
         $command         = $event->getCommand();
-        $token           = (string) $event->getToken();
+        $token           = $event->getToken();
         $verificationUrl = rtrim($this->baseUrl, '/') . '/verify-email/' . $token;
 
         $adapter = $this->mailer->getAdapter();
@@ -41,7 +42,7 @@ final class SendVerificationEmailListener
         $adapter
             ->from($this->fromEmail, $this->fromName)
             ->to($event->getEmail())
-            ->subject('Verify your Farmers IMS account')
+            ->subject($this->verificationSubject)
             ->isHtml(true)
             ->body(
                 '<p>Hello ' . htmlspecialchars($command->firstName, ENT_QUOTES, 'UTF-8') . ',</p>'

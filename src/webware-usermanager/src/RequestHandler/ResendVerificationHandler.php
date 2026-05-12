@@ -42,6 +42,7 @@ final class ResendVerificationHandler implements RequestHandlerInterface
         private readonly string $fromEmail,
         private readonly string $fromName,
         private readonly string $baseUrl,
+        private readonly string $verificationSubject,
     ) {}
 
     #[Override]
@@ -87,7 +88,7 @@ final class ResendVerificationHandler implements RequestHandlerInterface
                 $adapter
                     ->from($this->fromEmail, $this->fromName)
                     ->to($email, $user->firstName . ' ' . $user->lastName)
-                    ->subject('Verify your Farmers IMS account')
+                    ->subject($this->verificationSubject)
                     ->isHtml(true)
                     ->body(
                         '<p>Hello ' . htmlspecialchars($user->firstName, ENT_QUOTES, 'UTF-8') . ',</p>'
