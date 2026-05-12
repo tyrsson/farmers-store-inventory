@@ -494,10 +494,10 @@ foreach ($this->privileges as $pk => $privilege) {
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label small fw-semibold" for="new_rule_privilege">Privilege <span class="text-danger">*</span></label>
-                            <select id="new_rule_privilege" name="privilege_pk" class="form-select form-select-sm" required>
-                                <option value="">— select privilege —</option>
+                            <select id="new_rule_privilege" name="privilege_pk" class="form-select form-select-sm" required disabled>
+                                <option value="">— select resource first —</option>
                                 <?php foreach ($this->privileges as $pk => $privilege): ?>
-                                    <option value="<?= $pk ?>">
+                                    <option value="<?= $pk ?>" data-resource-pk="<?= $privilege->resourcePk ?>" hidden>
                                         <?= $this->escapeHtml($privilege->privilegeId) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -670,6 +670,34 @@ foreach ($this->privileges as $pk => $privilege) {
 
 <?php $this->inlineScript()->captureStart(); ?>
 (function () {
+    // Filter privilege options when resource is selected in Add Rule modal
+    document.getElementById('new_rule_resource')?.addEventListener('change', function () {
+        const resourcePk  = this.value;
+        const privSel     = document.getElementById('new_rule_privilege');
+        privSel.value     = '';
+        privSel.disabled  = !resourcePk;
+        for (const opt of privSel.options) {
+            if (!opt.value) {
+                opt.textContent = resourcePk ? '— select privilege —' : '— select resource first —';
+                opt.hidden = false;
+                continue;
+            }
+            opt.hidden = opt.dataset.resourcePk !== resourcePk;
+        }
+    });
+
+    // Reset privilege select when Add Rule modal is closed
+    document.getElementById('addRuleModal')?.addEventListener('hidden.bs.modal', function () {
+        const privSel    = document.getElementById('new_rule_privilege');
+        privSel.value    = '';
+        privSel.disabled = true;
+        for (const opt of privSel.options) {
+            if (opt.value) opt.hidden = true;
+        }
+        const firstOpt = privSel.querySelector('option:not([value])');
+        if (firstOpt) firstOpt.textContent = '— select resource first —';
+    });
+
     // Populate rule id when Add Assertion modal opens
     document.getElementById('addAssertionModal')?.addEventListener('show.bs.modal', function (e) {
         const trigger = e.relatedTarget;

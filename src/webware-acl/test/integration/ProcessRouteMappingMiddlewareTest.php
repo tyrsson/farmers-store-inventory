@@ -13,9 +13,12 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Webware\Acl\Admin\Command\DeleteRouteMappingCommand;
+use Webware\Acl\Admin\Command\SaveRouteMappingCommand;
 use Webware\Acl\Admin\Middleware\ProcessRouteMappingMiddleware;
-use Webware\Acl\Admin\WriteResult;
-use Webware\Acl\Repository\AclRepositoryInterface;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
+use Webware\CommandBus\CommandBusInterface;
 
 #[CoversClass(ProcessRouteMappingMiddleware::class)]
 final class ProcessRouteMappingMiddlewareTest extends TestCase
@@ -34,12 +37,13 @@ final class ProcessRouteMappingMiddlewareTest extends TestCase
     }
 
     #[Test]
-    public function postWithValidBodySavesMappingAndSetsSuccessTrue(): void
+    public function postWithValidBodyDispatchesSaveMappingCommandAndSetsSuccess(): void
     {
-        $repository = $this->createMock(AclRepositoryInterface::class);
-        $repository->expects($this->once())->method('saveRouteMapping')
-            ->with('admin.acl.rules.read', 2, 3);
-        $repository->expects($this->once())->method('incrementVersion');
+        $bus = $this->createMock(CommandBusInterface::class);
+        $bus->expects($this->once())
+            ->method('handle')
+            ->with($this->isInstanceOf(SaveRouteMappingCommand::class))
+            ->willReturnCallback(fn($cmd) => new CommandResult($cmd, CommandStatus::Success, null));
 
         $messenger = $this->createStub(SystemMessengerInterface::class);
 
@@ -48,34 +52,39 @@ final class ProcessRouteMappingMiddlewareTest extends TestCase
             ->withAttribute(SystemMessengerInterface::class, $messenger);
 
         $handler    = $this->capturingHandler();
-        $middleware = new ProcessRouteMappingMiddleware($repository);
+        $middleware = new ProcessRouteMappingMiddleware($bus);
         $middleware->process($request, $handler);
 
-        self::assertTrue($handler->received?->getAttribute(WriteResult::Success->value));
+        $result = $handler->received?->getAttribute(CommandResult::class);
+        self::assertInstanceOf(CommandResult::class, $result);
+        self::assertSame(CommandStatus::Success, $result->getStatus());
     }
 
     #[Test]
-    public function postWithMissingRouteNameSetsSuccessFalse(): void
+    public function postWithMissingRouteNameSetsFailure(): void
     {
-        $repository = $this->createStub(AclRepositoryInterface::class);
+        $bus = $this->createStub(CommandBusInterface::class);
 
         $request = (new ServerRequest([], [], '/', 'POST'))
             ->withParsedBody(['resource_pk' => '2', 'privilege_pk' => '3']);
 
         $handler    = $this->capturingHandler();
-        $middleware = new ProcessRouteMappingMiddleware($repository);
+        $middleware = new ProcessRouteMappingMiddleware($bus);
         $middleware->process($request, $handler);
 
-        self::assertFalse($handler->received?->getAttribute(WriteResult::Success->value));
+        $result = $handler->received?->getAttribute(CommandResult::class);
+        self::assertInstanceOf(CommandResult::class, $result);
+        self::assertSame(CommandStatus::Failure, $result->getStatus());
     }
 
     #[Test]
-    public function deleteWithValidRouteNameDeletesMappingAndSetsSuccessTrue(): void
+    public function deleteWithValidRouteNameDispatchesDeleteCommandAndSetsSuccess(): void
     {
-        $repository = $this->createMock(AclRepositoryInterface::class);
-        $repository->expects($this->once())->method('deleteRouteMapping')
-            ->with('admin.acl.rules.read');
-        $repository->expects($this->once())->method('incrementVersion');
+        $bus = $this->createMock(CommandBusInterface::class);
+        $bus->expects($this->once())
+            ->method('handle')
+            ->with($this->isInstanceOf(DeleteRouteMappingCommand::class))
+            ->willReturnCallback(fn($cmd) => new CommandResult($cmd, CommandStatus::Success, null));
 
         $messenger = $this->createStub(SystemMessengerInterface::class);
 
@@ -84,24 +93,28 @@ final class ProcessRouteMappingMiddlewareTest extends TestCase
             ->withAttribute(SystemMessengerInterface::class, $messenger);
 
         $handler    = $this->capturingHandler();
-        $middleware = new ProcessRouteMappingMiddleware($repository);
+        $middleware = new ProcessRouteMappingMiddleware($bus);
         $middleware->processDelete($request, $handler);
 
-        self::assertTrue($handler->received?->getAttribute(WriteResult::Success->value));
+        $result = $handler->received?->getAttribute(CommandResult::class);
+        self::assertInstanceOf(CommandResult::class, $result);
+        self::assertSame(CommandStatus::Success, $result->getStatus());
     }
 
     #[Test]
-    public function deleteWithEmptyRouteNameSetsSuccessFalse(): void
+    public function deleteWithEmptyRouteNameSetsFailure(): void
     {
-        $repository = $this->createStub(AclRepositoryInterface::class);
+        $bus = $this->createStub(CommandBusInterface::class);
 
-        $request = (new ServerRequest([], [], '/', 'POST'))
-            ->withParsedBody(['route_name' => '']);
+        $request = (new ServerRequest([], [], '/', 'DELETE'))
+            ->withAttribute('route_name', '');
 
         $handler    = $this->capturingHandler();
-        $middleware = new ProcessRouteMappingMiddleware($repository);
+        $middleware = new ProcessRouteMappingMiddleware($bus);
         $middleware->processDelete($request, $handler);
 
-        self::assertFalse($handler->received?->getAttribute(WriteResult::Success->value));
+        $result = $handler->received?->getAttribute(CommandResult::class);
+        self::assertInstanceOf(CommandResult::class, $result);
+        self::assertSame(CommandStatus::Failure, $result->getStatus());
     }
 }

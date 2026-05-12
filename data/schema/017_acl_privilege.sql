@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS acl_privilege (
     resource_pk   SMALLINT UNSIGNED NOT NULL,
     privilege_id  VARCHAR(100)      NOT NULL COMMENT 'Laminas ACL privilege ID, e.g. create',
     label         VARCHAR(100)      NOT NULL COMMENT 'Display label for management UI',
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (privilege_pk),
     UNIQUE KEY uq_resource_privilege (resource_pk, privilege_id),
     CONSTRAINT fk_priv_resource FOREIGN KEY (resource_pk) REFERENCES acl_resource (resource_pk)

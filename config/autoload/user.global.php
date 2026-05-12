@@ -2,7 +2,15 @@
 
 declare(strict_types=1);
 
+use Webware\UserManager\Event\SendVerificationEmailEvent;
+use Webware\UserManager\Listener\SendVerificationEmailListener;
+
 return [
+    'listeners' => [
+        SendVerificationEmailEvent::class => [
+            ['listener' => SendVerificationEmailListener::class, 'priority' => 1],
+        ],
+    ],
     'user' => [
         /**
          * Base URL used when building the email verification link.

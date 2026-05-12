@@ -35,6 +35,7 @@ final class Manifest
         public readonly DateTimeImmutable $receivedDate,
         public readonly int $createdBy,
         public readonly DateTimeImmutable $createdAt,
+        public readonly ?string $csvPath = null,
         public readonly array $items = [],
         public readonly int $itemCount = 0,
         public readonly int $pieceCount = 0,

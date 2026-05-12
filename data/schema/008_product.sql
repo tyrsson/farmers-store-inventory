@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS product (
     )                                   NULL,
     removed_by       INT UNSIGNED       NULL,
     created_at       DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (id),
     KEY idx_product_store_active (store_id, removed_at),
     KEY idx_product_ao (ao_number),

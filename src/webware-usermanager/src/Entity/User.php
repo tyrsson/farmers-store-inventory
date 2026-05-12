@@ -17,35 +17,37 @@ namespace Webware\UserManager\Entity;
 use DateTimeImmutable;
 use Laminas\Permissions\Acl\ProprietaryInterface;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
+use Laminas\Permissions\Acl\Role\RoleInterface;
 use Mezzio\Authentication\UserInterface;
 use Override;
 
 use function array_merge;
 use function array_values;
 
-final class User implements UserInterface, ResourceInterface, ProprietaryInterface
+final readonly class User implements UserInterface, RoleInterface, ResourceInterface, ProprietaryInterface
 {
-    public string $displayName {
-        get => $this->firstName . ' ' . $this->lastName;
-    }
-
     public function __construct(
-        public readonly int $id,
-        public readonly int $storeId,
-        public readonly int $roleId,
-        public readonly string $firstName,
-        public readonly string $lastName,
-        public readonly string $email,
-        public readonly string $passwordHash,
-        public readonly bool $active,
-        public readonly DateTimeImmutable $createdAt,
-        public readonly ?string $verificationToken = null,
-        public readonly ?DateTimeImmutable $tokenCreatedAt = null,
+        public int $id,
+        public int $storeId,
+        public int $roleId,
+        public string $firstName,
+        public string $lastName,
+        public string $email,
+        public string $passwordHash,
+        public bool $active,
+        public DateTimeImmutable $createdAt,
+        public ?string $verificationToken = null,
+        public ?DateTimeImmutable $tokenCreatedAt = null,
         /** @var string[] */
-        private readonly array $roles = [],
+        private array $roles = [],
         /** @var array<string, mixed> */
-        private readonly array $details = [],
+        private array $details = [],
     ) {}
+
+    public function displayName(): string
+    {
+        return $this->firstName . ' ' . $this->lastName;
+    }
 
     #[Override]
     public function getIdentity(): string
@@ -72,6 +74,12 @@ final class User implements UserInterface, ResourceInterface, ProprietaryInterfa
     public function getOwnerId(): int
     {
         return $this->id;
+    }
+
+    #[Override]
+    public function getRoleId(): int
+    {
+        return $this->roles[0] ?? 'guest';
     }
 
     /** @return string[] */

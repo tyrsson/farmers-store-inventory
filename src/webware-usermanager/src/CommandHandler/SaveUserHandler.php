@@ -15,9 +15,11 @@ declare(strict_types=1);
 namespace Webware\UserManager\CommandHandler;
 
 use Override;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Ramsey\Uuid\Uuid;
 use Throwable;
 use Webware\UserManager\Command\SaveUserCommand;
+use Webware\UserManager\Event\SendVerificationEmailEvent;
 use Webware\UserManager\Middleware\RegistrationMiddleware;
 use Webware\UserManager\Repository\UserRepositoryInterface;
 use Webware\CommandBus\Command\CommandResult;
@@ -32,6 +34,7 @@ final class SaveUserHandler implements CommandHandlerInterface
 {
     public function __construct(
         private readonly UserRepositoryInterface $users,
+        private readonly EventDispatcherInterface $eventDispatcher,
     ) {}
 
     #[Override]
@@ -60,6 +63,8 @@ final class SaveUserHandler implements CommandHandlerInterface
                 'verification_token' => $token,
                 'token_created_at'   => $now,
             ]);
+
+            $this->eventDispatcher->dispatch(new SendVerificationEmailEvent($command, $token));
 
             return new CommandResult($command, CommandStatus::Success, $token);
         } catch (Throwable $e) {

@@ -51,7 +51,42 @@ use Webware\Acl\Admin\Middleware\ProcessRouteMappingMiddleware;
 use Webware\Acl\Admin\Middleware\ProcessRuleMiddleware;
 use Webware\Acl\Repository\AclRepository;
 use Webware\Acl\Repository\AclRepositoryInterface;
+use Webware\Acl\Admin\Command\DeleteAssertionCommand;
+use Webware\Acl\Admin\Command\DeleteResourceCommand;
+use Webware\Acl\Admin\Command\DeleteRoleCommand;
+use Webware\Acl\Admin\Command\DeleteRouteMappingCommand;
+use Webware\Acl\Admin\Command\DeleteRuleCommand;
+use Webware\Acl\Admin\Command\SaveAssertionCommand;
+use Webware\Acl\Admin\Command\SaveResourceCommand;
+use Webware\Acl\Admin\Command\SaveRoleCommand;
+use Webware\Acl\Admin\Command\SaveRouteMappingCommand;
+use Webware\Acl\Admin\Command\SaveRuleCommand;
+use Webware\Acl\Admin\Command\UpdateRuleTypeCommand;
+use Webware\Acl\Admin\CommandHandler\Container\DeleteAssertionHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\DeleteResourceHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\DeleteRoleHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\DeleteRouteMappingHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\DeleteRuleHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\SaveAssertionHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\SaveResourceHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\SaveRoleHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\SaveRouteMappingHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\SaveRuleHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\Container\UpdateRuleTypeHandlerFactory;
+use Webware\Acl\Admin\CommandHandler\DeleteAssertionHandler;
+use Webware\Acl\Admin\CommandHandler\DeleteResourceHandler;
+use Webware\Acl\Admin\CommandHandler\DeleteRoleHandler;
+use Webware\Acl\Admin\CommandHandler\DeleteRouteMappingHandler;
+use Webware\Acl\Admin\CommandHandler\DeleteRuleHandler;
+use Webware\Acl\Admin\CommandHandler\SaveAssertionHandler;
+use Webware\Acl\Admin\CommandHandler\SaveResourceHandler;
+use Webware\Acl\Admin\CommandHandler\SaveRoleHandler;
+use Webware\Acl\Admin\CommandHandler\SaveRouteMappingHandler;
+use Webware\Acl\Admin\CommandHandler\SaveRuleHandler;
+use Webware\Acl\Admin\CommandHandler\UpdateRuleTypeHandler;
 use Webware\Admin\Event\RegisterWidgetEvent;
+use Webware\CommandBus\CommandBusInterface;
+use Webware\CommandBus\ConfigProvider as BusProvider;
 
 final class ConfigProvider
 {
@@ -64,10 +99,11 @@ final class ConfigProvider
     public function __invoke(): array
     {
         return [
-            'dependencies' => $this->getDependencies(),
-            'listeners'    => $this->getListeners(),
-            'router'       => $this->getRouteProviders(),
-            'templates'    => $this->getTemplates(),
+            'dependencies'           => $this->getDependencies(),
+            'listeners'              => $this->getListeners(),
+            'router'                 => $this->getRouteProviders(),
+            'templates'              => $this->getTemplates(),
+            CommandBusInterface::class => $this->getBusConfig(),
         ];
     }
 
@@ -104,6 +140,17 @@ final class ConfigProvider
                 ProcessRouteMappingMiddleware::class => ProcessRouteMappingMiddlewareFactory::class,
                 ProcessResourceMiddleware::class     => ProcessResourceMiddlewareFactory::class,
                 ProcessAssertionMiddleware::class    => ProcessAssertionMiddlewareFactory::class,
+                DeleteAssertionHandler::class      => DeleteAssertionHandlerFactory::class,
+                DeleteResourceHandler::class       => DeleteResourceHandlerFactory::class,
+                DeleteRoleHandler::class           => DeleteRoleHandlerFactory::class,
+                DeleteRouteMappingHandler::class   => DeleteRouteMappingHandlerFactory::class,
+                DeleteRuleHandler::class           => DeleteRuleHandlerFactory::class,
+                SaveAssertionHandler::class        => SaveAssertionHandlerFactory::class,
+                SaveResourceHandler::class         => SaveResourceHandlerFactory::class,
+                SaveRoleHandler::class             => SaveRoleHandlerFactory::class,
+                SaveRouteMappingHandler::class     => SaveRouteMappingHandlerFactory::class,
+                SaveRuleHandler::class             => SaveRuleHandlerFactory::class,
+                UpdateRuleTypeHandler::class       => UpdateRuleTypeHandlerFactory::class,
                 // Replaces Mezzio\Authentication\DefaultUserFactory so that
                 // users with no roles are assigned the configured base role.
                 UserInterface::class => DefaultUserFactory::class,
@@ -144,6 +191,25 @@ final class ConfigProvider
             AclBuiltEvent::class        => [
                 ['listener' => RegisterOwnershipAssertionListener::class, 'priority' => 1],
                 ['listener' => RegisterAclRouteMappingsListener::class,   'priority' => 2],
+            ],
+        ];
+    }
+
+    public function getBusConfig(): array
+    {
+        return [
+            BusProvider::COMMAND_MAP_KEY => [
+                SaveRoleCommand::class           => SaveRoleHandler::class,
+                DeleteRoleCommand::class         => DeleteRoleHandler::class,
+                SaveResourceCommand::class       => SaveResourceHandler::class,
+                DeleteResourceCommand::class     => DeleteResourceHandler::class,
+                SaveRuleCommand::class           => SaveRuleHandler::class,
+                UpdateRuleTypeCommand::class     => UpdateRuleTypeHandler::class,
+                DeleteRuleCommand::class         => DeleteRuleHandler::class,
+                SaveRouteMappingCommand::class   => SaveRouteMappingHandler::class,
+                DeleteRouteMappingCommand::class => DeleteRouteMappingHandler::class,
+                SaveAssertionCommand::class      => SaveAssertionHandler::class,
+                DeleteAssertionCommand::class    => DeleteAssertionHandler::class,
             ],
         ];
     }

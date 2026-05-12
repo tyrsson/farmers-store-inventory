@@ -14,7 +14,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Webware\Acl\AclBuilder;
 use Webware\Acl\Repository\AclRepositoryInterface;
-use Webware\Acl\Admin\WriteResult;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
 
 use function array_diff;
 use function array_fill_keys;
@@ -89,7 +90,8 @@ final class RouteMapManagerHandler implements RequestHandlerInterface
             'privileges'     => $privileges,
         ]));
 
-        if ($request->getAttribute(WriteResult::Success->value) === true) {
+        $commandResult = $request->getAttribute(CommandResult::class);
+        if ($commandResult instanceof CommandResult && $commandResult->getStatus() === CommandStatus::Success) {
             $response = $response->withHeader(Header::Trigger->value, json_encode(['closeModal' => null]));
         }
 

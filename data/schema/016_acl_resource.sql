@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS acl_resource (
     resource_pk  SMALLINT UNSIGNED AUTO_INCREMENT,
     resource_id  VARCHAR(100)      NOT NULL COMMENT 'Laminas ACL resource ID, e.g. ManifestManager',
     label        VARCHAR(100)      NOT NULL COMMENT 'Display label for management UI',
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (resource_pk),
     UNIQUE KEY uq_resource_id (resource_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

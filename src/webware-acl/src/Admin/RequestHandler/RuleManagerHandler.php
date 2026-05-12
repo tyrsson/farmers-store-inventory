@@ -12,7 +12,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Webware\Acl\Repository\AclRepositoryInterface;
-use Webware\Acl\Admin\WriteResult;
+use Webware\CommandBus\Command\CommandResult;
+use Webware\CommandBus\Command\CommandStatus;
 
 use function json_encode;
 
@@ -296,7 +297,8 @@ final class RuleManagerHandler implements RequestHandlerInterface
             'hierarchyRows'         => $hierarchyRows,
         ]));
 
-        if ($request->getAttribute(WriteResult::Success->value) === true) {
+        $commandResult = $request->getAttribute(CommandResult::class);
+        if ($commandResult instanceof CommandResult && $commandResult->getStatus() === CommandStatus::Success) {
             $response = $response->withHeader(Header::Trigger->value, json_encode(['closeModal' => null]));
         }
 

@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS manifest (
     received_date DATE              NOT NULL,
     created_by    INT UNSIGNED      NOT NULL,
     created_at    DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    csv_path      VARCHAR(255)      NULL     COMMENT 'Relative path to the uploaded CSV file; null once processing is complete',
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (id),
     KEY idx_manifest_store (store_id),
     CONSTRAINT fk_manifest_store      FOREIGN KEY (store_id)   REFERENCES store (store_number),

@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS manifest_item (
     notes       TEXT               NULL     COMMENT 'Scan-time damage notes',
     scanned_by  INT UNSIGNED       NOT NULL,
     scanned_at  DATETIME           NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    params       JSON               NULL     COMMENT 'Plugin extension data',
     PRIMARY KEY (id),
     UNIQUE KEY uq_manifest_item_ao (manifest_id, ao_number),
     KEY idx_mi_ao (ao_number),
