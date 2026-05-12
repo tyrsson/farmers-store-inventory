@@ -362,3 +362,11 @@
         }
     });
 })();
+
+// Allow HTMX to swap 4xx/5xx responses (e.g. validation errors returning 422)
+document.addEventListener('htmx:beforeSwap', function (evt) {
+    if (evt.detail.xhr.status >= 400) {
+        evt.detail.shouldSwap = true;
+        evt.detail.isError    = false;
+    }
+});

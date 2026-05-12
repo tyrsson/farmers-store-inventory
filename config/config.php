@@ -26,7 +26,6 @@ $aggregator = new ConfigAggregator([
     \Mezzio\Session\ConfigProvider::class,
     \Webware\CommandBus\ConfigProvider::class,
     \Axleus\Mailer\ConfigProvider::class,
-    \Webware\CommandBus\Event\ConfigProvider::class,
     \PhpDb\ConfigProvider::class,
     \PhpDb\Mysql\ConfigProvider::class,
     \Axleus\Log\ConfigProvider::class,
@@ -49,6 +48,7 @@ $aggregator = new ConfigAggregator([
             return [];
         },
     // Module config
+    Webware\Event\ConfigProvider::class,
     Webware\UserManager\ConfigProvider::class,
     WebwareAclConfigProvider::class,
     Webware\Admin\ConfigProvider::class,

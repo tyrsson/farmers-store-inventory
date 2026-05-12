@@ -18,6 +18,7 @@ use Axleus\Log\Middleware\MonologMiddleware;
 use Mezzio\Session\SessionMiddleware;
 use Psr\Container\ContainerInterface;
 use Webware\Acl\Middleware\IdentityMiddleware;
+use Webware\Event\Middleware\EventDispatcherMiddleware;
 use Webware\Traccio\Middleware\TracyDebuggerMiddleware;
 
 // Setup middleware pipeline:
@@ -29,6 +30,7 @@ return function (Application $app, MiddlewareFactory $factory, ContainerInterfac
         ? $app->pipe(TracyDebuggerMiddleware::class)
         : $app->pipe(ErrorHandler::class);
 
+    $app->pipe(EventDispatcherMiddleware::class);
     $app->pipe(ServerUrlMiddleware::class);
     $app->pipe(SessionMiddleware::class);
     $app->pipe(IdentityMiddleware::class);

@@ -60,7 +60,7 @@ final class UserRepository implements UserRepositoryInterface
 
         $this->dispatcher->dispatch(
             (new LogEvent(LogChannel::Security, Level::Info))
-                ->setMessage($user->displayName . ' authenticated successfully.')
+                ->setMessage($user->displayName() . ' authenticated successfully.')
                 ->setContext(['identity' => $user->getIdentity()])
         );
 
