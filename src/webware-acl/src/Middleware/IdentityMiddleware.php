@@ -14,8 +14,9 @@ declare(strict_types=1);
 
 namespace Webware\Acl\Middleware;
 
-use Mezzio\Authentication\UserInterface;
+use Mezzio\Authentication\UserInterface as MezzioUserInterface;
 use Mezzio\Session\SessionMiddleware;
+use Webware\UserManager\UserInterface;
 use Override;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -50,7 +51,7 @@ final class IdentityMiddleware implements MiddlewareInterface
     {
         $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
 
-        if ($session === null || ! $session->has(UserInterface::class)) {
+        if ($session === null || ! $session->has(MezzioUserInterface::class)) {
             $request = $request->withAttribute(
                 UserInterface::class,
                 ($this->userFactory)('guest', [$this->baseRole], []),
@@ -59,14 +60,14 @@ final class IdentityMiddleware implements MiddlewareInterface
             return $handler->handle($request);
         }
 
-        /** @var array{identity: string, roles: string[], details: array<string, mixed>} */
-        $data = $session->get(UserInterface::class);
+        /** @var array{username: string, roles: string[], details: array<string, mixed>} */
+        $data = $session->get(MezzioUserInterface::class);
 
         return $handler->handle(
             $request->withAttribute(
                 UserInterface::class,
                 ($this->userFactory)(
-                    $data['identity'] ?? 'guest',
+                    $data['username'] ?? 'guest',
                     $data['roles']    ?? [$this->baseRole],
                     $data['details']  ?? [],
                 ),

@@ -18,8 +18,6 @@ $cacheConfig = [
 
 $aggregator = new ConfigAggregator([
     \Mezzio\Authentication\Session\ConfigProvider::class,
-    \Mezzio\Authorization\Acl\ConfigProvider::class,
-    \Mezzio\Authorization\ConfigProvider::class,
     \Mezzio\Authentication\ConfigProvider::class,
     \Axleus\Message\ConfigProvider::class,
     \Mezzio\Session\Ext\ConfigProvider::class,

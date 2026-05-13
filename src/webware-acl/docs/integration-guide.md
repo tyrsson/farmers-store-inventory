@@ -12,6 +12,8 @@ managed via the ACL Admin UI.
 - `IdentityMiddleware` is registered in the global pipeline (before route dispatch)
 - The DB schema tables (`role`, `acl_resource`, `acl_privilege`, `acl_rule`,
   `acl_route_mapping`, `acl_version`) exist and are seeded with the base roles
+- **`Mezzio\Authentication\UserInterface` is aliased to `Webware\UserManager\UserInterface`
+  in the host-application's container** (see [User Identity Requirements](#user-identity-requirements) below)
 
 ---
 
@@ -276,3 +278,47 @@ After seeding, call `AclRepository::incrementVersion()` or truncate
 | Hardcoded privilege string (`'read'`) instead of `Privilege::READ` | Fragile — breaks if the constant value changes |
 | Forgetting `incrementVersion()` after seeding DB rules | Cache not invalidated; stale ACL persists |
 | Placing `AuthorizationMiddleware` after write middleware | Write executes before access is verified |
+| Resolving `Mezzio\Authentication\UserInterface` without the alias | `isAllowed()` fails — `DefaultUser` does not implement `RoleInterface` |
+
+---
+
+## User Identity Requirements
+
+`webware-acl` resolves `Mezzio\Authentication\UserInterface::class` from the
+container. Mezzio's own `DefaultUser` does **not** implement `RoleInterface` or
+`ProprietaryInterface`, so `$acl->isAllowed($user, ...)` and ownership
+assertions will fail if the bare Mezzio interface is used.
+
+The host application **must** alias Mezzio's interface to
+`Webware\UserManager\UserInterface` in its DI configuration:
+
+```php
+// config/autoload/dependencies.global.php  (host application only — not in any package)
+
+use Mezzio\Authentication\UserInterface as MezzioUserInterface;
+use Webware\UserManager\UserInterface as UserManagerUserInterface;
+
+return [
+    'dependencies' => [
+        'aliases' => [
+            // Resolving Mezzio's interface yields our richer implementation.
+            MezzioUserInterface::class => UserManagerUserInterface::class,
+        ],
+        'factories' => [
+            // The factory that creates User instances is registered under our
+            // interface key — NOT under MezzioUserInterface::class directly.
+            UserManagerUserInterface::class => \Webware\Acl\Authentication\DefaultUserFactory::class,
+        ],
+    ],
+];
+```
+
+> **Why the alias lives in the host app:**  
+> `webware-acl` must not depend on `webware-usermanager` (circular dependency)
+> and `webware-usermanager` must not own the DI key for
+> `Mezzio\Authentication\UserInterface` (it does not own that package). The
+> host application is the only place where both packages are simultaneously in
+> scope.
+
+See [`webware-usermanager` docs/user-interface.md](../../webware-usermanager/docs/user-interface.md)
+for the full interface contract and concrete class requirements.

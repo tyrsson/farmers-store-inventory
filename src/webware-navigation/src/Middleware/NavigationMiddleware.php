@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace Webware\Navigation\Middleware;
 
-use Mezzio\Authentication\UserInterface;
+use Webware\UserManager\UserInterface;
 use Mezzio\Router\RouteResult;
 use Override;
 use Psr\Http\Message\ResponseInterface;

@@ -17,7 +17,7 @@ namespace Webware\UserManager\Repository;
 use Axleus\Log\Event\LogEvent;
 use Axleus\Log\LogChannel;
 use DateTimeImmutable;
-use Mezzio\Authentication\UserInterface;
+use Webware\UserManager\UserInterface;
 use Monolog\Level;
 use PhpDb\Adapter\AdapterInterface;
 use PhpDb\Sql\Sql;

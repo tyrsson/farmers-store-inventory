@@ -15,12 +15,14 @@ declare(strict_types=1);
 namespace Ims\Manifest\Entity;
 
 use DateTimeImmutable;
+use Laminas\Permissions\Acl\ProprietaryInterface;
+use Laminas\Permissions\Acl\Resource\ResourceInterface;
 
 use function array_filter;
 use function array_values;
 use function count;
 
-final class Manifest
+final class Manifest implements ResourceInterface, ProprietaryInterface
 {
     /**
      * @param ManifestItem[] $items      Full item list — populated by findById() only.
@@ -100,5 +102,15 @@ final class Manifest
     public function cleanItems(): array
     {
         return array_values(array_filter($this->items, static fn(ManifestItem $i): bool => ! $i->isDamaged));
+    }
+
+    public function getResourceId(): string
+    {
+        return 'manifest';
+    }
+
+    public function getOwnerId(): int
+    {
+        return $this->storeId;
     }
 }

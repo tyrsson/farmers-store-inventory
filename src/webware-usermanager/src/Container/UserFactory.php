@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * This file is part of the Webware\Acl package.
+ * This file is part of the Webware\UserManager package.
  *
  * Copyright (c) 2026 Joey Smith <jsmith@webinertia.net>
  * and contributors.
@@ -12,23 +12,22 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Webware\Acl\Authentication;
+namespace Webware\UserManager\Container;
 
-use Mezzio\Authentication\DefaultUser;
 use Mezzio\Authentication\UserInterface;
 use Psr\Container\ContainerInterface;
 use Webmozart\Assert\Assert;
+use Webware\UserManager\Entity\GuestUser;
 
 /**
- * Replaces Mezzio\Authentication\DefaultUserFactory as the DI factory for
- * the UserInterface::class callable service.
+ * DI factory for the UserInterface::class callable service.
  *
- * The returned callable creates DefaultUser instances. When called with an
+ * Returns a callable that creates GuestUser instances. When called with an
  * empty $roles array (e.g. during an unauthenticated session restore), it
  * falls back to the configured base role so that every user object always
  * carries at least one role for ACL checks.
  */
-final class DefaultUserFactory
+final class UserFactory
 {
     public function __invoke(ContainerInterface $container): callable
     {
@@ -47,7 +46,7 @@ final class DefaultUserFactory
                 $roles = [$baseRole];
             }
 
-            return new DefaultUser($identity, $roles, $details);
+            return new GuestUser($identity, $roles, $details);
         };
     }
 }

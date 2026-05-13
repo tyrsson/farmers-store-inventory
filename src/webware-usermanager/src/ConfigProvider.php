@@ -17,6 +17,7 @@ namespace Webware\UserManager;
 use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Authentication\Session\PhpSession;
 use Mezzio\Authentication\UserRepositoryInterface;
+use Webware\UserManager\UserInterface;
 use Webware\UserManager\Repository\UserRepositoryInterface as UserRepositoryContract;
 use Webware\CommandBus\CommandBusInterface;
 
@@ -45,6 +46,9 @@ final class ConfigProvider
                 AuthenticationInterface::class => PhpSession::class,
             ],
             'factories' => [
+                // Registers the user factory under our own interface key.
+                // Host app aliases Mezzio\Authentication\UserInterface::class → UserInterface::class.
+                UserInterface::class                                => Container\UserFactory::class,
                 Admin\RequestHandler\CreateUserHandler::class       => Admin\RequestHandler\Container\CreateUserHandlerFactory::class,
                 Admin\RequestHandler\UpdateUserHandler::class       => Admin\RequestHandler\Container\UpdateUserHandlerFactory::class,
                 Admin\RequestHandler\ToggleUserActiveHandler::class => Admin\RequestHandler\Container\ToggleUserActiveHandlerFactory::class,

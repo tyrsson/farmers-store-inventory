@@ -259,13 +259,7 @@ JOIN acl_resource  re ON re.resource_pk  = pr.resource_pk AND re.resource_id = '
 WHERE ro.role_id = 'member'
 ON DUPLICATE KEY UPDATE type = VALUES(type);
 
-INSERT INTO acl_rule_assertion (rule_pk, assertion, mode, sort_order)
-SELECT r.id, 'Laminas\\Permissions\\Acl\\Assertion\\OwnershipAssertion', 'all', 0
-FROM acl_rule r
-JOIN role         ro ON ro.id          = r.role_pk      AND ro.role_id     = 'member'
-JOIN acl_resource re ON re.resource_pk = r.resource_pk  AND re.resource_id = 'user'
-JOIN acl_privilege pr ON pr.privilege_pk = r.privilege_pk AND pr.privilege_id = 'update'
-ON DUPLICATE KEY UPDATE assertion = VALUES(assertion);
+
 
 -- -----------------------------------------------------------------------------
 -- Seed user — Joey Smith (Developer, Store 207)

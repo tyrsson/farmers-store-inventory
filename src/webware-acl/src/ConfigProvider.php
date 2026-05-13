@@ -8,7 +8,6 @@ use Mezzio\Authentication\UserInterface;
 use Webware\Acl\Acl;
 use Webware\Acl\AclBuilder;
 use Webware\Acl\AclInterface;
-use Webware\Acl\Authentication\DefaultUserFactory;
 use Webware\Acl\Cache\AclCacheInterface;
 use Webware\Acl\Cache\FileAclCache;
 use Webware\Acl\Container\AclBuilderFactory;
@@ -151,9 +150,7 @@ final class ConfigProvider
                 SaveRouteMappingHandler::class     => SaveRouteMappingHandlerFactory::class,
                 SaveRuleHandler::class             => SaveRuleHandlerFactory::class,
                 UpdateRuleTypeHandler::class       => UpdateRuleTypeHandlerFactory::class,
-                // Replaces Mezzio\Authentication\DefaultUserFactory so that
-                // users with no roles are assigned the configured base role.
-                UserInterface::class => DefaultUserFactory::class,
+
             ],
         ];
     }
