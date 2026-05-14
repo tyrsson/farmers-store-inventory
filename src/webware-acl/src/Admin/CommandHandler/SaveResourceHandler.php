@@ -16,7 +16,7 @@ namespace Webware\Acl\Admin\CommandHandler;
 
 use Override;
 use Webware\Acl\Admin\Command\SaveResourceCommand;
-use Webware\Acl\Privilege;
+use Webware\Acl\PrivilegeInterface;
 use Webware\Acl\Repository\AclRepositoryInterface;
 use Webware\CommandBus\Command\CommandResult;
 use Webware\CommandBus\Command\CommandResultInterface;
@@ -36,10 +36,10 @@ final class SaveResourceHandler implements CommandHandlerInterface
         assert($command instanceof SaveResourceCommand);
 
         $resourcePk = $this->aclRepository->saveResource($command->resourceId, $command->label);
-        $this->aclRepository->insertPrivilege($resourcePk, Privilege::READ,   'Read');
-        $this->aclRepository->insertPrivilege($resourcePk, Privilege::CREATE, 'Create');
-        $this->aclRepository->insertPrivilege($resourcePk, Privilege::UPDATE, 'Update');
-        $this->aclRepository->insertPrivilege($resourcePk, Privilege::DELETE, 'Delete');
+        $this->aclRepository->insertPrivilege($resourcePk, PrivilegeInterface::READ,   'Read');
+        $this->aclRepository->insertPrivilege($resourcePk, PrivilegeInterface::CREATE, 'Create');
+        $this->aclRepository->insertPrivilege($resourcePk, PrivilegeInterface::UPDATE, 'Update');
+        $this->aclRepository->insertPrivilege($resourcePk, PrivilegeInterface::DELETE, 'Delete');
         $this->aclRepository->incrementVersion();
 
         return new CommandResult($command, CommandStatus::Success, $resourcePk);

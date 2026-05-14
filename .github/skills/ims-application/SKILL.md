@@ -1,5 +1,8 @@
 # ims-application — Farmers IMS Host Application Conventions
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 Load this skill when writing or reviewing any `.phtml` template, JavaScript, or
 CSS that is part of the **Farmers IMS host application** (`src/App/`, or any
 component template that integrates with the IMS layout). It documents rules that

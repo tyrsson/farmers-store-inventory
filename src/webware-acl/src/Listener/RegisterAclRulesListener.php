@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace Webware\Acl\Listener;
 
 use Webware\Acl\Event\RulesLoadedEvent;
-use Webware\Acl\Privilege;
+use Webware\Acl\PrivilegeInterface;
 
 /**
  * Registers webware-acl module ACL rules.
@@ -19,6 +19,6 @@ final class RegisterAclRulesListener
 {
     public function __invoke(RulesLoadedEvent $event): void
     {
-        $event->acl->allow('Developer', 'admin.acl', [Privilege::READ, Privilege::CREATE, Privilege::UPDATE, Privilege::DELETE]);
+        $event->acl->allow('Developer', 'admin.acl', [PrivilegeInterface::READ, PrivilegeInterface::CREATE, PrivilegeInterface::UPDATE, PrivilegeInterface::DELETE]);
     }
 }

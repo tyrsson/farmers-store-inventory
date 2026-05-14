@@ -81,10 +81,10 @@ final class RegisterManifestRulesListener
     {
         // Developer always has full access — not configurable via Admin UI
         $event->acl->allow('Developer', 'manifest', [
-            Privilege::READ,
-            Privilege::CREATE,
-            Privilege::UPDATE,
-            Privilege::DELETE,
+            PrivilegeInterface::READ,
+            PrivilegeInterface::CREATE,
+            PrivilegeInterface::UPDATE,
+            PrivilegeInterface::DELETE,
         ]);
     }
 }
@@ -96,7 +96,7 @@ final class RegisterManifestRulesListener
   that must never be overridden by an Administrator.
 - Do not replicate rules that belong in the DB (those are for Administrator
   configuration via the UI).
-- Always use `Privilege::READ / CREATE / UPDATE / DELETE` constants.
+- Always use `PrivilegeInterface::READ / CREATE / UPDATE / DELETE` constants.
   **Never** hardcode strings like `'read'`.
 
 ---
@@ -119,12 +119,12 @@ final class RegisterManifestRouteMappingsListener
 {
     public function __invoke(AclBuiltEvent $event): void
     {
-        $event->addRouteMapping('manifest.list',         'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.detail',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload.store', 'manifest', Privilege::CREATE);
-        $event->addRouteMapping('manifest.process',      'manifest', Privilege::UPDATE);
-        $event->addRouteMapping('manifest.finish',       'manifest', Privilege::UPDATE);
+        $event->addRouteMapping('manifest.list',         'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.detail',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload.store', 'manifest', PrivilegeInterface::CREATE);
+        $event->addRouteMapping('manifest.process',      'manifest', PrivilegeInterface::UPDATE);
+        $event->addRouteMapping('manifest.finish',       'manifest', PrivilegeInterface::UPDATE);
     }
 }
 ```
@@ -261,7 +261,7 @@ After seeding, call `AclRepository::incrementVersion()` or truncate
 □ Three listeners registered in ConfigProvider::getListeners()
 □ AuthorizationMiddleware::class first in every protected route stack
 □ Route names in addRouteMapping() match RouteProvider exactly
-□ Privilege constants used (Privilege::READ etc.) — no hardcoded strings
+□ Privilege constants used (PrivilegeInterface::READ etc.) — no hardcoded strings
 □ DB seed: Administrator default rules for new resource
 □ Cache invalidated after seeding
 ```
@@ -275,7 +275,7 @@ After seeding, call `AclRepository::incrementVersion()` or truncate
 | Listener not in `ConfigProvider::getListeners()` | Resource/rule/mapping silently missing from ACL on rebuild |
 | Route name typo in `addRouteMapping()` | Route always returns 403 — no mapping found |
 | `AuthorizationMiddleware` omitted from a route stack | Route is publicly accessible with no ACL check |
-| Hardcoded privilege string (`'read'`) instead of `Privilege::READ` | Fragile — breaks if the constant value changes |
+| Hardcoded privilege string (`'read'`) instead of `PrivilegeInterface::READ` | Fragile — breaks if the constant value changes |
 | Forgetting `incrementVersion()` after seeding DB rules | Cache not invalidated; stale ACL persists |
 | Placing `AuthorizationMiddleware` after write middleware | Write executes before access is verified |
 | Resolving `Mezzio\Authentication\UserInterface` without the alias | `isAllowed()` fails — `DefaultUser` does not implement `RoleInterface` |

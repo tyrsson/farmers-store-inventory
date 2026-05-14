@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace Webware\Admin\Listener;
 
 use Webware\Acl\Event\AclBuiltEvent;
-use Webware\Acl\Privilege;
+use Webware\Acl\PrivilegeInterface;
 
 /**
  * Registers route→ACL resource mappings for the admin module.
@@ -18,6 +18,6 @@ final class RegisterAdminRouteMappingsListener
 {
     public function __invoke(AclBuiltEvent $event): void
     {
-        $event->addRouteMapping('admin.dashboard.read', 'admin.dashboard', Privilege::READ);
+        $event->addRouteMapping('admin.dashboard.read', 'admin.dashboard', PrivilegeInterface::READ);
     }
 }

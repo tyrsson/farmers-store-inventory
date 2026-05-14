@@ -80,8 +80,9 @@ final class AclRepository implements AclRepositoryInterface
         foreach ($sql->prepareStatementForSqlObject($select)->execute() as $row) {
             $result[(int) $row['resource_pk']] = new Resource(
                 resourcePk: (int) $row['resource_pk'],
-                resourceId: (string) $row['resource_id'],
-                label:      (string) $row['label'],
+                resourceId: $row['resource_id'],
+                label:      $row['label'],
+                system:     (int) $row['system'] === 1,
             );
         }
 
@@ -305,7 +306,14 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function insertPrivilege(int $resourcePk, string $privilegeId, string $label): int
     {
-        $sql    = new Sql($this->adapter, 'acl_privilege');
+        $sql      = new Sql($this->adapter, 'acl_privilege');
+        $select   = $sql->select()->columns(['privilege_pk'])->where(['resource_pk' => $resourcePk, 'privilege_id' => $privilegeId]);
+        $existing = $sql->prepareStatementForSqlObject($select)->execute()->current();
+
+        if ($existing !== false && $existing !== null) {
+            return (int) $existing['privilege_pk'];
+        }
+
         $insert = $sql->insert()->values([
             'resource_pk'  => $resourcePk,
             'privilege_id' => $privilegeId,
@@ -366,24 +374,14 @@ final class AclRepository implements AclRepositoryInterface
     #[Override]
     public function deleteResource(int $resourcePk): void
     {
-        // 1. Rules referencing this resource's privileges
-        $sql    = new Sql($this->adapter, 'acl_rule');
-        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
-        $sql->prepareStatementForSqlObject($delete)->execute();
-
-        // 2. Route mappings referencing this resource
-        $sql    = new Sql($this->adapter, 'acl_route_privilege');
-        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
-        $sql->prepareStatementForSqlObject($delete)->execute();
-
-        // 3. Privileges belonging to this resource
-        $sql    = new Sql($this->adapter, 'acl_privilege');
-        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
-        $sql->prepareStatementForSqlObject($delete)->execute();
-
-        // 4. The resource itself
+        // The WHERE system = 0 guard is the final safety net against deleting
+        // seeded system resources. The UI disables the button for system rows,
+        // but this ensures the DB layer never removes them even if called directly.
+        // ON DELETE CASCADE (added in 023_acl_resource_system.sql) handles all
+        // dependent rows: acl_privilege → acl_rule → acl_rule_assertion and
+        // acl_route_privilege atomically.
         $sql    = new Sql($this->adapter, 'acl_resource');
-        $delete = $sql->delete()->where(['resource_pk' => $resourcePk]);
+        $delete = $sql->delete()->where(['resource_pk' => $resourcePk, 'system' => 0]);
         $sql->prepareStatementForSqlObject($delete)->execute();
     }
 

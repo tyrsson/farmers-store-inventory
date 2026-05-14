@@ -4,6 +4,9 @@ description: "ALWAYS load when creating or modifying any Command class that muta
 argument-hint: "<what you are implementing — e.g. 'SaveManifestCommand', 'new store-scoped command', 'ownership assertion for transfer'>"
 ---
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 ## Core Rule
 
 **Every command that mutates store-scoped or user-scoped data is the resource.**

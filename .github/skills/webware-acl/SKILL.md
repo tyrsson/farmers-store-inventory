@@ -1,5 +1,8 @@
 # webware-acl — ACL Integration Skill
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 Load this skill when:
 - Integrating a new module with the ACL system (protecting routes, adding resources/rules)
 - Writing or reviewing `RegisterXxx*Listener` classes for a component

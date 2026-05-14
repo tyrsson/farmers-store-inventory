@@ -4,6 +4,9 @@ description: "Load when creating or modifying any handler, middleware, route, or
 argument-hint: "<what you are creating — e.g. 'upload handler', 'process middleware for manifest', 'route wiring for POST endpoint'>"
 ---
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 ## Core Principle: Strict Middleware / Handler Separation
 
 **Middleware processes data. Handlers render responses. Never mix them.**

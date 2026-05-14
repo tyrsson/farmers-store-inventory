@@ -21,6 +21,11 @@ final class Acl implements AclInterface
         private readonly array $routeMappings = [],
     ) {}
 
+    public function getAcl(): LaminasAclInterface
+    {
+        return $this->acl;
+    }
+
     #[Override]
     public function isAllowed(
         array|RoleInterface|string|null $roles = null,

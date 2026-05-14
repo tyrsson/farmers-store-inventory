@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Ims\Manifest\Listener;
 
 use Webware\Acl\Event\AclBuiltEvent;
-use Webware\Acl\Privilege;
+use Webware\Acl\PrivilegeInterface;
 
 /**
  * Registers route → ACL resource mappings for the manifest module.
@@ -27,9 +27,9 @@ final class RegisterManifestRouteMappingsListener
 {
     public function __invoke(AclBuiltEvent $event): void
     {
-        $event->addRouteMapping('manifest.list',         'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.detail',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload.store', 'manifest', Privilege::CREATE);
+        $event->addRouteMapping('manifest.list',         'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.detail',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload.store', 'manifest', PrivilegeInterface::CREATE);
     }
 }

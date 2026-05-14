@@ -26,6 +26,7 @@ final readonly class Resource implements ResourceInterface
         public int $resourcePk,
         public string $resourceId,
         public string $label,
+        public bool $system = false,
     ) {}
 
     public function getResourceId(): string

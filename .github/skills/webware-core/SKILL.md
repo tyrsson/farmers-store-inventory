@@ -4,6 +4,9 @@ description: "Load when writing or reviewing any code that uses Webware\\Core pr
 argument-hint: "<what you are implementing — e.g. 'POST middleware', 'method-dispatching middleware', 'WriteResult read in handler'>"
 ---
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 ## Package Identity
 
 | Item | Value |

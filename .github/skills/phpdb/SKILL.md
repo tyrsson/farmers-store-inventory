@@ -4,6 +4,9 @@ description: "Load when writing or reviewing any code that uses PhpDb: adapters,
 argument-hint: "<what you are working on — e.g. 'new repository', 'INSERT query', 'profiler setup'>"
 ---
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 ## Core Rule — Always Use the `PhpDb\Sql\*` API for DML
 
 Raw SQL strings passed to `$adapter->query()` are **forbidden** for SELECT / INSERT / UPDATE / DELETE.

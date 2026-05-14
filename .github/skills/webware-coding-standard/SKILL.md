@@ -4,6 +4,9 @@ description: "Load this skill when writing or reviewing ANY PHP source file that
 argument-hint: "<file or class being created/reviewed>"
 ---
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 ## Overview
 
 The **Webware 1.0 coding standard** (`@Webware/coding-standard-1.0`) extends `@PER-CS3x0`.
@@ -304,3 +307,81 @@ namespace Vendor\Package;
 - [ ] PHPDoc only where native types are insufficient; no superfluous tags
 - [ ] Blank line before `return`, `throw`, `try` (when not the first statement in a block)
 - [ ] One blank line between methods/properties; no blank line between trait imports
+- [ ] PHPUnit test classes have `#[CoversClass(...)]` (one per class under test) — see PHPUnit Coverage Attributes section
+
+---
+
+## PHPUnit Coverage Attributes — Mandatory (PHPUnit 11+)
+
+PHPUnit 11 and later require **explicit coverage targets** on every test class. Missing attributes produce "risky test" warnings and will eventually become errors.
+
+### Rules
+- Every test class **must** have at least one `#[CoversClass(Foo::class)]` attribute
+- Add one `#[CoversClass]` per class under test — multiple are allowed
+- Place all `#[CoversClass]` attributes directly above the `class` declaration, after the docblock
+- Import `PHPUnit\Framework\Attributes\CoversClass` in the class imports
+- For tests that cover free functions, use `#[CoversFunction('functionName')]` instead
+
+---
+
+## PHPUnit Mocks vs Stubs — Mandatory Rule (PHPUnit 12+)
+
+**Using `with*()` without `expects()` is deprecated and will be an error in PHPUnit 14.**
+
+Rule: **if a test double does not set expectations, use `createStub()`. If it sets expectations (call count, arguments), use `createMock()` with `expects()`.**
+
+```php
+// ✅ Correct — expectation set, use createMock()
+$bus = $this->createMock(CommandBusInterface::class);
+$bus->expects($this->once())
+    ->method('handle')
+    ->with($this->isInstanceOf(SaveRoleCommand::class))
+    ->willReturn($result);
+
+// ✅ Correct — no expectation, use createStub()
+$messenger = $this->createStub(SystemMessengerInterface::class);
+$messenger->method('danger')->willReturn(null);
+
+// ❌ Wrong — with() without expects() is deprecated
+$acl = $this->createMock(AclInterface::class);
+$acl->method('isAllowed')->with($role, $resource, 'create')->willReturn(true);
+
+// ❌ Wrong — createMock() when no expectations are needed
+$messenger = $this->createMock(SystemMessengerInterface::class);
+```
+
+---
+
+## PHPUnit Coverage Attributes — Mandatory (PHPUnit 11+)
+
+PHPUnit 11 and later require **explicit coverage targets** on every test class. Missing attributes produce "risky test" warnings and will eventually become errors.
+
+### Rules
+- Every test class **must** have at least one `#[CoversClass(Foo::class)]` attribute
+- Add one `#[CoversClass]` per class under test — multiple are allowed
+- Place all `#[CoversClass]` attributes directly above the `class` declaration, after the docblock
+- Import `PHPUnit\Framework\Attributes\CoversClass` in the class imports
+- For tests that cover free functions, use `#[CoversFunction('functionName')]` instead
+
+```php
+// ✅ Correct
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+use Webware\Acl\Assertion\OwnershipAssertion;
+
+#[CoversClass(OwnershipAssertion::class)]
+final class OwnershipAssertionTest extends TestCase
+{
+    #[Test]
+    public function returnsFalseWhenRoleIsNotProprietary(): void { ... }
+}
+
+// ✅ Multiple classes under test
+#[CoversClass(OwnershipAssertion::class)]
+#[CoversClass(AssertionAggregate::class)]
+final class OwnershipAssertionIntegrationTest extends TestCase { ... }
+
+// ❌ Wrong — missing CoversClass, will be reported as risky
+final class OwnershipAssertionTest extends TestCase { ... }
+```

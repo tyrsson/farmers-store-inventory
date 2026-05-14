@@ -3101,12 +3101,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tyrsson/command-bus.git",
-                "reference": "6328a65c3b503ce908d2a097cd605cd61aae5f5a"
+                "reference": "95f566595d61694dca1abf1d0cca4a2d17a3e099"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tyrsson/command-bus/zipball/6328a65c3b503ce908d2a097cd605cd61aae5f5a",
-                "reference": "6328a65c3b503ce908d2a097cd605cd61aae5f5a",
+                "url": "https://api.github.com/repos/tyrsson/command-bus/zipball/95f566595d61694dca1abf1d0cca4a2d17a3e099",
+                "reference": "95f566595d61694dca1abf1d0cca4a2d17a3e099",
                 "shasum": ""
             },
             "require": {
@@ -3156,7 +3156,7 @@
                 "issues": "https://github.com/tyrsson/command-bus/issues",
                 "source": "https://github.com/tyrsson/command-bus"
             },
-            "time": "2026-04-29T21:58:08+00:00"
+            "time": "2026-05-14T01:12:18+00:00"
         }
     ],
     "packages-dev": [

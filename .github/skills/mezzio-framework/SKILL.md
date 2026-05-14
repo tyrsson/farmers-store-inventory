@@ -4,6 +4,9 @@ description: "Load when working with Mezzio framework internals: ConfigProvider,
 argument-hint: "<what you are working on — e.g. 'new module ConfigProvider', 'route middleware', 'authentication flow'>"
 ---
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 ## ConfigProvider Pattern
 
 Every module has a `ConfigProvider` class. The project owner is an expert Mezzio user — follow these patterns exactly.

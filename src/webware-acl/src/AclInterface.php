@@ -11,6 +11,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 interface AclInterface
 {
+    public function getAcl(): LaminasAclInterface;
+
     /**
      * @param string[]|RoleInterface[]|string|null $roles
      * @param string|ResourceInterface|null $resource

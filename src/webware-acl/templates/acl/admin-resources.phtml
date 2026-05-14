@@ -59,17 +59,28 @@ foreach ($this->privileges as $priv) {
                     </div>
                 </button>
                 <div class="d-flex align-items-center align-self-stretch border-start bg-body px-2 flex-shrink-0">
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-danger py-0 px-2"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteResourceModal"
-                        data-resource-pk="<?= $resource->resourcePk ?>"
-                        data-resource-id="<?= $this->escapeHtmlAttr($resource->resourceId) ?>"
-                        title="Delete resource"
-                    >
-                        <i class="bi bi-trash3"></i>
-                    </button>
+                    <?php if ($resource->system): ?>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-secondary py-0 px-2"
+                            disabled
+                            title="System resource — cannot be deleted"
+                        >
+                            <i class="bi bi-lock"></i>
+                        </button>
+                    <?php else: ?>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-danger py-0 px-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteResourceModal"
+                            data-resource-pk="<?= $resource->resourcePk ?>"
+                            data-resource-id="<?= $this->escapeHtmlAttr($resource->resourceId) ?>"
+                            title="Delete resource"
+                        >
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    <?php endif; ?>
                 </div>
             </h2>
             <div
@@ -83,7 +94,6 @@ foreach ($this->privileges as $priv) {
                                 <tr>
                                     <th>Privilege</th>
                                     <th>Label</th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -91,18 +101,6 @@ foreach ($this->privileges as $priv) {
                                     <tr>
                                         <td><code><?= $this->escapeHtml($priv->privilegeId) ?></code></td>
                                         <td class="text-secondary small"><?= $this->escapeHtml($priv->label) ?></td>
-                                        <td class="text-end">
-                                            <button
-                                                class="btn btn-sm btn-outline-secondary py-0 px-2"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editPrivilegeModal"
-                                                data-privilege-pk="<?= $priv->privilegePk ?>"
-                                                data-privilege-id="<?= $this->escapeHtmlAttr($priv->privilegeId) ?>"
-                                                data-privilege-label="<?= $this->escapeHtmlAttr($priv->label) ?>"
-                                            >
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>

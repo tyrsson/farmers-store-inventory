@@ -126,10 +126,10 @@ final class RegisterManifestRulesListener
     {
         // Developer always gets full access — not configurable via Admin UI
         $event->acl->allow('Developer', 'manifest', [
-            Privilege::READ,
-            Privilege::CREATE,
-            Privilege::UPDATE,
-            Privilege::DELETE,
+            PrivilegeInterface::READ,
+            PrivilegeInterface::CREATE,
+            PrivilegeInterface::UPDATE,
+            PrivilegeInterface::DELETE,
         ]);
     }
 }
@@ -171,10 +171,10 @@ final class RegisterManifestRouteMappingsListener
 {
     public function __invoke(AclBuiltEvent $event): void
     {
-        $event->addRouteMapping('manifest.list',         'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.detail',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload.store', 'manifest', Privilege::CREATE);
+        $event->addRouteMapping('manifest.list',         'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.detail',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload.store', 'manifest', PrivilegeInterface::CREATE);
     }
 }
 ```

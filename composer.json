@@ -48,6 +48,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/App/src/",
+            "Ims\\Migration\\": "src/ims-migration/src/",
             "Htmx\\": "src/Htmx/src/",
             "Ims\\Manifest\\": "src/ims-manifest/src/",
             "Ims\\Store\\": "src/ims-store/src/",

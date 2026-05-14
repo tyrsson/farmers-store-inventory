@@ -84,8 +84,10 @@ use Webware\Acl\Admin\CommandHandler\SaveRouteMappingHandler;
 use Webware\Acl\Admin\CommandHandler\SaveRuleHandler;
 use Webware\Acl\Admin\CommandHandler\UpdateRuleTypeHandler;
 use Webware\Admin\Event\RegisterWidgetEvent;
+use Webware\Acl\Container\CommandHandlerMiddlewareFactory;
 use Webware\CommandBus\CommandBusInterface;
 use Webware\CommandBus\ConfigProvider as BusProvider;
+use Webware\CommandBus\Middleware\CommandHandlerMiddleware;
 
 final class ConfigProvider
 {
@@ -150,7 +152,7 @@ final class ConfigProvider
                 SaveRouteMappingHandler::class     => SaveRouteMappingHandlerFactory::class,
                 SaveRuleHandler::class             => SaveRuleHandlerFactory::class,
                 UpdateRuleTypeHandler::class       => UpdateRuleTypeHandlerFactory::class,
-
+                CommandHandlerMiddleware::class     => CommandHandlerMiddlewareFactory::class,
             ],
         ];
     }

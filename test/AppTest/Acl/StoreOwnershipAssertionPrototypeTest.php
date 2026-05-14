@@ -23,6 +23,7 @@ use Laminas\Permissions\Acl\Resource\GenericResource;
 use Laminas\Permissions\Acl\Resource\ResourceInterface;
 use Laminas\Permissions\Acl\Role\GenericRole;
 use Laminas\Permissions\Acl\Role\RoleInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -38,6 +39,8 @@ use PHPUnit\Framework\TestCase;
  *
  * All collaborators are anonymous classes — no dependency on application entities.
  */
+#[CoversClass(OwnershipAssertion::class)]
+#[CoversClass(AssertionAggregate::class)]
 final class StoreOwnershipAssertionPrototypeTest extends TestCase
 {
     private Acl $acl;
@@ -47,6 +50,18 @@ final class StoreOwnershipAssertionPrototypeTest extends TestCase
 
     // ── Another user: PK=2, storeId=99 ──────────────────────────────────────
     private RoleInterface&ProprietaryInterface $otherUser;
+
+    // ── Warehouse user: storeId=42 (child of member) ─────────────────────────
+    private RoleInterface&ProprietaryInterface $warehouseUser;
+
+    // ── Warehouse Supervisor user: storeId=42 (grandchild of member) ─────────
+    private RoleInterface&ProprietaryInterface $warehouseSupervisorUser;
+
+    // ── Warehouse Supervisor user: storeId=99 (foreign store) ────────────────
+    private RoleInterface&ProprietaryInterface $warehouseSupervisorForeignUser;
+
+    // ── Administrator user: storeId=99 (foreign store, unrestricted) ─────────
+    private RoleInterface&ProprietaryInterface $adminUser;
 
     // ── User profile resources ───────────────────────────────────────────────
     private ResourceInterface&ProprietaryInterface $ownProfile;
@@ -60,7 +75,13 @@ final class StoreOwnershipAssertionPrototypeTest extends TestCase
     {
         $this->acl = new Acl();
 
+        // Role hierarchy for inheritance tests:
+        // guest → member → Warehouse → Warehouse Supervisor → Administrator
         $this->acl->addRole(new GenericRole('member'));
+        $this->acl->addRole(new GenericRole('Warehouse'), 'member');
+        $this->acl->addRole(new GenericRole('Warehouse Supervisor'), 'Warehouse');
+        $this->acl->addRole(new GenericRole('Administrator'), 'Warehouse Supervisor');
+
         $this->acl->addResource(new GenericResource('user.profile'));
         $this->acl->addResource(new GenericResource('store.manifest'));
 
@@ -138,6 +159,71 @@ final class StoreOwnershipAssertionPrototypeTest extends TestCase
             public function __construct(private readonly int $storeId) {}
             public function getResourceId(): string { return 'store.manifest'; }
             public function getOwnerId(): int { return $this->storeId; }
+        };
+
+        // ── Warehouse user: roleId='Warehouse', storeId=42 ───────────────────
+        $this->warehouseUser = new class (42) implements RoleInterface, ProprietaryInterface
+        {
+            public function __construct(private readonly int $storeId) {}
+            public function getRoleId(): string { return 'Warehouse'; }
+            public function getOwnerId(): int { return $this->storeId; }
+
+            public function getDetail(string $name, mixed $default = null): mixed
+            {
+                return match ($name) {
+                    'store_id' => $this->storeId,
+                    default    => $default,
+                };
+            }
+        };
+
+        // ── Warehouse Supervisor user: roleId='Warehouse Supervisor', storeId=42
+        $this->warehouseSupervisorUser = new class (42) implements RoleInterface, ProprietaryInterface
+        {
+            public function __construct(private readonly int $storeId) {}
+            public function getRoleId(): string { return 'Warehouse Supervisor'; }
+            public function getOwnerId(): int { return $this->storeId; }
+
+            public function getDetail(string $name, mixed $default = null): mixed
+            {
+                return match ($name) {
+                    'store_id' => $this->storeId,
+                    default    => $default,
+                };
+            }
+        };
+
+        // ── Warehouse Supervisor user: foreign store (storeId=99) ─────────────
+        $this->warehouseSupervisorForeignUser = new class (99) implements RoleInterface, ProprietaryInterface
+        {
+            public function __construct(private readonly int $storeId) {}
+            public function getRoleId(): string { return 'Warehouse Supervisor'; }
+            public function getOwnerId(): int { return $this->storeId; }
+
+            public function getDetail(string $name, mixed $default = null): mixed
+            {
+                return match ($name) {
+                    'store_id' => $this->storeId,
+                    default    => $default,
+                };
+            }
+        };
+
+        // ── Administrator user: roleId='Administrator', storeId=99 (foreign) ─
+        // Expected to bypass assertion via explicit unrestricted allow.
+        $this->adminUser = new class (99) implements RoleInterface, ProprietaryInterface
+        {
+            public function __construct(private readonly int $storeId) {}
+            public function getRoleId(): string { return 'Administrator'; }
+            public function getOwnerId(): int { return $this->storeId; }
+
+            public function getDetail(string $name, mixed $default = null): mixed
+            {
+                return match ($name) {
+                    'store_id' => $this->storeId,
+                    default    => $default,
+                };
+            }
         };
     }
 
@@ -245,5 +331,87 @@ final class StoreOwnershipAssertionPrototypeTest extends TestCase
 
         self::assertTrue($this->acl->isAllowed($this->memberUser, $this->ownManifest, 'save'));
         self::assertFalse($this->acl->isAllowed($this->memberUser, $this->foreignManifest, 'save'));
+    }
+
+    // ── Assertion inheritance tests ───────────────────────────────────────────
+    //
+    // These tests answer the open question: when a parent role (member) has an
+    // allow rule with an assertion attached, does the assertion also fire when
+    // isAllowed() is called with a child/grandchild role that has no explicit rule?
+    //
+    // The Laminas ACL docs do not state this explicitly. These tests are the
+    // authoritative record of the actual runtime behaviour.
+    //
+    // Setup: 'member' has allow on 'store.manifest'/'save' with StoreOwnedResourceAssertion.
+    //        'Warehouse' inherits from 'member' — no explicit rule.
+    //        'Warehouse Supervisor' inherits from 'Warehouse' — no explicit rule.
+    //        'Administrator' has a separate explicit allow with NO assertion.
+
+    #[Test]
+    public function childRoleInheritsAssertionFromParent(): void
+    {
+        // Only member has an explicit rule — Warehouse inherits it.
+        $this->acl->allow('member', 'store.manifest', 'save', $this->buildStoreOwnershipAssertion());
+
+        // Warehouse user, same store as manifest owner — should be allowed.
+        // This passes ONLY if the inherited rule's assertion also fires correctly.
+        self::assertTrue(
+            $this->acl->isAllowed($this->warehouseUser, $this->ownManifest, 'save'),
+            'Warehouse (child of member) must be allowed for own-store manifest via inherited assertion',
+        );
+    }
+
+    #[Test]
+    public function childRoleAssertionDeniesForForeignStore(): void
+    {
+        $this->acl->allow('member', 'store.manifest', 'save', $this->buildStoreOwnershipAssertion());
+
+        // Warehouse user from store 42, manifest owned by store 99 — should be denied.
+        self::assertFalse(
+            $this->acl->isAllowed($this->warehouseUser, $this->foreignManifest, 'save'),
+            'Warehouse (child of member) must be denied for foreign-store manifest via inherited assertion',
+        );
+    }
+
+    #[Test]
+    public function grandchildRoleInheritsAssertionFromAncestor(): void
+    {
+        // Warehouse Supervisor is two levels below member — no explicit rule on either
+        // Warehouse or Warehouse Supervisor.
+        $this->acl->allow('member', 'store.manifest', 'save', $this->buildStoreOwnershipAssertion());
+
+        // Warehouse Supervisor, same store — should be allowed.
+        self::assertTrue(
+            $this->acl->isAllowed($this->warehouseSupervisorUser, $this->ownManifest, 'save'),
+            'Warehouse Supervisor (grandchild of member) must be allowed for own-store manifest via inherited assertion',
+        );
+    }
+
+    #[Test]
+    public function grandchildRoleAssertionDeniesForForeignStore(): void
+    {
+        $this->acl->allow('member', 'store.manifest', 'save', $this->buildStoreOwnershipAssertion());
+
+        // Warehouse Supervisor from store 99 against manifest owned by store 42 — should be denied.
+        self::assertFalse(
+            $this->acl->isAllowed($this->warehouseSupervisorForeignUser, $this->ownManifest, 'save'),
+            'Warehouse Supervisor (grandchild of member) must be denied for foreign-store manifest via inherited assertion',
+        );
+    }
+
+    #[Test]
+    public function explicitUnrestrictedAllowOverridesInheritedAssertionRule(): void
+    {
+        // member has assertion-guarded rule; Administrator has an explicit allow with no assertion.
+        // The explicit rule on Administrator should take precedence over the inherited member rule.
+        $this->acl->allow('member', 'store.manifest', 'save', $this->buildStoreOwnershipAssertion());
+        $this->acl->allow('Administrator', 'store.manifest', 'save');
+
+        // Admin user is in store 99 but the manifest belongs to store 42 — should still be allowed
+        // because the Administrator's own explicit rule has no assertion.
+        self::assertTrue(
+            $this->acl->isAllowed($this->adminUser, $this->ownManifest, 'save'),
+            'Administrator with explicit unrestricted allow must bypass inherited assertion',
+        );
     }
 }
