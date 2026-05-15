@@ -31,7 +31,6 @@ final class AclDashboardWidget implements WidgetInterface
         public readonly int $resourceCount,
         public readonly int $ruleCount,
         public readonly int $assertionCount,
-        public readonly int $mappingCount,
         public readonly int $aclVersion,
     ) {}
 

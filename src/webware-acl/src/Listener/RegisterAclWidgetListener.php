@@ -33,7 +33,6 @@ final class RegisterAclWidgetListener
             resourceCount:  count($this->aclRepository->fetchResources()),
             ruleCount:      count($this->aclRepository->fetchRules()),
             assertionCount: (int) array_sum(array_map('count', $assertions)),
-            mappingCount:   count($this->aclRepository->fetchRouteMappings()),
             aclVersion:     $this->aclRepository->fetchVersion(),
         ));
     }

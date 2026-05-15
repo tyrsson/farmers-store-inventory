@@ -3,9 +3,199 @@
 Two middleware classes make up the per-request access control layer:
 
 - **`IdentityMiddleware`** — runs in the **global pipeline** once per request;
-  attaches the authenticated user and the system messenger to the request.
-- **`AuthorizationMiddleware`** — runs **first** in every protected route stack;
-  checks `AclInterface::isAllowedRoute()` and either delegates or terminates.
+  resolves the authenticated user and attaches it to the request.
+- **`AuthorizingDispatchMiddleware`** — runs in the **global pipeline** in place
+  of Mezzio's built-in `DispatchMiddleware`; checks `AclInterface::isAllowedRoute()`
+  and either dispatches the matched route handler or delegates to `ForbiddenHandlerInterface`.
+
+---
+
+## IdentityMiddleware
+
+### Location
+
+`src/Middleware/IdentityMiddleware.php`  
+Registered in: `config/pipeline.php` (global; always runs)
+
+### What it does
+
+```mermaid
+flowchart LR
+    A([Request]) --> B[IdentityMiddleware]
+    B --> C{Authenticated user in session?}
+    C -- yes --> D[withAttribute UserInterface to User]
+    C -- no  --> E[withAttribute UserInterface to GuestUser]
+    D --> F([delegate to next])
+    E --> F
+```
+
+**`GuestUser`** is a value object that satisfies `UserInterface` with:
+- `$roles = ['guest']` (the ACL base role, never granted anything)
+- `getOwnerId() → null`
+- `isGuest() → true`
+
+### Attributes set
+
+| Attribute key | Value |
+|---|---|
+| `UserInterface::class` | `User` (logged in) or `GuestUser` (anonymous) |
+
+This attribute is consumed downstream by `AuthorizingDispatchMiddleware` and by
+handlers that need to know the current user.
+
+> `SystemMessengerInterface` is **not** attached by `IdentityMiddleware`. That
+> is the responsibility of `App\Middleware\ImsMessengerMiddleware`, which must
+> also be registered in the global pipeline.
+
+---
+
+## AuthorizingDispatchMiddleware
+
+### Location
+
+`src/Middleware/AuthorizingDispatchMiddleware.php`  
+Registered in: **global pipeline, in place of Mezzio's `DispatchMiddleware`**.
+
+This middleware replaces `DispatchMiddleware` — it is not added to individual
+route stacks. Every request passes through it once.
+
+### Constructor dependencies
+
+```php
+public function __construct(
+    private readonly AclInterface $acl,
+    private readonly ForbiddenHandlerInterface $forbiddenHandler,
+) {}
+```
+
+The user is read from the request attribute set by `IdentityMiddleware`.
+
+### Decision table
+
+| Condition | Action |
+|---|---|
+| No `RouteResult` on request | **Pass through** — `MethodNotAllowedMiddleware` handles it |
+| Route not in ACL mappings | **Deny** → `ForbiddenHandlerInterface::handle($request)` |
+| User role(s) are allowed | **Dispatch** → `$routeResult->process($request, $handler)` |
+| Any other denial | **Deny** → `ForbiddenHandlerInterface::handle($request)` |
+
+All denial behaviour (redirect paths, toast messages) is owned by the
+`ForbiddenHandlerInterface` implementation. The middleware itself has no
+hardcoded paths or response logic.
+
+### Sequence diagram
+
+```mermaid
+sequenceDiagram
+    participant Request
+    participant IdentMW as IdentityMiddleware (already ran)
+    participant AuthMW as AuthorizingDispatchMiddleware
+    participant Acl as AclInterface
+    participant FH as ForbiddenHandlerInterface
+    participant Handler
+
+    Request->>AuthMW: process(request, handler)
+    AuthMW->>AuthMW: routeResult = request.getAttribute(RouteResult::class)
+    alt No RouteResult
+        AuthMW->>Handler: handle(request)
+    else RouteResult present
+        AuthMW->>AuthMW: user = request.getAttribute(UserInterface::class)
+        AuthMW->>AuthMW: roles = user->getRoles()
+        AuthMW->>Acl: isAllowedRoute(request, roles)
+        alt Allowed
+            Acl-->>AuthMW: true
+            AuthMW->>Handler: routeResult->process(request, handler)
+            Handler-->>Request: Response
+        else Denied
+            Acl-->>AuthMW: false
+            AuthMW->>FH: handle(request)
+            FH-->>Request: Response (redirect / 403)
+        end
+    end
+```
+
+### isAllowedRoute implementation detail
+
+```
+isAllowedRoute(request, roles)
+  1. Extract RouteResult from request attribute
+  2. If RouteResult is null or failure → return false
+  3. routeName = RouteResult.getMatchedRouteName()
+  4. mapping = routeMappings[routeName] ?? null
+  5. If mapping null → return false
+  6. For each role in roles:
+       if LaminasAcl::isAllowed(role, mapping.resource_id, mapping.privilege_id) → return true
+  7. return false
+```
+
+Roles are checked in the order returned by `UserInterface::getRoles()`. The first
+`true` short-circuits. This means a user with multiple roles is granted access
+if **any** role allows it — standard multi-role RBAC semantics.
+
+### isAllowedByRouteName
+
+Used by admin UI handlers to conditionally render action buttons without issuing
+a full redirect cycle.
+
+```php
+// In a template or handler — check a specific route
+$canEdit = $this->acl->isAllowedByRouteName('manifest.upload.store', $user->getRoles());
+```
+
+Internally identical to `isAllowedRoute` but accepts the route name string
+directly instead of reading from the `RouteResult` attribute.
+
+---
+
+## ForbiddenHandlerInterface
+
+`Webware\Acl\RequestHandler\ForbiddenHandlerInterface` extends
+`Psr\Http\Server\RequestHandlerInterface`. The default implementation is
+`ForbiddenHandler`, which:
+
+- **Guest** (`isGuest() === true`) → `RedirectResponse($loginPath)`, no toast
+- **Authenticated but denied** → optional `SystemMessengerInterface` warning
+  toast (only fires if the messenger is present on the request), then
+  `RedirectResponse($forbiddenRedirect ?? HTTP_REFERER ?? '/')`
+
+To substitute a custom denial handler, alias `ForbiddenHandlerInterface` in
+the host application's DI config:
+
+```php
+// config/autoload/acl.local.php
+use Webware\Acl\RequestHandler\ForbiddenHandlerInterface;
+
+return [
+    'dependencies' => [
+        'aliases' => [
+            ForbiddenHandlerInterface::class => MyCustomForbiddenHandler::class,
+        ],
+    ],
+];
+```
+
+### ForbiddenHandler config keys
+
+All keys live under `AclInterface::class` in the merged config:
+
+| Key | Default | Description |
+|---|---|---|
+| `login_path` | `'/login'` | Redirect target for guest denials |
+| `forbidden_redirect` | `'/'` | Redirect target for authenticated denials; falls back to `HTTP_REFERER` then `'/'` |
+| `forbidden_template` | `null` | Reserved — not yet implemented |
+
+---
+
+## Common Mistakes
+
+| Mistake | Consequence |
+|---|---|
+| Adding `AuthorizingDispatchMiddleware` to a route stack instead of global pipeline | Double ACL check; route handler may never be reached |
+| Leaving Mezzio's `DispatchMiddleware` in the global pipeline alongside `AuthorizingDispatchMiddleware` | Routes are dispatched twice |
+| Not registering the route in a `RegisterXxxRouteMappingsListener` | Route maps to no resource → always denied |
+| `UserInterface::class` attribute absent from request | `$user?->getRoles()` returns `[]` → every route denied |
+| Not calling `IdentityMiddleware` before `AuthorizingDispatchMiddleware` in the pipeline | User attribute missing; all routes denied |
+
 
 ---
 

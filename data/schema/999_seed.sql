@@ -392,4 +392,92 @@ ON DUPLICATE KEY UPDATE
 -- Bump the version counter so AclBuilder discards any stale cached ACL on
 -- the next request. Every reseed must end with this statement.
 -- -----------------------------------------------------------------------------
+
+-- -----------------------------------------------------------------------------
+-- ACL: admin.acl.* resources
+-- Each route name IS the resource_id. One resource per route.
+-- All 14 admin.acl.* routes are seeded here so they are protected on first
+-- deploy. Developer is the only role granted access (via DB rules below);
+-- RegisterAclRulesListener handles the in-memory grant for the legacy
+-- 'admin.acl' resource name used by the overview handler.
+-- -----------------------------------------------------------------------------
+INSERT INTO acl_resource (resource_id, label, `system`) VALUES
+    ('admin.acl.read',                'ACL — Overview',             1),
+    ('admin.acl.roles.read',          'ACL — Roles List',           1),
+    ('admin.acl.roles.create',        'ACL — Create Role',          1),
+    ('admin.acl.roles.delete',        'ACL — Delete Role',          1),
+    ('admin.acl.resources.read',      'ACL — Resources List',       1),
+    ('admin.acl.resources.create',    'ACL — Create Resource',      1),
+    ('admin.acl.resources.delete',    'ACL — Delete Resource',      1),
+    ('admin.acl.resources.protect',   'ACL — Protect Route',        1),
+    ('admin.acl.rules.read',          'ACL — Rules List',           1),
+    ('admin.acl.rules.create',        'ACL — Create Rule',          1),
+    ('admin.acl.rules.update',        'ACL — Update Rule',          1),
+    ('admin.acl.rules.delete',        'ACL — Delete Rule',          1),
+    ('admin.acl.assertions.create',   'ACL — Create Assertion',     1),
+    ('admin.acl.assertions.delete',   'ACL — Delete Assertion',     1)
+ON DUPLICATE KEY UPDATE label = VALUES(label), `system` = VALUES(`system`);
+
+-- Privileges — derived from HTTP method via METHOD_PRIVILEGE_MAP
+INSERT INTO acl_privilege (resource_pk, privilege_id, label)
+SELECT r.resource_pk, p.privilege_id, p.label
+FROM acl_resource r
+JOIN (
+    SELECT 'admin.acl.read'              AS resource_id, 'read'   AS privilege_id, 'Read'   AS label UNION ALL
+    SELECT 'admin.acl.roles.read',                       'read',                   'Read'            UNION ALL
+    SELECT 'admin.acl.roles.create',                     'create',                 'Create'          UNION ALL
+    SELECT 'admin.acl.roles.delete',                     'delete',                 'Delete'          UNION ALL
+    SELECT 'admin.acl.resources.read',                   'read',                   'Read'            UNION ALL
+    SELECT 'admin.acl.resources.create',                 'create',                 'Create'          UNION ALL
+    SELECT 'admin.acl.resources.delete',                 'delete',                 'Delete'          UNION ALL
+    SELECT 'admin.acl.resources.protect',                'create',                 'Create'          UNION ALL
+    SELECT 'admin.acl.rules.read',                       'read',                   'Read'            UNION ALL
+    SELECT 'admin.acl.rules.create',                     'create',                 'Create'          UNION ALL
+    SELECT 'admin.acl.rules.update',                     'update',                 'Update'          UNION ALL
+    SELECT 'admin.acl.rules.delete',                     'delete',                 'Delete'          UNION ALL
+    SELECT 'admin.acl.assertions.create',                'create',                 'Create'          UNION ALL
+    SELECT 'admin.acl.assertions.delete',                'delete',                 'Delete'
+) p ON r.resource_id = p.resource_id
+ON DUPLICATE KEY UPDATE label = VALUES(label);
+
+-- Allow rules — Developer only
+-- Role inheritance propagates this up the chain if needed in future.
+INSERT INTO acl_rule (role_pk, resource_pk, privilege_pk, type)
+SELECT ro.id, pr.resource_pk, pr.privilege_pk, 'allow'
+FROM role ro
+JOIN acl_privilege pr ON 1 = 1
+JOIN acl_resource  re ON re.resource_pk = pr.resource_pk
+WHERE ro.role_id = 'Developer'
+  AND re.resource_id IN (
+      'admin.acl.read',
+      'admin.acl.roles.read',    'admin.acl.roles.create',    'admin.acl.roles.delete',
+      'admin.acl.resources.read','admin.acl.resources.create','admin.acl.resources.delete','admin.acl.resources.protect',
+      'admin.acl.rules.read',    'admin.acl.rules.create',    'admin.acl.rules.update',   'admin.acl.rules.delete',
+      'admin.acl.assertions.create','admin.acl.assertions.delete'
+  )
+ON DUPLICATE KEY UPDATE type = VALUES(type);
+
+-- Route → resource+privilege mappings
+INSERT INTO acl_route_privilege (route_name, resource_pk, privilege_pk)
+SELECT routes.route_name, pr.resource_pk, pr.privilege_pk
+FROM (
+    SELECT 'admin.acl.read'             AS route_name, 'admin.acl.read'             AS resource_id, 'read'   AS privilege_id UNION ALL
+    SELECT 'admin.acl.roles.read',                     'admin.acl.roles.read',                      'read'                   UNION ALL
+    SELECT 'admin.acl.roles.create',                   'admin.acl.roles.create',                    'create'                 UNION ALL
+    SELECT 'admin.acl.roles.delete',                   'admin.acl.roles.delete',                    'delete'                 UNION ALL
+    SELECT 'admin.acl.resources.read',                 'admin.acl.resources.read',                  'read'                   UNION ALL
+    SELECT 'admin.acl.resources.create',               'admin.acl.resources.create',                'create'                 UNION ALL
+    SELECT 'admin.acl.resources.delete',               'admin.acl.resources.delete',                'delete'                 UNION ALL
+    SELECT 'admin.acl.resources.protect',              'admin.acl.resources.protect',               'create'                 UNION ALL
+    SELECT 'admin.acl.rules.read',                     'admin.acl.rules.read',                      'read'                   UNION ALL
+    SELECT 'admin.acl.rules.create',                   'admin.acl.rules.create',                    'create'                 UNION ALL
+    SELECT 'admin.acl.rules.update',                   'admin.acl.rules.update',                    'update'                 UNION ALL
+    SELECT 'admin.acl.rules.delete',                   'admin.acl.rules.delete',                    'delete'                 UNION ALL
+    SELECT 'admin.acl.assertions.create',              'admin.acl.assertions.create',               'create'                 UNION ALL
+    SELECT 'admin.acl.assertions.delete',              'admin.acl.assertions.delete',               'delete'
+) AS routes
+JOIN acl_resource  re ON re.resource_id  = routes.resource_id
+JOIN acl_privilege pr ON pr.privilege_id = routes.privilege_id AND pr.resource_pk = re.resource_pk
+ON DUPLICATE KEY UPDATE resource_pk = VALUES(resource_pk), privilege_pk = VALUES(privilege_pk);
+
 UPDATE acl_version SET version = version + 1 WHERE id = 1;

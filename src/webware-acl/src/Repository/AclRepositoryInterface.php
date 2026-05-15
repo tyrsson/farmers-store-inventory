@@ -67,14 +67,6 @@ interface AclRepositoryInterface
     public function fetchRuleAssertions(): array;
 
     /**
-     * Returns route→resource+privilege mappings.
-     * Each row: route_name, resource_id (string), privilege_id (string).
-     *
-     * @return array<string, array{resource_id: string, privilege_id: string}>
-     */
-    public function fetchRouteMappings(): array;
-
-    /**
      * Returns the current ACL version counter from the acl_version table.
      * Used by FileAclCache to determine whether the cache is stale.
      */
@@ -147,17 +139,6 @@ interface AclRepositoryInterface
      * Deletes a rule by its integer PK.
      */
     public function deleteRule(int $id): void;
-
-    /**
-     * Inserts or replaces the route→resource+privilege mapping for $routeName.
-     * Uses INSERT … ON DUPLICATE KEY UPDATE on the unique key (route_name).
-     */
-    public function saveRouteMapping(string $routeName, int $resourcePk, int $privilegePk): void;
-
-    /**
-     * Deletes the route mapping for $routeName.
-     */
-    public function deleteRouteMapping(string $routeName): void;
 
     /**
      * Inserts a new assertion row for the given rule PK.

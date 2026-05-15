@@ -14,8 +14,10 @@ declare(strict_types=1);
 
 namespace Webware\Acl\Container;
 
+use Mezzio\Authentication\AuthenticationInterface;
 use Mezzio\Authentication\UserInterface;
 use Psr\Container\ContainerInterface;
+use Webware\Acl\AclInterface;
 use Webware\Acl\Middleware\IdentityMiddleware;
 
 final class IdentityMiddlewareFactory
@@ -23,11 +25,12 @@ final class IdentityMiddlewareFactory
     public function __invoke(ContainerInterface $container): IdentityMiddleware
     {
         $config   = $container->get('config');
-        $baseRole = (string) ($config['webware-acl']['base_role'] ?? 'guest');
+        $baseRole = (string) ($config[AclInterface::class]['base_role'] ?? 'guest');
 
         return new IdentityMiddleware(
             userFactory: $container->get(UserInterface::class),
             baseRole:    $baseRole,
+            auth:        $container->get(AuthenticationInterface::class),
         );
     }
 }

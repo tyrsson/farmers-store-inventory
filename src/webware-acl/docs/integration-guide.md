@@ -191,43 +191,20 @@ another module's listener runs (rare).
 
 ---
 
-## Step 5 — Add AuthorizationMiddleware to Route Stacks
+## Step 5 — No Per-Route Middleware Required
 
-Add `AuthorizationMiddleware::class` as the **first** middleware in every
-protected route stack:
+`AuthorizingDispatchMiddleware` runs in the **global pipeline** in place of
+Mezzio's `DispatchMiddleware`. You do **not** add any ACL middleware to
+individual route stacks.
 
-```php
-// RouteProvider.php
+Protection is determined entirely by the route-to-resource mapping registered
+in `RegisterXxxRouteMappingsListener`. If a route has no mapping, it is denied.
+If a route is intentionally public (e.g. `/login`), simply omit it from the
+mapping — `AuthorizingDispatchMiddleware` will pass it through only when
+the user is allowed; otherwise `ForbiddenHandlerInterface` handles the denial.
 
-use Webware\Acl\Middleware\AuthorizationMiddleware;
-use Ims\Manifest\RequestHandler\ManifestListHandler;
-use Ims\Manifest\RequestHandler\ManifestUploadHandler;
-use Ims\Manifest\Middleware\ProcessManifestUploadMiddleware;
-
-$app->route(
-    '/manifests',
-    [
-        AuthorizationMiddleware::class,   // ← always first
-        ManifestListHandler::class,
-    ],
-    ['GET'],
-    'manifest.list'
-);
-
-$app->route(
-    '/manifests/upload',
-    [
-        AuthorizationMiddleware::class,
-        ProcessManifestUploadMiddleware::class,
-        ManifestUploadHandler::class,
-    ],
-    ['POST'],
-    'manifest.upload.store'
-);
-```
-
-> Never place `AuthorizationMiddleware` after a write middleware. Access must be
-> verified before any data mutation occurs.
+> **Never** add `AuthorizingDispatchMiddleware` to a route stack. It must only
+> appear once, in the global pipeline.
 
 ---
 
@@ -259,11 +236,11 @@ After seeding, call `AclRepository::incrementVersion()` or truncate
 □ RegisterXxxRulesListener — adds built-in immutable rules
 □ RegisterXxxRouteMappingsListener — maps all protected routes
 □ Three listeners registered in ConfigProvider::getListeners()
-□ AuthorizationMiddleware::class first in every protected route stack
 □ Route names in addRouteMapping() match RouteProvider exactly
 □ Privilege constants used (PrivilegeInterface::READ etc.) — no hardcoded strings
 □ DB seed: Administrator default rules for new resource
-□ Cache invalidated after seeding
+□ Cache invalidated after seeding (AclRepository::incrementVersion())
+□ AuthorizingDispatchMiddleware in global pipeline (not in route stacks)
 ```
 
 ---
@@ -274,11 +251,11 @@ After seeding, call `AclRepository::incrementVersion()` or truncate
 |---|---|
 | Listener not in `ConfigProvider::getListeners()` | Resource/rule/mapping silently missing from ACL on rebuild |
 | Route name typo in `addRouteMapping()` | Route always returns 403 — no mapping found |
-| `AuthorizationMiddleware` omitted from a route stack | Route is publicly accessible with no ACL check |
+| Adding `AuthorizingDispatchMiddleware` to a route stack | Double ACL check; unexpected behaviour |
+| Leaving Mezzio's `DispatchMiddleware` in the global pipeline | Routes dispatched twice |
 | Hardcoded privilege string (`'read'`) instead of `PrivilegeInterface::READ` | Fragile — breaks if the constant value changes |
 | Forgetting `incrementVersion()` after seeding DB rules | Cache not invalidated; stale ACL persists |
-| Placing `AuthorizationMiddleware` after write middleware | Write executes before access is verified |
-| Resolving `Mezzio\Authentication\UserInterface` without the alias | `isAllowed()` fails — `DefaultUser` does not implement `RoleInterface` |
+| Resolving `Mezzio\Authentication\UserInterface` without the alias | `isAllowed()` fails — `GuestUser` does not satisfy `RoleInterface` without proper wiring |
 
 ---
 
@@ -307,7 +284,7 @@ return [
         'factories' => [
             // The factory that creates User instances is registered under our
             // interface key — NOT under MezzioUserInterface::class directly.
-            UserManagerUserInterface::class => \Webware\Acl\Authentication\DefaultUserFactory::class,
+            UserManagerUserInterface::class => \Webware\UserManager\Container\UserFactory::class,
         ],
     ],
 ];

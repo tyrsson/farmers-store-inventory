@@ -86,6 +86,12 @@ final readonly class User implements UserInterface
         return $this->roles;
     }
 
+    #[Override]
+    public function isGuest(): bool
+    {
+        return false;
+    }
+
     /** @param mixed $default */
     #[Override]
     public function getDetail(string $name, $default = null): mixed

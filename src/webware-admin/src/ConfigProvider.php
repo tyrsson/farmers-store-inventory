@@ -5,17 +5,14 @@ declare(strict_types=1);
 
 namespace Webware\Admin;
 
-use Webware\Acl\Event\AclBuiltEvent;
 use Webware\Acl\Event\ResourcesLoadedEvent;
 use Webware\Acl\Event\RulesLoadedEvent;
 use Webware\Admin\Container\DashboardHandlerFactory;
 use Webware\Admin\Container\DashboardMiddlewareFactory;
 use Webware\Admin\Container\RegisterAdminResourcesListenerFactory;
-use Webware\Admin\Container\RegisterAdminRouteMappingsListenerFactory;
 use Webware\Admin\Container\RegisterAdminRulesListenerFactory;
 use Webware\Admin\Container\RouteProviderFactory;
 use Webware\Admin\Listener\RegisterAdminResourcesListener;
-use Webware\Admin\Listener\RegisterAdminRouteMappingsListener;
 use Webware\Admin\Listener\RegisterAdminRulesListener;
 use Webware\Admin\Middleware\DashboardMiddleware;
 use Webware\Admin\RequestHandler\DashboardHandler;
@@ -41,7 +38,6 @@ final readonly class ConfigProvider
                 DashboardMiddleware::class                   => DashboardMiddlewareFactory::class,
                 RegisterAdminResourcesListener::class        => RegisterAdminResourcesListenerFactory::class,
                 RegisterAdminRulesListener::class            => RegisterAdminRulesListenerFactory::class,
-                RegisterAdminRouteMappingsListener::class    => RegisterAdminRouteMappingsListenerFactory::class,
                 RouteProvider::class                         => RouteProviderFactory::class,
             ],
         ];
@@ -74,9 +70,7 @@ final readonly class ConfigProvider
             RulesLoadedEvent::class     => [
                 ['listener' => RegisterAdminRulesListener::class, 'priority' => 1],
             ],
-            AclBuiltEvent::class        => [
-                ['listener' => RegisterAdminRouteMappingsListener::class, 'priority' => 1],
-            ],
+
         ];
     }
 }

@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace Webware\UserManager;
 
 use Htmx\Middleware\DisableBodyMiddleware;
-use Mezzio\Authentication\AuthenticationMiddleware;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
@@ -29,7 +28,6 @@ use Webware\UserManager\RequestHandler\RegistrationHandler;
 use Webware\UserManager\RequestHandler\ResendVerificationHandler;
 use Webware\UserManager\RequestHandler\UserListHandler;
 use Webware\UserManager\RequestHandler\VerifyEmailHandler;
-use Webware\Acl\Middleware\AuthorizationMiddleware;
 
 final class RouteProvider implements RouteProviderInterface
 {
@@ -43,7 +41,6 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
-                    AuthorizationMiddleware::class,
                     LoginHandler::class,
                 ]
             ),
@@ -55,8 +52,6 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
-                    AuthorizationMiddleware::class,
-                    AuthenticationMiddleware::class,
                     LoginHandler::class,
                 ]
             ),
@@ -69,7 +64,6 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
-                    AuthorizationMiddleware::class,
                     RegistrationHandler::class,
                 ]
             ),
@@ -81,7 +75,6 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
-                    AuthorizationMiddleware::class,
                     RegistrationMiddleware::class,
                     RegistrationHandler::class,
                 ]
@@ -94,7 +87,6 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
-                    AuthorizationMiddleware::class,
                     VerifyEmailHandler::class,
                 ]
             ),
@@ -106,7 +98,6 @@ final class RouteProvider implements RouteProviderInterface
             $middlewareFactory->prepare(
                 [
                     DisableBodyMiddleware::class,
-                    AuthorizationMiddleware::class,
                     ResendVerificationHandler::class,
                 ]
             ),
@@ -118,7 +109,6 @@ final class RouteProvider implements RouteProviderInterface
             '/logout',
             $middlewareFactory->prepare(
                 [
-                    AuthorizationMiddleware::class,
                     LogoutHandler::class,
                 ]
             ),
@@ -136,7 +126,6 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/user',
             $middlewareFactory->prepare(
                 [
-                    AuthorizationMiddleware::class,
                     UserListHandler::class,
                 ]
             ),
@@ -153,7 +142,6 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/user/create',
             $middlewareFactory->prepare(
                 [
-                    AuthorizationMiddleware::class,
                     CreateUserHandler::class,
                 ]
             ),
@@ -171,7 +159,6 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/user/{id:\d+}',
             $middlewareFactory->prepare(
                 [
-                    AuthorizationMiddleware::class,
                     UpdateUserHandler::class,
                 ]
             ),
@@ -183,7 +170,6 @@ final class RouteProvider implements RouteProviderInterface
             '/admin/user/{id:\d+}/toggle',
             $middlewareFactory->prepare(
                 [
-                    AuthorizationMiddleware::class,
                     ToggleUserActiveHandler::class,
                 ]
             ),

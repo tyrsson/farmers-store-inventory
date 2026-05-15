@@ -1,8 +1,12 @@
 ---
 name: "webware-coding-standard"
-description: "Load this skill when writing or reviewing ANY PHP source file that uses the Webware 1.0 coding standard. Enforces vendor/webware/coding-standard rules that must be applied manually when php-cs-fixer cannot run."
+description: "ALWAYS load before writing or reviewing ANY PHP file in this project. No exceptions. Enforces Webware 1.0 coding standard rules manually when php-cs-fixer cannot run. Skipping this skill produces WET, non-compliant code."
 argument-hint: "<file or class being created/reviewed>"
 ---
+
+> ⚠ **MANDATORY — LOAD BEFORE TOUCHING ANY PHP FILE**
+> This skill must be loaded before writing or reviewing any PHP source file. No exceptions.
+> Failure to load this skill is the primary cause of coding standard violations in this project.
 
 > ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
 > Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
@@ -385,3 +389,57 @@ final class OwnershipAssertionIntegrationTest extends TestCase { ... }
 // ❌ Wrong — missing CoversClass, will be reported as risky
 final class OwnershipAssertionTest extends TestCase { ... }
 ```
+
+---
+
+## Readonly Classes — Prefer Class-Level over Property-Level
+
+When all properties of a class are readonly, use `readonly class` rather than marking each property individually.
+
+```php
+// ✅ Correct — class-level readonly
+final readonly class SaveRoleCommand implements CommandInterface
+{
+    public function __construct(
+        public string $name,
+        public string $description,
+    ) {}
+}
+
+// ❌ Wrong — per-property readonly when class-level is possible
+final class SaveRoleCommand implements CommandInterface
+{
+    public function __construct(
+        public readonly string $name,
+        public readonly string $description,
+    ) {}
+}
+```
+
+Fall back to per-property `readonly` only when `readonly class` is prevented:
+- The class extends a non-readonly parent
+- One or more properties must remain mutable
+- A dependency injection framework (or other tool) requires non-readonly construction
+
+---
+
+## Webware Component Config Key Convention
+
+All webware component configuration is stored in the merged config array under the **component's primary interface class** as the top-level key — never a plain string like `'webware-acl'` or `'webware-navigation'`.
+
+```php
+// ✅ Correct — factory reads from interface class key
+$config = $container->get('config');
+$acl    = $config[AclInterface::class] ?? [];
+$nav    = $config[NavigationInterface::class] ?? [];
+
+// ❌ Wrong — string keys
+$acl = $config['webware-acl'] ?? [];
+$nav = $config['webware-navigation'] ?? [];
+```
+
+Rules:
+- The config key is always the **FQCN of the component's primary interface** (e.g. `AclInterface::class`, `NavigationInterface::class`)
+- Defaults are declared in each module's `ConfigProvider` (e.g. `getAclConfig()`, `getNavigationConfig()`)
+- Application overrides are placed under the same interface key in `config/autoload/*.local.php`
+- Factories must import the interface and use `$config[TheInterface::class]` — never a hard-coded string

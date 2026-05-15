@@ -21,8 +21,6 @@ use Ims\Manifest\RequestHandler\ManifestUploadHandler;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
-use Webware\Acl\Middleware\AuthorizationMiddleware;
-
 final class RouteProvider implements RouteProviderInterface
 {
     public function registerRoutes(
@@ -32,7 +30,6 @@ final class RouteProvider implements RouteProviderInterface
         $routeCollector->get(
             '/manifests',
             $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
                 ManifestListHandler::class,
             ]),
             'manifest.list'
@@ -47,7 +44,6 @@ final class RouteProvider implements RouteProviderInterface
         $routeCollector->get(
             '/manifest/upload',
             $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
                 ManifestUploadHandler::class,
             ]),
             'manifest.upload'
@@ -56,7 +52,6 @@ final class RouteProvider implements RouteProviderInterface
         $routeCollector->post(
             '/manifest/upload',
             $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
                 ProcessManifestUploadMiddleware::class,
                 ManifestUploadHandler::class,
             ]),
@@ -66,7 +61,6 @@ final class RouteProvider implements RouteProviderInterface
         $routeCollector->get(
             '/manifest/{id:\d+}',
             $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
                 ManifestDetailHandler::class,
             ]),
             'manifest.detail'

@@ -17,7 +17,10 @@ interface UserInterface extends
     MezzioUserInterface,
     RoleInterface,
     ResourceInterface,
-    ProprietaryInterface {}
+    ProprietaryInterface
+{
+    public function isGuest(): bool;
+}
 ```
 
 ---
@@ -35,6 +38,10 @@ use for role-based or ownership-based checks.
 | `RoleInterface` | `laminas/laminas-permissions-acl` | `$acl->isAllowed($user, ...)` |
 | `ResourceInterface` | `laminas/laminas-permissions-acl` | User-profile ownership assertion |
 | `ProprietaryInterface` | `laminas/laminas-permissions-acl` | `getOwnerId()` — used by `OwnershipAssertion` |
+
+`isGuest()` is an additional method not derived from any parent interface. It
+allows any consumer to distinguish a guest (anonymous) user from an
+authenticated user without inspecting role strings or checking `null`.
 
 Every concrete `User` entity produced by the authentication layer **must**
 implement this interface so that ACL checks and ownership assertions work
@@ -68,7 +75,7 @@ return [
         'factories' => [
             // The concrete factory that creates User instances must be
             // registered under our interface key.
-            UserManagerUserInterface::class => \Webware\Acl\Authentication\DefaultUserFactory::class,
+            UserManagerUserInterface::class => \Webware\UserManager\Container\UserFactory::class,
         ],
     ],
 ];
@@ -94,6 +101,7 @@ Any class used as the concrete implementation must:
    `OwnershipAssertion` can compare it against a profile resource's owner.
 5. `getDetail(string $name): mixed` — must expose at minimum `store_id` for
    store-scoped ownership assertions.
+6. `isGuest(): bool` — `GuestUser` returns `true`; `User` returns `false`.
 
 ---
 
@@ -101,6 +109,8 @@ Any class used as the concrete implementation must:
 
 ```
 □ Concrete User class implements Webware\UserManager\UserInterface
+□ GuestUser::isGuest() returns true
+□ User::isGuest() returns false
 □ MezzioUserInterface::class aliased to UserManagerUserInterface::class in host-app DI
 □ UserManagerUserInterface::class bound to the concrete factory in host-app DI
 □ getOwnerId() returns the user's PK (not store_id — that comes via getDetail('store_id'))

@@ -6,7 +6,7 @@
 Load this skill when:
 - Integrating a new module with the ACL system (protecting routes, adding resources/rules)
 - Writing or reviewing `RegisterXxx*Listener` classes for a component
-- Using `AuthorizationMiddleware`, `AclInterface`, or `WriteResult` in any context
+- Using `AuthorizingDispatchMiddleware`, `AclInterface`, or `WriteResult` in any context
 - Understanding how the ACL build pipeline works
 
 ---
@@ -89,7 +89,7 @@ or route mappings does so by listening to these events.
 AclBuildStartedEvent  → (roles loaded from DB)
 ResourcesLoadedEvent  → listeners add component resources
 RulesLoadedEvent      → listeners add component rules
-AclBuiltEvent         → listeners add route mappings; cache is written after dispatch
+AclBuiltEvent         → listeners may add last-minute rules; cache is written after dispatch
 ```
 
 ### Event summary
@@ -98,7 +98,7 @@ AclBuiltEvent         → listeners add route mappings; cache is written after d
 |---|---|---|
 | `ResourcesLoadedEvent` | `$event->acl` (`Laminas\Permissions\Acl\Acl`) | `$event->acl->addResource(...)` |
 | `RulesLoadedEvent` | `$event->acl` | `$event->acl->allow(...)` / `->deny(...)` |
-| `AclBuiltEvent` | `$event->acl` + methods | `$event->addRouteMapping(...)` |
+| `AclBuiltEvent` | `$event->acl` | `$event->acl->allow(...)` / `->deny(...)` last-minute rules only |
 
 ---
 
@@ -146,26 +146,16 @@ final class RegisterManifestRulesListener
   admin UI (e.g. Developer always gets full access).
 - End-user configurable grants live in the DB and are loaded automatically.
 
-### 3. `Register{Module}RouteMappingsListener` — fires on `AclBuiltEvent`
+### 3. ~~`Register{Module}RouteMappingsListener`~~ — **DELETED (superseded by `ProtectRouteCommand`)**
 
-```php
-final class RegisterManifestRouteMappingsListener
-{
-    public function __invoke(AclBuiltEvent $event): void
-    {
-        $event->addRouteMapping('manifest.list',         'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.detail',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload.store', 'manifest', Privilege::CREATE);
-    }
-}
-```
-
-- **Every protected route must have a mapping.** Routes with no mapping are
-  treated as unprotected by `isAllowedByRouteName()`.
-- Route name format follows the Mezzio route name given in `RouteProvider`.
-- Privilege should reflect the HTTP intent: GET → `READ`, POST → `CREATE`,
-  PATCH/PUT → `UPDATE`, DELETE → `DELETE`.
+> ⚠ Route mappings via `AclBuiltEvent::addRouteMapping()` are **no longer supported**.
+> `AclBuiltEvent` no longer carries route mapping data. The method `addRouteMapping()` has been removed.
+>
+> Protected routes are now registered **explicitly** through the admin UI using `ProtectRouteCommand`,
+> which saves them as first-class `acl_resource` + `acl_privilege` rows in the database.
+> `AuthorizingDispatchMiddleware` checks the ACL directly by route name — no listener needed.
+>
+> **Do not create new `Register{Module}RouteMappingsListener` classes.** Remove any that exist.
 
 ### ConfigProvider registration
 
@@ -179,9 +169,7 @@ public function getListeners(): array
         RulesLoadedEvent::class => [
             ['listener' => RegisterManifestRulesListener::class, 'priority' => 1],
         ],
-        AclBuiltEvent::class => [
-            ['listener' => RegisterManifestRouteMappingsListener::class, 'priority' => 1],
-        ],
+        // AclBuiltEvent — no RouteMappingsListener; route protection is managed via ProtectRouteCommand
     ];
 }
 ```
@@ -192,18 +180,21 @@ factory and go in `'factories'`.
 
 ---
 
-## `AuthorizationMiddleware` — Protecting Routes
+## `AuthorizingDispatchMiddleware` — Route Access Control (Global Pipeline)
 
-`AuthorizationMiddleware` is the ACL gatekeeper. It must be the **first**
-middleware in every protected route stack.
+`AuthorizationMiddleware` has been **deleted**. Route-level ACL enforcement is now
+handled globally by `AuthorizingDispatchMiddleware`, registered as the DI override for
+`Mezzio\Router\Middleware\DispatchMiddleware::class`.
+
+**Do NOT add any middleware to individual route stacks for ACL purposes.** Every
+route stack should only contain data-processing middleware and a terminal handler.
 
 ```php
-// In RouteProvider::registerRoutes()
+// In RouteProvider::registerRoutes() — NO authorization middleware in the stack
 $routeCollector->get(
     '/manifests',
     $middlewareFactory->prepare([
-        AuthorizationMiddleware::class,   // ← always first
-        ManifestListHandler::class,
+        ManifestListHandler::class,   // ← no ACL middleware here
     ]),
     'manifest.list'
 );
@@ -211,27 +202,31 @@ $routeCollector->get(
 $routeCollector->post(
     '/manifests/upload',
     $middlewareFactory->prepare([
-        AuthorizationMiddleware::class,            // ← always first
-        ProcessManifestUploadMiddleware::class,    // ← data processing
-        ManifestUploadHandler::class,             // ← render
+        ProcessManifestUploadMiddleware::class,
+        ManifestUploadHandler::class,
     ]),
     'manifest.upload.store'
 );
 ```
+
+### How route protection works
+
+1. A route is **unprotected by default** — any authenticated user can access it.
+2. To protect a route, use `ProtectRouteCommand` via the ACL admin UI
+   (`POST /admin/access/resources/protect`). This saves the route as an `acl_resource`
+   + `acl_privilege` pair in the database.
+3. `AuthorizingDispatchMiddleware` calls `$acl->hasResource($routeName)` before dispatching.
+   - Route not in ACL → pass through freely.
+   - Route in ACL → call `$acl->isAllowed($roles, $routeResource, $privilege)`. Denied → `ForbiddenHandler::handle()`.
 
 ### Decision table
 
 | Condition | Result |
 |---|---|
 | No `RouteResult` or routing failure | Pass through (not ACL's concern) |
-| `isAllowedRoute()` → true | Delegate to next middleware |
-| Unauthenticated (only base role) | Silent redirect to login |
-| Authenticated but denied | Warning toast + redirect to home |
-| Route name not in mappings | Same as denied |
-
-`AuthorizationMiddleware` reads `SystemMessengerInterface` from the request
-attribute and calls `$messenger?->warning(...)` — null-safe, no crash if
-messenger is absent.
+| Route not in ACL (not protected) | Pass through freely |
+| `isAllowed()` → true | Delegate to next middleware |
+| `isAllowed()` → false | `ForbiddenHandler::handle($request)` |
 
 ---
 
@@ -257,8 +252,6 @@ Key write methods:
 | `saveRule(int $rolePk, int $resourcePk, int $privilegePk, string $type): void` | Upsert — type: `'allow'`\|`'deny'` |
 | `updateRuleType(int $id, string $type): void` | PATCH path |
 | `deleteRule(int $id): void` | By rule PK |
-| `saveRouteMapping(string $routeName, int $resourcePk, int $privilegePk): void` | Upsert |
-| `deleteRouteMapping(string $routeName): void` | |
 | `incrementVersion(): void` | **Must be called after every write** |
 
 ---
@@ -266,7 +259,7 @@ Key write methods:
 ## `IdentityMiddleware`
 
 Attaches `SystemMessengerInterface` and the authenticated `UserInterface` to
-the request. It runs **before** `AuthorizationMiddleware` in the global pipeline
+the request. It runs **before** `AuthorizingDispatchMiddleware` in the global pipeline
 (not per-route) — it is already present on every request. Do not add it to
 individual route stacks.
 
@@ -289,8 +282,10 @@ Do not interact with `FileAclCache` directly in component code. Only
 src/{module}/src/Listener/
     Register{Module}ResourcesListener.php
     Register{Module}RulesListener.php
-    Register{Module}RouteMappingsListener.php
 ```
+
+> ~~`Register{Module}RouteMappingsListener.php`~~ — **DELETED**. Do not create this class.
+> Route protection is managed via `ProtectRouteCommand` (admin UI).
 
 Factories (if needed) live in:
 ```
@@ -307,9 +302,9 @@ src/{module}/src/Container/
   listeners. Resources and rules must be registered through the event pipeline.
 - **Do not** call `$aclRepository->incrementVersion()` multiple times per
   request — one call per write operation is sufficient.
-- **Do not** add `AuthorizationMiddleware` to the global pipeline — it is
-  route-specific. The global pipeline uses `IdentityMiddleware` only.
-- **Do not** check `isAllowedRoute()` inside handlers or middleware other than
-  `AuthorizationMiddleware`. If a route is reachable, it is already allowed.
-- **Do not** hardcode privilege strings (`'read'`, `'create'`). Always use
-  `Privilege::READ`, `Privilege::CREATE`, etc.
+- **Do not** add `AuthorizationMiddleware` to route stacks — it has been deleted.
+  `AuthorizingDispatchMiddleware` handles ACL enforcement globally.
+- **Do not** implement `Register{Module}RouteMappingsListener` — the `AclBuiltEvent`
+  route-mapping API has been removed. Protect routes via `ProtectRouteCommand` instead.
+- **Do not** call `$acl->addResource()` or `$acl->allow()` outside of ACL event
+  listeners. Resources and rules must be registered through the event pipeline.

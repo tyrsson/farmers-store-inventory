@@ -14,8 +14,7 @@ declare(strict_types=1);
 
 namespace Webware\Acl\Middleware;
 
-use Mezzio\Authentication\UserInterface as MezzioUserInterface;
-use Mezzio\Session\SessionMiddleware;
+use Mezzio\Authentication\AuthenticationInterface;
 use Webware\UserManager\UserInterface;
 use Override;
 use Psr\Http\Message\ResponseInterface;
@@ -26,11 +25,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 /**
  * Resolves the current identity and attaches a UserInterface to every request.
  *
- * Two states only:
- *  - Session contains UserInterface data → deserialise and set the real user
- *  - No session data                     → set a guest user via the configured base role
+ * Delegates to AuthenticationInterface::authenticate() which handles both:
+ *  - POST /login with credentials → verifies, writes session, returns real user
+ *  - Any request with a valid session → reads session, returns real user
+ *  - No credentials / no session → returns null → guest user set
  *
- * Always calls the next handler — access decisions are AclMiddleware's job.
+ * Always calls the next handler — access decisions are AuthorizingDispatchMiddleware's job.
  * Pipe this once in the global pipeline, after SessionMiddleware.
  */
 final class IdentityMiddleware implements MiddlewareInterface
@@ -41,37 +41,37 @@ final class IdentityMiddleware implements MiddlewareInterface
     /**
      * @param callable(string, string[], array<string, mixed>): UserInterface $userFactory
      */
-    public function __construct(callable $userFactory, private readonly string $baseRole)
-    {
+    public function __construct(
+        callable $userFactory,
+        private readonly string $baseRole,
+        private readonly AuthenticationInterface $auth,
+    ) {
         $this->userFactory = $userFactory;
     }
 
     #[Override]
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $session = $request->getAttribute(SessionMiddleware::SESSION_ATTRIBUTE);
+        $mezzioUser = $this->auth->authenticate($request);
 
-        if ($session === null || ! $session->has(MezzioUserInterface::class)) {
-            $request = $request->withAttribute(
-                UserInterface::class,
-                ($this->userFactory)('guest', [$this->baseRole], []),
+        if ($mezzioUser === null) {
+            return $handler->handle(
+                $request->withAttribute(
+                    UserInterface::class,
+                    ($this->userFactory)('guest', [$this->baseRole], []),
+                )
             );
-
-            return $handler->handle($request);
         }
-
-        /** @var array{username: string, roles: string[], details: array<string, mixed>} */
-        $data = $session->get(MezzioUserInterface::class);
 
         return $handler->handle(
             $request->withAttribute(
                 UserInterface::class,
                 ($this->userFactory)(
-                    $data['username'] ?? 'guest',
-                    $data['roles']    ?? [$this->baseRole],
-                    $data['details']  ?? [],
+                    $mezzioUser->getIdentity(),
+                    $mezzioUser->getRoles(),
+                    $mezzioUser->getDetails(),
                 ),
-            ),
+            )
         );
     }
 }

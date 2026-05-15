@@ -13,4 +13,7 @@ interface UserInterface extends
     MezzioUserInterface,
     RoleInterface,
     ResourceInterface,
-    ProprietaryInterface {}
+    ProprietaryInterface 
+{
+    public function isGuest(): bool;
+}

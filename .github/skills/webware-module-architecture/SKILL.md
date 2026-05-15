@@ -1,8 +1,12 @@
 ---
 name: "webware-module-architecture"
-description: "Load when creating or modifying any handler, middleware, route, or module in the webware component ecosystem or any host application built from webware components. Covers the strict separation between data-processing middleware and rendering handlers, the HttpMethodProcessorTrait pattern, WriteResult, and RouteProvider pipeline wiring."
+description: "ALWAYS load before creating or modifying any handler, middleware, route, or module. No exceptions. Covers the mandatory separation between data-processing middleware and rendering handlers, HttpMethodProcessorTrait, WriteResult, and RouteProvider pipeline wiring. Skipping this skill produces architecturally incorrect code."
 argument-hint: "<what you are creating — e.g. 'upload handler', 'process middleware for manifest', 'route wiring for POST endpoint'>"
 ---
+
+> ⚠ **MANDATORY — LOAD BEFORE TOUCHING ANY HANDLER, MIDDLEWARE, OR ROUTE**
+> This skill must be loaded before writing or reviewing any handler, middleware, route, or module. No exceptions.
+> Failure to load this skill is the primary cause of architectural violations in this project.
 
 > ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
 > Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.

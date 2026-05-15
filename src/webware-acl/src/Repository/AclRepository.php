@@ -180,37 +180,6 @@ final class AclRepository implements AclRepositoryInterface
      * {@inheritDoc}
      */
     #[Override]
-    public function fetchRouteMappings(): array
-    {
-        $sql    = new Sql($this->adapter);
-        $select = $sql->select('acl_route_privilege')
-            ->join(
-                'acl_resource',
-                'acl_resource.resource_pk = acl_route_privilege.resource_pk',
-                ['resource_id'],
-            )
-            ->join(
-                'acl_privilege',
-                'acl_privilege.privilege_pk = acl_route_privilege.privilege_pk',
-                ['privilege_id'],
-            )
-            ->columns(['route_name']);
-
-        $result = [];
-        foreach ($sql->prepareStatementForSqlObject($select)->execute() as $row) {
-            $result[(string) $row['route_name']] = [
-                'resource_id'  => (string) $row['resource_id'],
-                'privilege_id' => (string) $row['privilege_id'],
-            ];
-        }
-
-        return $result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    #[Override]
     public function fetchVersion(): int
     {
         if ($this->cachedVersion !== null) {
@@ -404,42 +373,6 @@ final class AclRepository implements AclRepositoryInterface
         $sql    = new Sql($this->adapter, 'acl_rule');
         $update = $sql->update()->set(['type' => $type])->where(['id' => $id]);
         $sql->prepareStatementForSqlObject($update)->execute();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    #[Override]    public function saveRouteMapping(string $routeName, int $resourcePk, int $privilegePk): void
-    {
-        $sql    = new Sql($this->adapter, 'acl_route_privilege');
-        $select = $sql->select()->columns(['id'])->where(['route_name' => $routeName]);
-
-        $existing = $sql->prepareStatementForSqlObject($select)->execute()->current();
-
-        if ($existing !== false && $existing !== null) {
-            $update = $sql->update()
-                ->set(['resource_pk' => $resourcePk, 'privilege_pk' => $privilegePk])
-                ->where(['id' => (int) $existing['id']]);
-            $sql->prepareStatementForSqlObject($update)->execute();
-        } else {
-            $insert = $sql->insert()->values([
-                'route_name'   => $routeName,
-                'resource_pk'  => $resourcePk,
-                'privilege_pk' => $privilegePk,
-            ]);
-            $sql->prepareStatementForSqlObject($insert)->execute();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    #[Override]
-    public function deleteRouteMapping(string $routeName): void
-    {
-        $sql    = new Sql($this->adapter, 'acl_route_privilege');
-        $delete = $sql->delete()->where(['route_name' => $routeName]);
-        $sql->prepareStatementForSqlObject($delete)->execute();
     }
 
     /**

@@ -148,3 +148,39 @@ Integration prototype: `test/AppTest/Acl/StoreOwnershipAssertionPrototypeTest.ph
 Tests cover:
 - `OwnershipAssertion` (profile): own data → allow, other user's data → deny, via aggregate
 - `StoreOwnedResourceAssertion` (store): own store → allow, foreign store → deny, via aggregate
+
+---
+
+## Commands That Do NOT Require Ownership Interfaces
+
+Some commands mutate ACL configuration data itself and run in the admin context where ownership
+is already asserted by the global `AuthorizingDispatchMiddleware` pipeline. These commands are
+**exempt** from `RoleProviderInterface` + `StoreOwnedResourceInterface`:
+
+| Command | Reason |
+|---|---|
+| `ProtectRouteCommand` | Admin-only; registers a route as an ACL resource. No store ownership boundary. |
+| `SaveRoleCommand` | Admin-only; no store boundary. |
+| `DeleteRoleCommand` | Admin-only; no store boundary. |
+| `SaveResourceCommand` | Admin-only; no store boundary. |
+| `DeleteResourceCommand` | Admin-only; no store boundary. |
+| `SaveRuleCommand` | Admin-only; no store boundary. |
+| `DeleteRuleCommand` | Admin-only; no store boundary. |
+
+### `ProtectRouteCommand` shape (for reference)
+
+```php
+final readonly class ProtectRouteCommand implements CommandInterface
+{
+    use NamedCommandTrait;
+
+    public function __construct(
+        public string $routeName,
+        public array  $allowedMethods,
+    ) {}
+}
+```
+
+The `allowedMethods` are resolved from the router at request time by `ProcessProtectRouteMiddleware`
+using `RouteCollectorInterface::getRoutes()`, so the handler only needs the route name and the
+pre-resolved method list — no ACL resource fields on the command itself.

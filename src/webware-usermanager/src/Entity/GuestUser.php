@@ -94,4 +94,10 @@ final readonly class GuestUser implements UserInterface
     {
         return null;
     }
+
+    #[Override]
+    public function isGuest(): bool
+    {
+        return true;
+    }
 }

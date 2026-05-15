@@ -4,7 +4,6 @@
  * @var array<int, int[]>                          $roleParents
  * @var array<int, \Webware\Acl\Entity\Resource>  $resources
  * @var array<int, array{role_id: string, resource_id: string, privilege_id: string, type: string}> $rules
- * @var array<string, array{resource_id: string, privilege_id: string}> $mappings
  */
 $this->headTitle('ACL Manager');
 ?>
@@ -24,7 +23,7 @@ $this->headTitle('ACL Manager');
             <i class="bi bi-shield-lock text-primary fs-5"></i>
             <h1 class="h4 fw-bold mb-0">ACL Manager</h1>
         </div>
-        <p class="text-secondary small mb-0">Manage roles, resources, privileges, rules, assertions, and route mappings.</p>
+        <p class="text-secondary small mb-0">Manage roles, resources, privileges, rules, and assertions.</p>
     </div>
     <span class="badge bg-body-tertiary border text-secondary" style="font-size:.72rem;">
         Cache v<?= $this->escapeHtml((string) ($this->aclVersion ?? '—')) ?>
@@ -68,15 +67,6 @@ $this->headTitle('ACL Manager');
                 <div class="text-secondary small">Assertions</div>
             </div>
         </div>
-    </div>
-    <div class="col">
-        <a href="<?= $this->url('admin.acl.routes.read') ?>" class="card h-100 text-decoration-none">
-            <div class="card-body text-center py-3">
-                <i class="bi bi-signpost-split fs-3 text-primary mb-2 d-block"></i>
-                <div class="fs-2 fw-bold"><?= count($this->mappings) ?></div>
-                <div class="text-secondary small">Route Maps</div>
-            </div>
-        </a>
     </div>
 </div>
 
@@ -132,43 +122,7 @@ $this->headTitle('ACL Manager');
 
 <!-- Quick access row -->
 <div class="row g-3">
-    <div class="col-12 col-md-6">
-        <div class="card h-100">
-            <div class="card-header d-flex align-items-center gap-2 py-2">
-                <i class="bi bi-signpost-split text-primary"></i>
-                <span class="fw-semibold small">Route Mappings</span>
-                <span class="badge bg-body-tertiary border text-secondary ms-1"><?= count($this->mappings) ?></span>
-                <a href="<?= $this->url('admin.acl.routes.read') ?>" class="ms-auto btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.75rem;">
-                    Manage <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-            <div class="card-body p-0">
-                <?php
-                $previewMappings = array_slice($this->mappings, 0, 5, true);
-                $remaining       = count($this->mappings) - count($previewMappings);
-                ?>
-                <ul class="list-group list-group-flush">
-                    <?php foreach ($previewMappings as $routeName => $mapping): ?>
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
-                            <code style="font-size:.8125rem;"><?= $this->escapeHtml($routeName) ?></code>
-                            <span class="text-secondary" style="font-size:.72rem;">
-                                <?= $this->escapeHtml($mapping['resource_id']) ?> / <?= $this->escapeHtml($mapping['privilege_id']) ?>
-                            </span>
-                        </li>
-                    <?php endforeach; ?>
-                    <?php if ($remaining > 0): ?>
-                        <li class="list-group-item py-2 px-3 text-secondary small fst-italic">
-                            and <?= $remaining ?> more…
-                        </li>
-                    <?php endif; ?>
-                    <?php if ($this->mappings === []): ?>
-                        <li class="list-group-item py-2 px-3 text-secondary small">No route mappings yet.</li>
-                    <?php endif; ?>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <div class="col-12 col-md-6">
+    <div class="col-12">
         <div class="card h-100">
             <div class="card-header d-flex align-items-center gap-2 py-2">
                 <i class="bi bi-toggles text-primary"></i>

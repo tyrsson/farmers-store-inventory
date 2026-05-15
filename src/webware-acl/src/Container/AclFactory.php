@@ -16,6 +16,7 @@ namespace Webware\Acl\Container;
 
 use Psr\Container\ContainerInterface;
 use Webware\Acl\Acl;
+use Webware\Acl\AclInterface;
 
 final readonly class AclFactory
 {
@@ -23,10 +24,11 @@ final readonly class AclFactory
     {
         $aclBuilder = $container->get(\Webware\Acl\AclBuilder::class);
         $laminas    = $aclBuilder->build();
+        $paramMap   = $container->get('config')[AclInterface::class]['route_param_map'] ?? [];
 
         return new Acl(
-            acl:           $laminas,
-            routeMappings: $aclBuilder->getRouteMappings(),
+            acl:      $laminas,
+            paramMap: $paramMap,
         );
     }
 }
