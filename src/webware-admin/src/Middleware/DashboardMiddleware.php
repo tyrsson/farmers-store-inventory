@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Webware\Admin\Middleware;
 
-use Mezzio\Authentication\UserInterface;
+use Webware\UserManager\UserInterface;
 use Override;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;

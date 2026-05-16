@@ -8,7 +8,6 @@ use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
 use Override;
-use Webware\Acl\Middleware\AuthorizationMiddleware;
 use Webware\Admin\Middleware\DashboardMiddleware;
 
 final readonly class RouteProvider implements RouteProviderInterface
@@ -22,7 +21,6 @@ final readonly class RouteProvider implements RouteProviderInterface
                 '/admin',
                 $middlewareFactory->prepare(
                     [
-                        AuthorizationMiddleware::class,
                         DashboardMiddleware::class,
                         RequestHandler\DashboardHandler::class,
                     ]

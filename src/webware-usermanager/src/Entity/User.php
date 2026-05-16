@@ -15,16 +15,13 @@ declare(strict_types=1);
 namespace Webware\UserManager\Entity;
 
 use DateTimeImmutable;
-use Laminas\Permissions\Acl\ProprietaryInterface;
-use Laminas\Permissions\Acl\Resource\ResourceInterface;
-use Laminas\Permissions\Acl\Role\RoleInterface;
-use Mezzio\Authentication\UserInterface;
 use Override;
+use Webware\UserManager\UserInterface;
 
 use function array_merge;
 use function array_values;
 
-final readonly class User implements UserInterface, RoleInterface, ResourceInterface, ProprietaryInterface
+final readonly class User implements UserInterface
 {
     public function __construct(
         public int $id,
@@ -87,6 +84,12 @@ final readonly class User implements UserInterface, RoleInterface, ResourceInter
     public function getRoles(): array
     {
         return $this->roles;
+    }
+
+    #[Override]
+    public function isGuest(): bool
+    {
+        return false;
     }
 
     /** @param mixed $default */

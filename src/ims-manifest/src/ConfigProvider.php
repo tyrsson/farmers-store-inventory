@@ -50,7 +50,6 @@ final readonly class ConfigProvider
                 RouteProvider::class                                                               => Container\RouteProviderFactory::class,
                 Listener\RegisterManifestResourcesListener::class                                 => Container\RegisterManifestResourcesListenerFactory::class,
                 Listener\RegisterManifestRulesListener::class                                     => Container\RegisterManifestRulesListenerFactory::class,
-                Listener\RegisterManifestRouteMappingsListener::class                             => Container\RegisterManifestRouteMappingsListenerFactory::class,
                 Listener\RegisterManifestWidgetListener::class                                    => Container\RegisterManifestWidgetListenerFactory::class,
                 CommandHandler\UploadManifestHandler::class                                       => CommandHandler\Container\UploadManifestHandlerFactory::class,
             ],
@@ -68,9 +67,6 @@ final readonly class ConfigProvider
             ],
             RulesLoadedEvent::class     => [
                 ['listener' => Listener\RegisterManifestRulesListener::class, 'priority' => 1],
-            ],
-            AclBuiltEvent::class        => [
-                ['listener' => Listener\RegisterManifestRouteMappingsListener::class, 'priority' => 1],
             ],
         ];
     }

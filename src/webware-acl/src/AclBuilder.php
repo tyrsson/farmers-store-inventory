@@ -53,9 +53,6 @@ use function sprintf;
  */
 final class AclBuilder
 {
-    /** @var array<string, array{resource_id: string, privilege_id: string}> */
-    private array $routeMappings = [];
-
     public function __construct(
         private readonly AclRepositoryInterface $repository,
         private readonly AclCacheInterface $cache,
@@ -81,7 +78,6 @@ final class AclBuilder
         $resources      = $this->repository->fetchResources();
         $rules          = $this->repository->fetchRules();
         $assertions     = $this->repository->fetchRuleAssertions();
-        $routeMappings  = $this->repository->fetchRouteMappings();
 
         // Convert entity objects to cache-friendly arrays
         $rolesData = array_values(
@@ -105,23 +101,11 @@ final class AclBuilder
             'resources'     => $resourcesData,
             'rules'         => $rules,         // already resolved string IDs from repository joins
             'assertions'    => $assertions,    // rule_pk → [{assertion, mode, sort_order}]
-            'routeMappings' => $routeMappings,  // already resolved string IDs from repository joins
         ];
 
         $this->cache->set($data);
 
         return $this->buildFromArrays($data);
-    }
-
-    /**
-     * Returns the route→resource+privilege mapping populated by the most
-     * recent call to build(). Must be called after build().
-     *
-     * @return array<string, array{resource_id: string, privilege_id: string}>
-     */
-    public function getRouteMappings(): array
-    {
-        return $this->routeMappings;
     }
 
     /**
@@ -167,11 +151,7 @@ final class AclBuilder
 
         $this->dispatch(new RulesLoadedEvent($acl));
 
-        // Store route mappings for AclMiddleware access — pass DB-loaded mappings
-        // into the event so listeners can extend the set, then read back the result.
-        $event = new AclBuiltEvent($acl, $data['routeMappings']);
-        $this->dispatch($event);
-        $this->routeMappings = $event->getRouteMappings();
+        $this->dispatch(new AclBuiltEvent($acl));
 
         return $acl;
     }

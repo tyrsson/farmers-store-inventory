@@ -5,22 +5,20 @@ declare(strict_types=1);
 
 namespace Webware\Acl;
 
+use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
 use Override;
+use Webware\Acl\Admin\Middleware\ProcessAssertionMiddleware;
+use Webware\Acl\Admin\Middleware\ProcessProtectRouteMiddleware;
+use Webware\Acl\Admin\Middleware\ProcessResourceMiddleware;
+use Webware\Acl\Admin\Middleware\ProcessRoleMiddleware;
+use Webware\Acl\Admin\Middleware\ProcessRuleMiddleware;
 use Webware\Acl\Admin\RequestHandler\AclOverviewHandler;
 use Webware\Acl\Admin\RequestHandler\ResourceListHandler;
 use Webware\Acl\Admin\RequestHandler\RoleListHandler;
-use Webware\Acl\Admin\RequestHandler\RouteMapManagerHandler;
 use Webware\Acl\Admin\RequestHandler\RuleManagerHandler;
-use Webware\Acl\Middleware\AuthorizationMiddleware;
-use Mezzio\Helper\BodyParams\BodyParamsMiddleware;
-use Webware\Acl\Admin\Middleware\ProcessAssertionMiddleware;
-use Webware\Acl\Admin\Middleware\ProcessResourceMiddleware;
-use Webware\Acl\Admin\Middleware\ProcessRoleMiddleware;
-use Webware\Acl\Admin\Middleware\ProcessRouteMappingMiddleware;
-use Webware\Acl\Admin\Middleware\ProcessRuleMiddleware;
 
 final readonly class RouteProvider implements RouteProviderInterface
 {
@@ -29,13 +27,10 @@ final readonly class RouteProvider implements RouteProviderInterface
         RouteCollectorInterface $routeCollector,
         MiddlewareFactoryInterface $middlewareFactory
     ): void {
-        // ACL overview — GET summary dashboard
+        // ACL overview
         $routeCollector->get(
             '/admin/access',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                AclOverviewHandler::class,
-            ]),
+            $middlewareFactory->prepare([AclOverviewHandler::class]),
             'admin.acl.read'
         )->setOptions([
             'navigation' => 'admin',
@@ -45,28 +40,10 @@ final readonly class RouteProvider implements RouteProviderInterface
             'order'      => 15,
         ]);
 
-        // Route map management — GET list
-        $routeCollector->get(
-            '/admin/access/routes',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                RouteMapManagerHandler::class,
-            ]),
-            'admin.acl.routes.read'
-        )->setOptions([
-            'label'  => 'Route Map',
-            'icon'   => 'bi-signpost-split-fill',
-            'parent' => 'admin.acl.read',
-            'order'  => 20,
-        ]);
-
-        // Role management — GET list
+        // Role management
         $routeCollector->get(
             '/admin/access/roles',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                RoleListHandler::class,
-            ]),
+            $middlewareFactory->prepare([RoleListHandler::class]),
             'admin.acl.roles.read'
         )->setOptions([
             'label'  => 'Roles',
@@ -75,13 +52,10 @@ final readonly class RouteProvider implements RouteProviderInterface
             'order'  => 30,
         ]);
 
-        // Resource management — GET list
+        // Resource management
         $routeCollector->get(
             '/admin/access/resources',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ResourceListHandler::class,
-            ]),
+            $middlewareFactory->prepare([ResourceListHandler::class]),
             'admin.acl.resources.read'
         )->setOptions([
             'label'  => 'Resources',
@@ -90,13 +64,10 @@ final readonly class RouteProvider implements RouteProviderInterface
             'order'  => 40,
         ]);
 
-        // Rule management — GET matrix
+        // Rule management
         $routeCollector->get(
             '/admin/access/rules',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                RuleManagerHandler::class,
-            ]),
+            $middlewareFactory->prepare([RuleManagerHandler::class]),
             'admin.acl.rules.read'
         )->setOptions([
             'label'  => 'Rules',
@@ -108,121 +79,65 @@ final readonly class RouteProvider implements RouteProviderInterface
         // Rules write/delete
         $routeCollector->post(
             '/admin/access/rules',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessRuleMiddleware::class,
-                RuleManagerHandler::class,
-            ]),
+            $middlewareFactory->prepare([ProcessRuleMiddleware::class, RuleManagerHandler::class]),
             'admin.acl.rules.create'
         );
-
         $routeCollector->patch(
             '/admin/access/rules/{id:\d+}',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                BodyParamsMiddleware::class,
-                ProcessRuleMiddleware::class,
-                RuleManagerHandler::class,
-            ]),
+            $middlewareFactory->prepare([BodyParamsMiddleware::class, ProcessRuleMiddleware::class, RuleManagerHandler::class]),
             'admin.acl.rules.update'
         );
-
         $routeCollector->delete(
             '/admin/access/rules/{id:\d+}',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessRuleMiddleware::class,
-                RuleManagerHandler::class,
-            ]),
+            $middlewareFactory->prepare([ProcessRuleMiddleware::class, RuleManagerHandler::class]),
             'admin.acl.rules.delete'
         );
 
-        // Assertion management — POST add, DELETE remove
+        // Assertion management
         $routeCollector->post(
             '/admin/access/rules/{rule_id:\d+}/assertions',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                BodyParamsMiddleware::class,
-                ProcessAssertionMiddleware::class,
-                RuleManagerHandler::class,
-            ]),
+            $middlewareFactory->prepare([BodyParamsMiddleware::class, ProcessAssertionMiddleware::class, RuleManagerHandler::class]),
             'admin.acl.assertions.create'
         );
-
         $routeCollector->delete(
             '/admin/access/rules/{rule_id:\d+}/assertions/{id:\d+}',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessAssertionMiddleware::class,
-                RuleManagerHandler::class,
-            ]),
+            $middlewareFactory->prepare([ProcessAssertionMiddleware::class, RuleManagerHandler::class]),
             'admin.acl.assertions.delete'
         );
 
-        // Route mappings write/delete
-        $routeCollector->post(
-            '/admin/access/routes',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessRouteMappingMiddleware::class,
-                RouteMapManagerHandler::class,
-            ]),
-            'admin.acl.routes.create'
-        );
-
-        $routeCollector->delete(
-            '/admin/access/routes/{route_name:[a-z0-9._-]+}',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessRouteMappingMiddleware::class,
-                RouteMapManagerHandler::class,
-            ]),
-            'admin.acl.routes.delete'
-        );
-
-        // Roles write
+        // Roles write/delete
         $routeCollector->post(
             '/admin/access/roles',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessRoleMiddleware::class,
-                RoleListHandler::class,
-            ]),
+            $middlewareFactory->prepare([ProcessRoleMiddleware::class, RoleListHandler::class]),
             'admin.acl.roles.create'
         );
-
-        // Roles delete
         $routeCollector->delete(
             '/admin/access/roles/{pk:\d+}',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessRoleMiddleware::class,
-                RoleListHandler::class,
-            ]),
+            $middlewareFactory->prepare([ProcessRoleMiddleware::class, RoleListHandler::class]),
             'admin.acl.roles.delete'
         );
 
-        // Resources write
+        // Resources write/delete
         $routeCollector->post(
             '/admin/access/resources',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessResourceMiddleware::class,
-                ResourceListHandler::class,
-            ]),
+            $middlewareFactory->prepare([ProcessResourceMiddleware::class, ResourceListHandler::class]),
             'admin.acl.resources.create'
         );
-
-        // Resources delete
         $routeCollector->delete(
             '/admin/access/resources/{pk:\d+}',
-            $middlewareFactory->prepare([
-                AuthorizationMiddleware::class,
-                ProcessResourceMiddleware::class,
-                ResourceListHandler::class,
-            ]),
+            $middlewareFactory->prepare([ProcessResourceMiddleware::class, ResourceListHandler::class]),
             'admin.acl.resources.delete'
         );
 
+        // Protect a route — POST registers it as an ACL resource
+        $routeCollector->post(
+            '/admin/access/resources/protect',
+            $middlewareFactory->prepare([
+                BodyParamsMiddleware::class,
+                ProcessProtectRouteMiddleware::class,
+                ResourceListHandler::class,
+            ]),
+            'admin.acl.resources.protect'
+        );
     }
 }

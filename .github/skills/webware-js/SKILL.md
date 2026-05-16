@@ -1,5 +1,8 @@
 # webware-js — JavaScript Client Conventions for Webware Components
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 Load this skill when writing or reviewing any `.phtml` template in a webware
 component that includes page-specific JavaScript, or when hooking into HTMX or
 Bootstrap events. Host-application-specific rules (asset paths, CSS naming

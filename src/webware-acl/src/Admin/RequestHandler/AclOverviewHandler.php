@@ -32,16 +32,14 @@ final class AclOverviewHandler implements RequestHandlerInterface
         $resources   = $this->aclRepository->fetchResources();
         $rules       = $this->aclRepository->fetchRules();
         $assertions  = $this->aclRepository->fetchRuleAssertions();
-        $mappings    = $this->aclRepository->fetchRouteMappings();
 
         return new HtmlResponse($this->template->render('acl::admin-acl', [
-            'roles'           => $roles,
-            'roleParents'     => $roleParents,
-            'resources'       => $resources,
-            'rules'           => $rules,
-            'assertionCount'  => array_sum(array_map('count', $assertions)),
-            'mappings'        => $mappings,
-            'aclVersion'      => $this->aclRepository->fetchVersion(),
+            'roles'          => $roles,
+            'roleParents'    => $roleParents,
+            'resources'      => $resources,
+            'rules'          => $rules,
+            'assertionCount' => array_sum(array_map('count', $assertions)),
+            'aclVersion'     => $this->aclRepository->fetchVersion(),
         ]));
     }
 }

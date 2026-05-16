@@ -17,16 +17,20 @@ namespace Ims\Manifest\Listener;
 use Webware\Acl\Event\ResourcesLoadedEvent;
 
 /**
- * Registers the manifest ACL resource.
+ * Previously registered the 'manifest' and 'admin.manifest' ACL resources
+ * inline. Both resources are now seeded as system rows in acl_resource
+ * (999_seed.sql) and loaded by AclBuilder::fetchResources() before any event
+ * fires. Adding them here a second time would throw "Resource already exists".
  *
- * Invoked on ResourcesLoadedEvent so that rules and route mappings can
- * reference the 'manifest' resource.
+ * This listener is retained as a no-op so the ConfigProvider registration and
+ * event wiring do not need to change. It may be removed in a future cleanup
+ * once all callers are audited.
  */
 final class RegisterManifestResourcesListener
 {
     public function __invoke(ResourcesLoadedEvent $event): void
     {
-        $event->acl->addResource('manifest');
-        $event->acl->addResource('admin.manifest');
+        // No-op: 'manifest' and 'admin.manifest' are seeded in acl_resource
+        // with system = 1. AclBuilder loads them from DB before this event fires.
     }
 }

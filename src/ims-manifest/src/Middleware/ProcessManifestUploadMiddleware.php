@@ -18,7 +18,7 @@ use Axleus\Message\SystemMessengerInterface;
 use DateTimeImmutable;
 use Ims\Manifest\Command\UploadManifestCommand;
 use Ims\Manifest\Csv\ManifestCsvParser;
-use Mezzio\Authentication\UserInterface;
+use Webware\UserManager\UserInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;

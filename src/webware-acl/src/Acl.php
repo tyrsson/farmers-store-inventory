@@ -10,16 +10,19 @@ use Laminas\Permissions\Acl\Role\RoleInterface;
 use Mezzio\Router\RouteResult;
 use Override;
 use Psr\Http\Message\ServerRequestInterface;
+use Webware\Acl\Http\RouteResource;
 
 final class Acl implements AclInterface
 {
-    /**
-     * @param array<string, array{resource_id: string, privilege_id: string}> $routeMappings
-     */
     public function __construct(
         private readonly LaminasAclInterface $acl,
-        private readonly array $routeMappings = [],
+        private readonly array $paramMap = [],
     ) {}
+
+    public function getAcl(): LaminasAclInterface
+    {
+        return $this->acl;
+    }
 
     #[Override]
     public function isAllowed(
@@ -51,13 +54,14 @@ final class Acl implements AclInterface
 
         $routeName = $routeResult->getMatchedRouteName();
 
-        if (! isset($this->routeMappings[$routeName])) {
-            return false;
+        // Not opted in as a resource — allow through (opt-in model)
+        if (! $this->acl->hasResource($routeName)) {
+            return true;
         }
 
-        $mapping = $this->routeMappings[$routeName];
+        $routeResource = new RouteResource($routeResult, $request, $this->paramMap);
 
-        return $this->isAllowed($roles, $mapping['resource_id'], $mapping['privilege_id']);
+        return $this->isAllowed($roles, $routeResource, $routeResource->getPrivilegeId());
     }
 
     #[Override]
@@ -65,12 +69,12 @@ final class Acl implements AclInterface
         string $routeName,
         array|RoleInterface|string|null $roles = null,
     ): bool {
-        if (! isset($this->routeMappings[$routeName])) {
+        // Not opted in = not protected = allow
+        if (! $this->acl->hasResource($routeName)) {
             return true;
         }
 
-        $mapping = $this->routeMappings[$routeName];
-
-        return $this->isAllowed($roles, $mapping['resource_id'], $mapping['privilege_id']);
+        // null privilege = "any" — correct for navigation visibility checks
+        return $this->isAllowed($roles, $routeName, null);
     }
 }

@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Ims\Manifest\Listener;
 
 use Webware\Acl\Event\RulesLoadedEvent;
-use Webware\Acl\Privilege;
+use Webware\Acl\PrivilegeInterface;
 
 /**
  * Grants ACL rules for the manifest resource.
@@ -31,9 +31,9 @@ final class RegisterManifestRulesListener
 {
     public function __invoke(RulesLoadedEvent $event): void
     {
-        $event->acl->allow('Warehouse', 'manifest', [Privilege::READ, Privilege::CREATE, Privilege::UPDATE]);
+        $event->acl->allow('Warehouse', 'manifest', [PrivilegeInterface::READ, PrivilegeInterface::CREATE, PrivilegeInterface::UPDATE]);
         // admin.manifest rules are TBD — Warehouse Supervisor is the minimum candidate.
         // Grant READ so the admin widget is visible to that role and above.
-        $event->acl->allow('Warehouse Supervisor', 'admin.manifest', Privilege::READ);
+        $event->acl->allow('Warehouse Supervisor', 'admin.manifest', PrivilegeInterface::READ);
     }
 }

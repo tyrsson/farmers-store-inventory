@@ -12,6 +12,8 @@ managed via the ACL Admin UI.
 - `IdentityMiddleware` is registered in the global pipeline (before route dispatch)
 - The DB schema tables (`role`, `acl_resource`, `acl_privilege`, `acl_rule`,
   `acl_route_mapping`, `acl_version`) exist and are seeded with the base roles
+- **`Mezzio\Authentication\UserInterface` is aliased to `Webware\UserManager\UserInterface`
+  in the host-application's container** (see [User Identity Requirements](#user-identity-requirements) below)
 
 ---
 
@@ -79,10 +81,10 @@ final class RegisterManifestRulesListener
     {
         // Developer always has full access — not configurable via Admin UI
         $event->acl->allow('Developer', 'manifest', [
-            Privilege::READ,
-            Privilege::CREATE,
-            Privilege::UPDATE,
-            Privilege::DELETE,
+            PrivilegeInterface::READ,
+            PrivilegeInterface::CREATE,
+            PrivilegeInterface::UPDATE,
+            PrivilegeInterface::DELETE,
         ]);
     }
 }
@@ -94,7 +96,7 @@ final class RegisterManifestRulesListener
   that must never be overridden by an Administrator.
 - Do not replicate rules that belong in the DB (those are for Administrator
   configuration via the UI).
-- Always use `Privilege::READ / CREATE / UPDATE / DELETE` constants.
+- Always use `PrivilegeInterface::READ / CREATE / UPDATE / DELETE` constants.
   **Never** hardcode strings like `'read'`.
 
 ---
@@ -117,12 +119,12 @@ final class RegisterManifestRouteMappingsListener
 {
     public function __invoke(AclBuiltEvent $event): void
     {
-        $event->addRouteMapping('manifest.list',         'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.detail',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload',       'manifest', Privilege::READ);
-        $event->addRouteMapping('manifest.upload.store', 'manifest', Privilege::CREATE);
-        $event->addRouteMapping('manifest.process',      'manifest', Privilege::UPDATE);
-        $event->addRouteMapping('manifest.finish',       'manifest', Privilege::UPDATE);
+        $event->addRouteMapping('manifest.list',         'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.detail',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload',       'manifest', PrivilegeInterface::READ);
+        $event->addRouteMapping('manifest.upload.store', 'manifest', PrivilegeInterface::CREATE);
+        $event->addRouteMapping('manifest.process',      'manifest', PrivilegeInterface::UPDATE);
+        $event->addRouteMapping('manifest.finish',       'manifest', PrivilegeInterface::UPDATE);
     }
 }
 ```
@@ -189,43 +191,20 @@ another module's listener runs (rare).
 
 ---
 
-## Step 5 — Add AuthorizationMiddleware to Route Stacks
+## Step 5 — No Per-Route Middleware Required
 
-Add `AuthorizationMiddleware::class` as the **first** middleware in every
-protected route stack:
+`AuthorizingDispatchMiddleware` runs in the **global pipeline** in place of
+Mezzio's `DispatchMiddleware`. You do **not** add any ACL middleware to
+individual route stacks.
 
-```php
-// RouteProvider.php
+Protection is determined entirely by the route-to-resource mapping registered
+in `RegisterXxxRouteMappingsListener`. If a route has no mapping, it is denied.
+If a route is intentionally public (e.g. `/login`), simply omit it from the
+mapping — `AuthorizingDispatchMiddleware` will pass it through only when
+the user is allowed; otherwise `ForbiddenHandlerInterface` handles the denial.
 
-use Webware\Acl\Middleware\AuthorizationMiddleware;
-use Ims\Manifest\RequestHandler\ManifestListHandler;
-use Ims\Manifest\RequestHandler\ManifestUploadHandler;
-use Ims\Manifest\Middleware\ProcessManifestUploadMiddleware;
-
-$app->route(
-    '/manifests',
-    [
-        AuthorizationMiddleware::class,   // ← always first
-        ManifestListHandler::class,
-    ],
-    ['GET'],
-    'manifest.list'
-);
-
-$app->route(
-    '/manifests/upload',
-    [
-        AuthorizationMiddleware::class,
-        ProcessManifestUploadMiddleware::class,
-        ManifestUploadHandler::class,
-    ],
-    ['POST'],
-    'manifest.upload.store'
-);
-```
-
-> Never place `AuthorizationMiddleware` after a write middleware. Access must be
-> verified before any data mutation occurs.
+> **Never** add `AuthorizingDispatchMiddleware` to a route stack. It must only
+> appear once, in the global pipeline.
 
 ---
 
@@ -257,11 +236,11 @@ After seeding, call `AclRepository::incrementVersion()` or truncate
 □ RegisterXxxRulesListener — adds built-in immutable rules
 □ RegisterXxxRouteMappingsListener — maps all protected routes
 □ Three listeners registered in ConfigProvider::getListeners()
-□ AuthorizationMiddleware::class first in every protected route stack
 □ Route names in addRouteMapping() match RouteProvider exactly
-□ Privilege constants used (Privilege::READ etc.) — no hardcoded strings
+□ Privilege constants used (PrivilegeInterface::READ etc.) — no hardcoded strings
 □ DB seed: Administrator default rules for new resource
-□ Cache invalidated after seeding
+□ Cache invalidated after seeding (AclRepository::incrementVersion())
+□ AuthorizingDispatchMiddleware in global pipeline (not in route stacks)
 ```
 
 ---
@@ -272,7 +251,51 @@ After seeding, call `AclRepository::incrementVersion()` or truncate
 |---|---|
 | Listener not in `ConfigProvider::getListeners()` | Resource/rule/mapping silently missing from ACL on rebuild |
 | Route name typo in `addRouteMapping()` | Route always returns 403 — no mapping found |
-| `AuthorizationMiddleware` omitted from a route stack | Route is publicly accessible with no ACL check |
-| Hardcoded privilege string (`'read'`) instead of `Privilege::READ` | Fragile — breaks if the constant value changes |
+| Adding `AuthorizingDispatchMiddleware` to a route stack | Double ACL check; unexpected behaviour |
+| Leaving Mezzio's `DispatchMiddleware` in the global pipeline | Routes dispatched twice |
+| Hardcoded privilege string (`'read'`) instead of `PrivilegeInterface::READ` | Fragile — breaks if the constant value changes |
 | Forgetting `incrementVersion()` after seeding DB rules | Cache not invalidated; stale ACL persists |
-| Placing `AuthorizationMiddleware` after write middleware | Write executes before access is verified |
+| Resolving `Mezzio\Authentication\UserInterface` without the alias | `isAllowed()` fails — `GuestUser` does not satisfy `RoleInterface` without proper wiring |
+
+---
+
+## User Identity Requirements
+
+`webware-acl` resolves `Mezzio\Authentication\UserInterface::class` from the
+container. Mezzio's own `DefaultUser` does **not** implement `RoleInterface` or
+`ProprietaryInterface`, so `$acl->isAllowed($user, ...)` and ownership
+assertions will fail if the bare Mezzio interface is used.
+
+The host application **must** alias Mezzio's interface to
+`Webware\UserManager\UserInterface` in its DI configuration:
+
+```php
+// config/autoload/dependencies.global.php  (host application only — not in any package)
+
+use Mezzio\Authentication\UserInterface as MezzioUserInterface;
+use Webware\UserManager\UserInterface as UserManagerUserInterface;
+
+return [
+    'dependencies' => [
+        'aliases' => [
+            // Resolving Mezzio's interface yields our richer implementation.
+            MezzioUserInterface::class => UserManagerUserInterface::class,
+        ],
+        'factories' => [
+            // The factory that creates User instances is registered under our
+            // interface key — NOT under MezzioUserInterface::class directly.
+            UserManagerUserInterface::class => \Webware\UserManager\Container\UserFactory::class,
+        ],
+    ],
+];
+```
+
+> **Why the alias lives in the host app:**  
+> `webware-acl` must not depend on `webware-usermanager` (circular dependency)
+> and `webware-usermanager` must not own the DI key for
+> `Mezzio\Authentication\UserInterface` (it does not own that package). The
+> host application is the only place where both packages are simultaneously in
+> scope.
+
+See [`webware-usermanager` docs/user-interface.md](../../webware-usermanager/docs/user-interface.md)
+for the full interface contract and concrete class requirements.

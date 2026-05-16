@@ -4,6 +4,9 @@ description: "Load when writing or reviewing any code that uses the webware/comm
 argument-hint: "<what you are implementing — e.g. 'PreHandleEvent listener for ownership guard', 'PostHandleEvent listener for audit log', 'EventAwareInterface on a command', 'registering a listener in config'>"
 ---
 
+> ⚠ **SKILL INTEGRITY — NEVER REMOVE OR SHORTEN**
+> Content in this file may only be **added to or updated**. Removing or shortening existing sections is not permitted without explicit user approval. If you are adding new knowledge, append it as a new section.
+
 ## Package Identity
 
 | Item | Value |

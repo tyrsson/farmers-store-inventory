@@ -19,8 +19,6 @@ use App\RequestHandler\PingHandler;
 use Mezzio\MiddlewareFactoryInterface;
 use Mezzio\Router\RouteCollectorInterface;
 use Mezzio\Router\RouteProviderInterface;
-use Webware\Acl\Middleware\AuthorizationMiddleware;
-
 final class RouteProvider implements RouteProviderInterface
 {
     public function registerRoutes(
@@ -31,7 +29,6 @@ final class RouteProvider implements RouteProviderInterface
             '/',
             $middlewareFactory->prepare(
                 [
-                    AuthorizationMiddleware::class,
                     DashboardHandler::class,
                 ]
             ),
@@ -48,7 +45,6 @@ final class RouteProvider implements RouteProviderInterface
             '/ping',
             $middlewareFactory->prepare(
                 [
-                    AuthorizationMiddleware::class,
                     PingHandler::class,
                 ]
             ),

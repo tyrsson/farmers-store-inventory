@@ -4,7 +4,6 @@
  * @var int $resourceCount
  * @var int $ruleCount
  * @var int $assertionCount
- * @var int $mappingCount
  * @var int $aclVersion
  */
 $this->headTitle('Admin Dashboard');
@@ -37,10 +36,6 @@ $this->headTitle('Admin Dashboard');
                     <div class="fs-3 fw-bold text-primary"><?= $this->assertionCount ?></div>
                     <div class="text-secondary" style="font-size:.75rem;">Assertions</div>
                 </div>
-                <div class="col text-center">
-                    <div class="fs-3 fw-bold text-primary"><?= $this->mappingCount ?></div>
-                    <div class="text-secondary" style="font-size:.75rem;">Route Maps</div>
-                </div>
             </div>
             <!-- Quick links -->
             <div class="d-flex flex-column gap-1">
@@ -52,9 +47,6 @@ $this->headTitle('Admin Dashboard');
                 </a>
                 <a href="<?= $this->url('admin.acl.rules.read') ?>" class="btn btn-sm btn-outline-secondary text-start">
                     <i class="bi bi-toggles me-1"></i> Manage Rules
-                </a>
-                <a href="<?= $this->url('admin.acl.routes.read') ?>" class="btn btn-sm btn-outline-secondary text-start">
-                    <i class="bi bi-signpost-split me-1"></i> Manage Route Map
                 </a>
             </div>
         </div>

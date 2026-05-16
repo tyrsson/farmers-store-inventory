@@ -626,4 +626,6 @@
 .ims-badge-xs   { font-size: .65rem; }
 .ims-text-ro    { font-size: .72rem; font-style: italic; }
 .ims-switch-wide { width: 2.2rem; }
+.ims-col-methods { width: 10rem; }
+.ims-col-action  { width: 6rem; text-align: right; }
 
